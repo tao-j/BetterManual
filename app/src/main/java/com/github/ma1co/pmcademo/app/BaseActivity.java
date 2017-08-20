@@ -95,8 +95,9 @@ public class BaseActivity extends Activity {
             case ScalarInput.ISV_DIAL_1_COUNTERCW:
                 return onUpperDialChanged(getDialStatus(ScalarInput.ISV_DIAL_1_STATUS) / 22);
             case ScalarInput.ISV_DIAL_2_CLOCKWISE:
+                return onLowerDialChanged(1);
             case ScalarInput.ISV_DIAL_2_COUNTERCW:
-                return onLowerDialChanged(getDialStatus(ScalarInput.ISV_DIAL_2_STATUS) / 22);
+                return onLowerDialChanged(-1);
             case ScalarInput.ISV_KEY_MODE_DIAL:
                 return onModeDialChanged(getDialStatus(ScalarInput.ISV_KEY_MODE_DIAL));
             default:

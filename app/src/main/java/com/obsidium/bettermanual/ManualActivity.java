@@ -1632,6 +1632,65 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         }
     }
 
+    @Override
+    protected boolean onLowerDialChanged(int value) {
+        switch (m_dialMode)
+        {
+            case shutter:
+                if (m_haveApertureControl)
+                {
+                    if (value == 1)
+                        setDialMode(DialMode.aperture);
+                    else
+                        setDialMode(DialMode.bracket);
+                    break;
+                }
+            case aperture:
+                if (value == 1)
+                    setDialMode(DialMode.iso);
+                else
+                    setDialMode(DialMode.shutter);
+                break;
+            case iso:
+                if (value == 1)
+                    setDialMode(DialMode.exposure);
+                else
+                    setDialMode(DialMode.aperture);
+                break;
+            case exposure:
+                if (value == 1)
+                    setDialMode(m_haveTouchscreen ? DialMode.shutter : DialMode.mode);
+                else
+                    setDialMode(DialMode.iso);
+                break;
+            case mode:
+                if (value == 1)
+                    setDialMode(DialMode.drive);
+                else
+                    setDialMode(DialMode.exposure);
+                break;
+            case drive:
+                if (value == 1)
+                    setDialMode(DialMode.timelapse);
+                else
+                    setDialMode(DialMode.mode);
+                break;
+            case timelapse:
+                if (value == 1)
+                    setDialMode(DialMode.bracket);
+                else
+                    setDialMode(DialMode.drive);
+                break;
+            case bracket:
+                if (value == 1)
+                    setDialMode(DialMode.shutter);
+                else
+                    setDialMode(DialMode.timelapse);
+                break;
+        }
+        return true;
+    }
+
     private void setDialMode(DialMode newMode)
     {
         m_dialMode = newMode;

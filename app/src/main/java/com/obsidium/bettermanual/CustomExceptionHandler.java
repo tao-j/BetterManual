@@ -16,6 +16,7 @@ public class CustomExceptionHandler implements Thread.UncaughtExceptionHandler
     }
 
     public void uncaughtException(Thread t, Throwable e) {
+        e.printStackTrace();
         final Writer result = new StringWriter();
         final PrintWriter printWriter = new PrintWriter(result);
         e.printStackTrace(printWriter);

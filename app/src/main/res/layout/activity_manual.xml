@@ -10,7 +10,7 @@
         android:id="@+id/surfaceView"
         />
 
-    <com.obsidium.bettermanual.GridView
+    <com.obsidium.bettermanual.views.GridView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/vGrid"
@@ -30,64 +30,79 @@
         android:textSize="18dp"
         android:layout_marginTop="2dp"/>
 
-    <ImageView
+    <LinearLayout
+        android:id="@+id/left_holder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/ivMode"
-        android:layout_alignLeft="@+id/surfaceView"
-        android:paddingTop="6dp"
-        android:paddingRight="6dp"
-        android:paddingBottom="6dp"
-        android:paddingLeft="2dp"
-        android:layout_alignTop="@+id/surfaceView"
-        android:minWidth="40dp"
-        android:scaleType="center"
-        android:clickable="true"
-        android:layout_marginTop="2dp"/>
+        android:layout_centerVertical="false"
+        android:orientation="vertical">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/ivDriveMode"
-        android:layout_below="@+id/ivMode"
-        android:layout_alignLeft="@+id/ivMode"
-        android:paddingTop="6dp"
-        android:paddingRight="6dp"
-        android:paddingBottom="6dp"
-        android:paddingLeft="2dp"
-        android:scaleType="center"
-        android:minWidth="40dp"
-        android:clickable="true"/>
+        <view
+            android:id="@+id/ivMode"
+            class="com.obsidium.bettermanual.views.ExposureModeView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/surfaceView"
+            android:layout_alignTop="@+id/surfaceView"
+            android:layout_marginTop="2dp"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:minWidth="40dp"
+            android:paddingBottom="6dp"
+            android:paddingLeft="2dp"
+            android:paddingRight="6dp"
+            android:paddingTop="6dp"
+            android:scaleType="center" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/ivTimelapse"
-        android:layout_below="@+id/ivDriveMode"
-        android:layout_alignLeft="@+id/ivDriveMode"
-        android:paddingTop="6dp"
-        android:paddingRight="6dp"
-        android:paddingBottom="6dp"
-        android:paddingLeft="2dp"
-        android:scaleType="center"
-        android:minWidth="40dp"
-        android:clickable="true"
-        android:layout_marginTop="12dp"/>
+        <view
+            android:id="@+id/ivDriveMode"
+            class="com.obsidium.bettermanual.views.DriveMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/ivMode"
+            android:layout_below="@+id/ivMode"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:minWidth="40dp"
+            android:paddingBottom="6dp"
+            android:paddingLeft="2dp"
+            android:paddingRight="6dp"
+            android:paddingTop="6dp"
+            android:scaleType="center" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/ivBracket"
-        android:layout_below="@+id/ivTimelapse"
-        android:layout_alignLeft="@+id/ivTimelapse"
-        android:paddingTop="6dp"
-        android:paddingRight="6dp"
-        android:paddingBottom="6dp"
-        android:paddingLeft="2dp"
-        android:scaleType="center"
-        android:minWidth="40dp"
-        android:clickable="true"
-        android:layout_marginTop="2dp"/>
+        <ImageView
+            android:id="@+id/ivTimelapse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/ivDriveMode"
+            android:layout_below="@+id/ivDriveMode"
+            android:layout_marginTop="12dp"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:minWidth="40dp"
+            android:paddingBottom="6dp"
+            android:paddingLeft="2dp"
+            android:paddingRight="6dp"
+            android:paddingTop="6dp"
+            android:scaleType="center" />
+
+        <ImageView
+            android:id="@+id/ivBracket"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/ivTimelapse"
+            android:layout_below="@+id/ivTimelapse"
+            android:layout_marginTop="2dp"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:minWidth="40dp"
+            android:paddingBottom="6dp"
+            android:paddingLeft="2dp"
+            android:paddingRight="6dp"
+            android:paddingTop="6dp"
+            android:scaleType="center" />
+    </LinearLayout>
+
 
     <TextView
         android:layout_width="fill_parent"
@@ -104,14 +119,14 @@
         android:gravity="bottom"
         android:layout_marginBottom="4dp"/>
 
-    <com.obsidium.bettermanual.PreviewNavView
+    <com.obsidium.bettermanual.views.PreviewNavView
+        android:id="@+id/vPreviewNav"
         android:layout_width="75dp"
         android:layout_height="50dp"
-        android:id="@+id/vPreviewNav"
-        android:layout_above="@+id/lInfoBottom"
-        android:layout_marginLeft="4dp"
+        android:layout_above="@+id/bottom_holder"
+        android:layout_alignParentBottom="false"
         android:layout_marginBottom="4dp"
-        android:layout_alignParentBottom="true"/>
+        android:layout_marginLeft="4dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -124,160 +139,128 @@
         android:textSize="38dp"
         android:textColor="@android:color/white"/>
 
-    <com.obsidium.bettermanual.HistogramView
+    <com.obsidium.bettermanual.views.HistogramView
+        android:id="@+id/vHist"
         android:layout_width="76dp"
         android:layout_height="40dp"
-        android:id="@+id/vHist"
-        tools:background="#fcf75c"
-        android:layout_alignParentRight="true"
+        android:layout_above="@+id/bottom_holder"
         android:layout_alignParentBottom="false"
-        android:layout_above="@+id/lInfoBottom"
-        android:layout_marginRight="2dp"/>
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="2dp"
+        tools:background="#fcf75c" />
 
     <LinearLayout
-        android:orientation="horizontal"
+        android:id="@+id/lFocusScale"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/bottom_holder"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
         android:layout_marginLeft="32dp"
         android:layout_marginRight="32dp"
-        android:layout_marginBottom="10dp"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/lFocusScale"
-        android:layout_above="@+id/lInfoBottom">
+        android:orientation="horizontal">
 
         <ImageView
+            android:id="@+id/ivFocusLeft"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="4dp"
-            android:id="@+id/ivFocusLeft"/>
+            android:layout_marginRight="4dp" />
 
-        <com.obsidium.bettermanual.FocusScaleView
+        <com.obsidium.bettermanual.views.FocusScaleView
+            android:id="@+id/vFocusScale"
             android:layout_width="156dp"
             android:layout_height="20dp"
-            android:id="@+id/vFocusScale"
-            android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true"
-            tools:background="#32722f"
-            />
+            android:layout_centerHorizontal="true"
+            tools:background="#32722f" />
 
         <ImageView
+            android:id="@+id/ivFocusRight"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/ivFocusRight"
-            android:layout_marginLeft="4dp"
-            />
+            android:layout_marginLeft="4dp" />
 
     </LinearLayout>
 
-    <TableLayout
+    <LinearLayout
+        android:id="@+id/bottom_holder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:id="@+id/lInfoBottom"
-        >
+        android:clickable="false"
+        android:orientation="horizontal">
 
-        <TableRow
+        <com.obsidium.bettermanual.views.ShutterView
+            android:id="@+id/tvShutter"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="bottom">
+            android:layout_weight="1"
+            android:clickable="true"
+            android:gravity="bottom|center"
+            android:paddingTop="12dp"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/white"
+            android:textSize="22dp"
+            tools:background="#f86d6d"
+            tools:text="Shutter" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="22dp"
-                tools:text="Shutter"
-                android:id="@+id/tvShutter"
-                android:layout_weight="0.8"
-                android:gravity="bottom|center_horizontal"
-                android:textColor="@android:color/white"
-                tools:background="#f86d6d"
-                android:singleLine="true"
-                android:ellipsize="none"
-                android:layout_gravity="bottom"
-                android:paddingTop="12dp"
-                android:clickable="true"/>
+        <com.obsidium.bettermanual.views.ApertureView
+            android:id="@+id/tvAperture"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:gravity="bottom|center"
+            android:paddingTop="12dp"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/white"
+            android:textSize="22dp"
+            tools:background="#87f083"
+            tools:text="Aperture" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="22dp"
-                tools:text="Aperture"
-                android:id="@+id/tvAperture"
-                android:layout_weight="0.8"
-                android:gravity="bottom|center_horizontal"
-                android:textColor="@android:color/white"
-                tools:background="#87f083"
-                android:singleLine="true"
-                android:ellipsize="none"
-                android:layout_gravity="bottom"
-                android:paddingTop="12dp"
-                android:clickable="true"/>
+        <com.obsidium.bettermanual.views.IsoView
+            android:id="@+id/tvISO"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:gravity="bottom|center"
+            android:paddingTop="12dp"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/white"
+            android:textSize="22dp"
+            tools:background="#90a0fa"
+            tools:text="ISO" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="22dp"
-                tools:text="ISO"
-                android:id="@+id/tvISO"
-                android:layout_weight="1.1"
-                android:gravity="bottom|center_horizontal"
-                android:textColor="@android:color/white"
-                tools:background="#90a0fa"
-                android:clickable="true"
-                android:singleLine="true"
-                android:ellipsize="none"
-                android:layout_gravity="bottom"
-                android:paddingTop="12dp"
-                />
+        <com.obsidium.bettermanual.views.EvView
+            android:id="@+id/tvExposureCompensation"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:gravity="bottom|center"
+            android:paddingTop="12dp"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/white"
+            android:textSize="22dp"
+            tools:background="#502080"
+            tools:text="EV" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="22dp"
-                tools:text="EV"
-                android:id="@+id/tvExposureCompensation"
-                android:layout_weight="1"
-                android:gravity="bottom|center_horizontal"
-                android:textColor="@android:color/white"
-                tools:background="#502080"
-                android:clickable="true"
-                android:singleLine="true"
-                android:ellipsize="none"
-                android:layout_gravity="bottom"
-                android:paddingTop="12dp"
-                />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:gravity="bottom|center_horizontal"
-                android:layout_weight="1"
-                tools:background="#1547f0"
-                android:layout_height="wrap_content"
-                android:id="@+id/lExposure">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="22dp"
-                tools:text="EV"
-                android:id="@+id/tvExposure"
-                android:gravity="bottom"
-                android:textColor="@android:color/white"
-                android:clickable="true"
-                android:singleLine="true"
-                android:ellipsize="none"
-                android:layout_gravity="bottom"
-                android:paddingTop="12dp"
-                />
-            </LinearLayout>
-        </TableRow>
-
-    </TableLayout>
+        <TextView
+            android:id="@+id/tvExposure"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:gravity="bottom|center"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/white"
+            android:textSize="22dp"
+            tools:background="#502080"
+            tools:text="EV" />
+    </LinearLayout>
 
     <TextView
         android:layout_width="fill_parent"

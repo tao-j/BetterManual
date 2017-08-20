@@ -100,6 +100,12 @@ public class BaseActivity extends Activity {
                 return onLowerDialChanged(-1);
             case ScalarInput.ISV_KEY_MODE_DIAL:
                 return onModeDialChanged(getDialStatus(ScalarInput.ISV_KEY_MODE_DIAL));
+            case ScalarInput.ISV_KEY_ZOOM_OFF: // zoom not active
+                return onZoomOffKey();
+            case ScalarInput.ISV_KEY_ZOOM_TELE: //zoom in
+                return onZoomTeleKey();
+            case ScalarInput.ISV_KEY_IR_ZOOM_WIDE: //zoom out
+                return onZoomWideKey();
             default:
                 return super.onKeyDown(keyCode, event);
         }
@@ -190,6 +196,11 @@ public class BaseActivity extends Activity {
     protected boolean onUpperDialChanged(int value) { return false; }
     protected boolean onLowerDialChanged(int value) { return false; }
     protected boolean onModeDialChanged(int value) { return false; }
+
+    protected boolean onZoomTeleKey(){return false;}
+    protected boolean onZoomWideKey(){return false;}
+    protected boolean onZoomOffKey(){return false;}
+
 
     protected boolean onDeleteKeyDown() {
         return true;

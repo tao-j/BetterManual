@@ -2,7 +2,10 @@ package com.github.ma1co.pmcademo.app;
 
 import android.os.Environment;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Logger {
     public static File getFile() {

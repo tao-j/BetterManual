@@ -16,7 +16,7 @@
  * limitations under the License.
  */
  
-package com.obsidium.bettermanual;
+package com.obsidium.bettermanual.views;
 
 import android.content.Context;
 import android.graphics.Canvas;

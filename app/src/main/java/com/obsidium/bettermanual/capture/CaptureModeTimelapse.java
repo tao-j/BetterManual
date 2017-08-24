@@ -59,7 +59,7 @@ public class CaptureModeTimelapse extends CaptureMode
         catch (NoSuchMethodError e)
         {
         }
-        activityInterface.getMainHandler().post(m_timelapseRunnable);
+        activityInterface.takePicture();
     }
 
     @Override
@@ -112,7 +112,7 @@ public class CaptureModeTimelapse extends CaptureMode
                 if (m_timelapseInterval != 0)
                     activityInterface.getMainHandler().postDelayed(m_timelapseRunnable, m_timelapseInterval);
                 else
-                    activityInterface.getCamera().burstableTakePicture();
+                    activityInterface.takePicture();
             }
         }
         else
@@ -182,7 +182,7 @@ public class CaptureModeTimelapse extends CaptureMode
         @Override
         public void run()
         {
-            activityInterface.getCamera().burstableTakePicture();
+            activityInterface.takePicture();
         }
     };
 }

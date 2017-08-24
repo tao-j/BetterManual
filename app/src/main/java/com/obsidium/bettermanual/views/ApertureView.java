@@ -12,6 +12,21 @@ import com.sony.scalar.hardware.CameraEx;
 
 public class ApertureView extends BaseTextView implements CameraEx.ApertureChangeListener {
 
+    private class ApertureSetRunner implements Runnable
+    {
+        private int direction;
+        public ApertureSetRunner(int direction)
+        {
+            this.direction = direction;
+        }
+        @Override
+        public void run() {
+            if (direction > 0)
+                activityInterface.getCamera().decrementAperture();
+            else
+                activityInterface.getCamera().incrementAperture();
+        }
+    }
 
     // Aperture
     private boolean         m_notifyOnNextApertureChange;
@@ -34,12 +49,10 @@ public class ApertureView extends BaseTextView implements CameraEx.ApertureChang
         if (activityInterface.getIso().getCurrentIso() != 0)
         {
             m_notifyOnNextApertureChange = true;
-            if (distance > 0)
-                activityInterface.getCamera().decrementAperture();
-            else
-                activityInterface.getCamera().incrementAperture();
+            activityInterface.getBackHandler().post(new ApertureSetRunner(distance));
         }
     }
+
 
     @Override
     public boolean onClick() {

@@ -40,6 +40,7 @@ import java.util.List;
 
 public class ManualActivity extends BaseActivity implements SurfaceHolder.Callback, View.OnClickListener, CameraEx.ShutterListener, ActivityInterface
 {
+
     private static final boolean LOGGING_ENABLED = false;
     private static final int MESSAGE_TIMEOUT = 1000;
     private final  String TAG  = ManualActivity.class.getSimpleName();
@@ -104,6 +105,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         timelapseSetInterval, timelapseSetPicCount,
         bracketSetStep, bracketSetPicCount
     }
+
     public DialMode        m_dialMode;
 
     protected final Handler   m_handler = new Handler();
@@ -307,7 +309,6 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     public Handler getBackHandler() {
         return mbgHandler;
     }
-
     private void log(final String str)
     {
         if (LOGGING_ENABLED)
@@ -318,6 +319,37 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     public void startActivity(Class<?> activity) {
         startActivity(new Intent(getApplicationContext(), activity));
     }
+
+    @Override
+    public void takePicture() {
+        m_camera.burstableTakePicture();
+    }
+
+    /**
+     * Returned from camera when a capture is done
+     * STATUS_CANCELED = 1;
+     * STATUS_ERROR = 2;
+     * STATUS_OK = 0;
+     * @param i code
+     * @param cameraEx did capture Image
+     */
+    @Override
+    public void onShutter(int i, CameraEx cameraEx)
+    {
+        if (i != 0)
+        {
+            m_takingPicture = false;
+        }
+        if (!bulbcapture) {
+
+            m_camera.cancelTakePicture();
+            if (timelapse.isActive())
+                timelapse.onShutter(i);
+            else if (bracket.isActive())
+                bracket.onShutter(i);
+        }
+    }
+
 
     public void updateViewVisibility()
     {
@@ -452,6 +484,8 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
             }
         });
 
+        List<?> supportedBurstDriveButtonReleaseBehaves = paramsModifier.getSupportedBurstDriveButtonReleaseBehaves();
+
         // ISO
         m_camera.setAutoISOSensitivityListener(iso);
 
@@ -583,30 +617,6 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         stopBackgroundThread();
     }
 
-
-    /**
-     * Returned from camera when a capture is done
-     * STATUS_CANCELED = 1;
-     * STATUS_ERROR = 2;
-     * STATUS_OK = 0;
-     * @param i code
-     * @param cameraEx did capture Image
-     */
-    @Override
-    public void onShutter(int i, CameraEx cameraEx)
-    {
-        if (i != 0)
-        {
-            m_takingPicture = false;
-        }
-        m_camera.cancelTakePicture();
-
-        if (timelapse.isActive())
-            timelapse.onShutter(i);
-        else if (bracket.isActive())
-            bracket.onShutter(i);
-    }
-
     // OnClickListener
     public void onClick(View view)
     {
@@ -702,7 +712,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
                     if (value < 0)
                         bracket.decrementPicCount();
                     else
-                        bracket.incrementPicCount();;
+                        bracket.incrementPicCount();
                     break;
             }
             return true;
@@ -829,6 +839,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     @Override
     protected boolean onEnterKeyDown()
     {
+        Log.d(TAG,"onEnterKeyDown");
         if (timelapse.isActive())
         {
             timelapse.abort();
@@ -857,43 +868,19 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
             startActivity(MinShutterActivity.class);
             return true;
         }
-        /*else if ((m_dialMode == DialMode.shutter && m_tvShutter.getText().equals("BULB")) || bulbcapture)
+        else if ((m_dialMode == DialMode.shutter && m_tvShutter.getText().equals("BULB")) || bulbcapture)
         {
             if (!bulbcapture) {
-                m_tvHint.setVisibility(View.GONE);
-                m_tvMsg.setVisibility(View.GONE);
-                // Take first picture at set shutter speed
-                bulbcapture = true;
-                m_camera.stopDirectShutter(new CameraEx.DirectShutterStoppedCallback() {
-                    @Override
-                    public void onShutterStopped(CameraEx cameraEx) {
-
-                    }
-                });
-                //m_camera.getNormalCamera().stopPreview();
-                Log.d(TAG,"setShutter for bulb to:" + 65535);
-                //m_camera.adjustShutterSpeed(65535);
-                m_camera.incrementShutterSpeed();
-                mbgHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        m_camera.burstableTakePicture();
-                    }
-                });
-                Log.d(TAG, "Start BULB");
+                startBulbCapture();
                 return true;
 
             }
             else if (bulbcapture){
 
-                Log.d(TAG, "Stop BULB");
-                m_camera.cancelTakePicture();
-                m_camera.startDirectShutter();
-                bulbcapture = false;
-                //m_camera.getNormalCamera().startPreview();
+                stopBulbCapture();
                 return  true;
             }
-        }*/
+        }
         else if (m_dialMode == DialMode.exposure)
         {
             // Reset exposure compensation
@@ -946,6 +933,29 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         }
         return false;
     }
+
+    private void stopBulbCapture() {
+        Log.d(TAG, "Stop BULB");
+        bulbcapture = false;
+        m_camera.cancelTakePicture();
+        m_camera.startDirectShutter();
+    }
+
+    private void startBulbCapture()
+    {
+        m_tvHint.setVisibility(View.GONE);
+        m_tvMsg.setVisibility(View.GONE);
+        bulbcapture = true;
+        m_camera.stopDirectShutter(new CameraEx.DirectShutterStoppedCallback() {
+            @Override
+            public void onShutterStopped(CameraEx cameraEx) {
+                Log.d(TAG,"start Bulb");
+                takePicture();
+            }
+        });
+    }
+
+
 
     @Override
     protected boolean onUpKeyDown()
@@ -1058,15 +1068,15 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     @Override
     protected boolean onShutterKeyUp()
     {
-
+        Log.d(TAG,"onShutterKeyUp");
         m_shutterKeyDown = false;
-        return true;
+        return false;
     }
 
     @Override
     protected boolean onShutterKeyDown()
     {
-
+        Log.d(TAG,"onShutterKeyDown");
         // direct shutter...
         /*
         log("onShutterKeyDown\n");
@@ -1077,7 +1087,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
             m_camera.burstableTakePicture();
         }
         */
-        return true;
+        return false;
     }
 
     @Override
@@ -1097,6 +1107,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
+        Log.d(TAG, "onkeydown:"+event.getScanCode()+ " event:" + event.getAction());
         final int scanCode = event.getScanCode();
         if (timelapse.isActive() && scanCode != ScalarInput.ISV_KEY_ENTER)
             return true;
@@ -1140,7 +1151,21 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
                 return true;
             }
         }
+
+        if (scanCode == ScalarInput.ISV_KEY_S2) {
+            Log.d(TAG, "S2");
+            return true;
+        }
+        if (scanCode == ScalarInput.ISV_KEY_S1_1)
+            Log.d(TAG, "S1_1");
+
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        Log.d(TAG, "onkeyup:"+event.getScanCode()+ " event:" + event.getAction());
+        return super.onKeyUp(keyCode, event);
     }
 
     @Override
@@ -1194,6 +1219,4 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
             e.printStackTrace();
         }
     }
-
-
 }

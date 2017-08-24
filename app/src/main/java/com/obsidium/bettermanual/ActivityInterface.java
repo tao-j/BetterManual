@@ -32,4 +32,5 @@ public interface ActivityInterface
     ApertureView getAperture();
     IsoView getIso();
     void startActivity(Class<?> activity);
+    void takePicture();
 }

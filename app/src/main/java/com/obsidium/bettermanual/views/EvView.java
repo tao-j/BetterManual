@@ -2,6 +2,7 @@ package com.obsidium.bettermanual.views;
 
 import android.content.Context;
 import android.hardware.Camera;
+import android.os.Looper;
 import android.util.AttributeSet;
 
 /**
@@ -9,6 +10,22 @@ import android.util.AttributeSet;
  */
 
 public class EvView extends BaseTextView {
+
+    private class EvSetRunner implements Runnable
+    {
+        private int direction;
+        public EvSetRunner(int direction)
+        {
+            this.direction = direction;
+        }
+        @Override
+        public void run() {
+            if (direction > 0)
+                decrementExposureCompensation(true);
+            else
+                incrementExposureCompensation(true);
+        }
+    }
 
     private int             m_maxExposureCompensation;
     private int             m_minExposureCompensation;
@@ -30,10 +47,7 @@ public class EvView extends BaseTextView {
     @Override
     public void onScrolled(int distance) {
         if (activityInterface.getIso().getCurrentIso() != 0) {
-            if (distance > 0)
-                decrementExposureCompensation(true);
-            else
-                incrementExposureCompensation(true);
+            activityInterface.getBackHandler().post(new EvSetRunner(distance));
         }
     }
 
@@ -90,17 +104,23 @@ public class EvView extends BaseTextView {
         }
     }
 
-    private void updateExposureCompensation(boolean notify)
+    private void updateExposureCompensation(final boolean notify)
     {
-        final String text;
-        if (m_curExposureCompensation == 0)
-            text = "\uEB18\u00B10.0";
-        else if (m_curExposureCompensation > 0)
-            text = String.format("\uEB18+%.1f", m_curExposureCompensation * m_exposureCompensationStep);
-        else
-            text = String.format("\uEB18%.1f", m_curExposureCompensation * m_exposureCompensationStep);
-        setText(text);
-        if (notify)
-            activityInterface.showMessageDelayed(text);
+        activityInterface.getMainHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                final String text;
+                if (m_curExposureCompensation == 0)
+                    text = "\uEB18\u00B10.0";
+                else if (m_curExposureCompensation > 0)
+                    text = String.format("\uEB18+%.1f", m_curExposureCompensation * m_exposureCompensationStep);
+                else
+                    text = String.format("\uEB18%.1f", m_curExposureCompensation * m_exposureCompensationStep);
+                setText(text);
+                if (notify)
+                    activityInterface.showMessageDelayed(text);
+            }
+        });
+
     }
 }

@@ -64,7 +64,7 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
         activityInterface.hideHintMessage();
         activityInterface.hideMessage();
         // Take first picture at set shutter speed
-        activityInterface.getCamera().burstableTakePicture();
+        activityInterface.takePicture();
     }
 
     @Override
@@ -198,7 +198,7 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
                     shutterSpeedInfo.currentShutterSpeed_d == m_bracketNextShutterSpeed.second)
             {
                 // Focus speed adjusted, take next picture
-                activityInterface.getCamera().burstableTakePicture();
+                activityInterface.takePicture();
             }
         }
     }

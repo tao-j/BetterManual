@@ -11,6 +11,22 @@ import com.sony.scalar.hardware.CameraEx;
 
 public class ShutterView extends BaseTextView {
 
+    private class ShutterSetRunner implements Runnable
+    {
+        private int direction;
+        public ShutterSetRunner(int direction)
+        {
+            this.direction = direction;
+        }
+        @Override
+        public void run() {
+            if (direction > 0)
+                activityInterface.getCamera().decrementShutterSpeed();
+            else
+                activityInterface.getCamera().incrementShutterSpeed();
+        }
+    }
+
     // Shutter speed
     private boolean         m_notifyOnNextShutterSpeedChange;
     public ShutterView(Context context) {
@@ -29,10 +45,7 @@ public class ShutterView extends BaseTextView {
     public void onScrolled(int distance) {
         if (activityInterface.getIso().getCurrentIso() != 0)
         {
-            if (distance > 0)
-                activityInterface.getCamera().decrementShutterSpeed();
-            else
-                activityInterface.getCamera().incrementShutterSpeed();
+            activityInterface.getBackHandler().post(new ShutterSetRunner(distance));
         }
 
     }

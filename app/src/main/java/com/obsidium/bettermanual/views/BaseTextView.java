@@ -8,7 +8,7 @@ import android.widget.TextView;
 import com.obsidium.bettermanual.ActivityInterface;
 import com.obsidium.bettermanual.OnSwipeTouchListener;
 
-public abstract class BaseTextView extends TextView
+public abstract class BaseTextView extends TextView implements DialValueSet
 {
 
     protected ActivityInterface activityInterface;

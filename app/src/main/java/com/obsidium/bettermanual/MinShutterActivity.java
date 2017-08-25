@@ -8,9 +8,10 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.github.ma1co.pmcademo.app.BaseActivity;
+import com.github.ma1co.pmcademo.app.DialPadKeysEvents;
 import com.sony.scalar.hardware.CameraEx;
 
-public class MinShutterActivity extends BaseActivity implements SeekBar.OnSeekBarChangeListener
+public class MinShutterActivity extends BaseActivity implements SeekBar.OnSeekBarChangeListener, DialPadKeysEvents
 {
     private SeekBar     m_sbShutter;
     private TextView    m_tvInfo;
@@ -45,6 +46,7 @@ public class MinShutterActivity extends BaseActivity implements SeekBar.OnSeekBa
     @Override
     public void onResume()
     {
+        dialHandler.setDialEventListner(this);
         super.onResume();
 
         m_camera = CameraEx.open(0, null);
@@ -79,20 +81,70 @@ public class MinShutterActivity extends BaseActivity implements SeekBar.OnSeekBa
     }
 
     @Override
-    protected boolean onEnterKeyDown()
+    public boolean onEnterKeyDown()
     {
         onBackPressed();
         return true;
     }
 
     @Override
-    protected boolean onUpperDialChanged(int value)
+    public boolean onEnterKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onUpperDialChanged(int value)
     {
         m_sbShutter.incrementProgressBy(value);
         final Camera.Parameters params = m_camera.createEmptyParameters();
         m_camera.createParametersModifier(params).setAutoShutterSpeedLowLimit(CameraUtil.MIN_SHUTTER_VALUES[m_sbShutter.getProgress()]);
         m_camera.getNormalCamera().setParameters(params);
         return true;
+    }
+
+    @Override
+    public boolean onLowerDialChanged(int value) {
+        return false;
+    }
+
+    @Override
+    public boolean onUpKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onUpKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onDownKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onDownKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onLeftKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onLeftKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onRightKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onRightKeyUp() {
+        return false;
     }
 
     /* OnSeekBarChangeListener */

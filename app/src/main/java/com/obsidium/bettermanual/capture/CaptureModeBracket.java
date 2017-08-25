@@ -2,13 +2,14 @@ package com.obsidium.bettermanual.capture;
 
 import android.util.Pair;
 
+import com.github.ma1co.pmcademo.app.DialPadKeysEvents;
 import com.obsidium.bettermanual.ActivityInterface;
 import com.obsidium.bettermanual.CameraUtil;
 import com.obsidium.bettermanual.ManualActivity;
 import com.obsidium.bettermanual.views.ExposureModeView;
 import com.sony.scalar.hardware.CameraEx;
 
-public class CaptureModeBracket extends CaptureMode implements  CameraEx.ShutterSpeedChangeListener {
+public class CaptureModeBracket extends CaptureMode implements  CameraEx.ShutterSpeedChangeListener, DialPadKeysEvents {
 
     // Bracketing
     private int             m_bracketStep;  // in 1/3 stops
@@ -17,6 +18,12 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
     private int             m_bracketShutterDelta;
     private Pair<Integer, Integer> m_bracketNextShutterSpeed;
     private int             m_bracketNeutralShutterIndex;
+
+    private final int BRACKET_NON = 0;
+    private final int BRACKET_STEP = 1;
+    private final int BRACKET_PICCOUNT = 2;
+    private int currentDialMode = BRACKET_NON;
+
 
     public CaptureModeBracket(ActivityInterface activityInterface)
     {
@@ -31,7 +38,7 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
 
     @Override
     public void prepare() {
-        if (activityInterface.getDialMode() == ManualActivity.DialMode.bracketSetStep || activityInterface.getDialMode() == ManualActivity.DialMode.bracketSetPicCount)
+        if (isActive())
             abort();
         else
         {
@@ -48,7 +55,6 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
 
             activityInterface.setLeftViewVisibility(false);
 
-            activityInterface.setDialMode(ManualActivity.DialMode.bracketSetStep);
             m_bracketPicCount = 3;
             m_bracketStep = 3;
             m_bracketShutterDelta = 0;
@@ -73,7 +79,6 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
         //m_handler.removeCallbacks(m_timelapseRunnable);
         isActive = false;
         activityInterface.showMessageDelayed("Bracketing finished");
-        activityInterface.setDialMode(ManualActivity.DialMode.shutter);
         activityInterface.getCamera().startDirectShutter();
         activityInterface.getCamera().getNormalCamera().startPreview();
 
@@ -201,5 +206,82 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
                 activityInterface.takePicture();
             }
         }
+    }
+
+    @Override
+    public boolean onUpperDialChanged(int value) {
+        return false;
+    }
+
+    @Override
+    public boolean onLowerDialChanged(int value) {
+        return false;
+    }
+
+    @Override
+    public boolean onUpKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onUpKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onDownKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onDownKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onLeftKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onLeftKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onRightKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onRightKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onEnterKeyDown() {
+        if (currentDialMode == BRACKET_NON)
+        {
+            prepare();
+            currentDialMode = BRACKET_STEP;
+        }
+        else if(currentDialMode == BRACKET_STEP)
+        {
+            activityInterface.showHintMessage("\uE4CD to set picture count, \uE04C to confirm");
+            currentDialMode = BRACKET_PICCOUNT;
+        }
+        else
+        {
+            activityInterface.getDialHandler().setDefaultListner();
+            startCountDown();
+            currentDialMode = BRACKET_NON;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean onEnterKeyUp() {
+        return false;
     }
 }

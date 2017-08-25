@@ -7,7 +7,7 @@ import android.widget.ImageView;
 
 import com.obsidium.bettermanual.ActivityInterface;
 
-public abstract class BaseImageView extends ImageView
+public abstract class BaseImageView extends ImageView implements DialValueSet
 {
 
     protected ActivityInterface activity;

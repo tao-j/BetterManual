@@ -25,12 +25,11 @@ public interface ActivityInterface
     Handler getBackHandler();
     void updateViewVisibility();
     void setLeftViewVisibility(boolean state);
-    void setDialMode(ManualActivity.DialMode dialMode);
-    ManualActivity.DialMode getDialMode();
     ShutterView getShutter();
     DriveMode getDriveMode();
     ApertureView getAperture();
     IsoView getIso();
     void startActivity(Class<?> activity);
     void takePicture();
+    DialHandler getDialHandler();
 }

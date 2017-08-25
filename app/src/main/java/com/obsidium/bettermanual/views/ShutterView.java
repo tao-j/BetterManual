@@ -11,6 +11,11 @@ import com.sony.scalar.hardware.CameraEx;
 
 public class ShutterView extends BaseTextView {
 
+    @Override
+    public void setIn_DecrementValue(int value) {
+        onScrolled(value);
+    }
+
     private class ShutterSetRunner implements Runnable
     {
         private int direction;

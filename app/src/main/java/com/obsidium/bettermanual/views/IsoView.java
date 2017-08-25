@@ -57,7 +57,7 @@ public class IsoView extends BaseTextView implements CameraEx.AutoISOSensitivity
     public boolean onClick() {
         setIso(m_curIso == 0 ? getFirstManualIso() : 0);
         activityInterface.showMessageDelayed(m_curIso == 0 ? "Auto \uE488" : "Manual \uE488");
-        return true;
+        return false;
     }
 
     private void setIso(int iso) {
@@ -102,5 +102,10 @@ public class IsoView extends BaseTextView implements CameraEx.AutoISOSensitivity
     @Override
     public void onChanged(int i, CameraEx cameraEx) {
         setText("\uE488 " + String.valueOf(i) + (m_curIso == 0 ? "(A)" : ""));
+    }
+
+    @Override
+    public void setIn_DecrementValue(int value) {
+        onScrolled(value);
     }
 }

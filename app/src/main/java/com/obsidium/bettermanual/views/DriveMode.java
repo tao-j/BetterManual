@@ -93,4 +93,9 @@ public class DriveMode extends BaseImageView
 
         updateImage();
     }
+
+    @Override
+    public void setIn_DecrementValue(int value) {
+
+    }
 }

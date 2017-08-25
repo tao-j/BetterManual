@@ -11,6 +11,11 @@ import android.util.AttributeSet;
 
 public class EvView extends BaseTextView {
 
+    @Override
+    public void setIn_DecrementValue(int value) {
+        onScrolled(value);
+    }
+
     private class EvSetRunner implements Runnable
     {
         private int direction;

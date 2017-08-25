@@ -12,6 +12,11 @@ import com.sony.scalar.hardware.CameraEx;
 
 public class ApertureView extends BaseTextView implements CameraEx.ApertureChangeListener {
 
+    @Override
+    public void setIn_DecrementValue(int value) {
+        onScrolled(value);
+    }
+
     private class ApertureSetRunner implements Runnable
     {
         private int direction;

@@ -3,13 +3,21 @@ package com.obsidium.bettermanual.views;
 import android.content.Context;
 import android.hardware.Camera;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import com.obsidium.bettermanual.ManualActivity;
 import com.obsidium.bettermanual.SonyDrawables;
 import com.sony.scalar.hardware.CameraEx;
 
 
+
 public class ExposureModeView extends BaseImageView {
+    private final String TAG = ExposureModeView.class.getSimpleName();
+
+    @Override
+    public void setIn_DecrementValue(int value) {
+
+    }
 
     public enum ExposureModes { manual, aperture, shutter, other }
     private ExposureModes m_exposureModes;
@@ -37,6 +45,7 @@ public class ExposureModeView extends BaseImageView {
     public void updateImage()
     {
         String mode = activity.getCamera().getNormalCamera().getParameters().getSceneMode();
+        Log.d(TAG, "updateImage:" + mode);
         //log(String.format("updateImage %s\n", mode));
         if (mode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
         {
@@ -66,22 +75,24 @@ public class ExposureModeView extends BaseImageView {
 
     public void toggle()
     {
+        Log.d(TAG,"toggle()");
         final String newMode;
         switch (m_exposureModes)
         {
             case manual:
                 newMode = CameraEx.ParametersModifier.SCENE_MODE_APERTURE_PRIORITY;
-                if (activity.getDialMode() != ManualActivity.DialMode.mode)
-                    activity.setDialMode(activity.getAperture().haveApertureControl() ? ManualActivity.DialMode.aperture : ManualActivity.DialMode.iso);
+                /*if (activity.getDialMode() != ManualActivity.DialMode.mode)
+                    activity.setDialMode(activity.getAperture().haveApertureControl() ? ManualActivity.DialMode.aperture : ManualActivity.DialMode.iso);*/
                 setMinShutterSpeed(activity.getPreferences().getMinShutterSpeed());
                 break;
             default:
                 newMode = CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE;
-                if (activity.getDialMode() != ManualActivity.DialMode.mode)
-                    activity.setDialMode(ManualActivity.DialMode.shutter);
+                /*if (activity.getDialMode() != ManualActivity.DialMode.mode)
+                    activity.setDialMode(ManualActivity.DialMode.shutter);*/
                 setMinShutterSpeed(-1);
                 break;
         }
+        Log.d(TAG,"newmode:" + newMode);
         setSceneMode(newMode);
     }
 

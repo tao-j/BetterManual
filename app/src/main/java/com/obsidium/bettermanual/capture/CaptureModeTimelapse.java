@@ -1,16 +1,23 @@
 package com.obsidium.bettermanual.capture;
 
+import com.github.ma1co.pmcademo.app.DialPadKeysEvents;
 import com.obsidium.bettermanual.ActivityInterface;
 import com.obsidium.bettermanual.ManualActivity;
 import com.sony.scalar.sysutil.didep.Settings;
 
-public class CaptureModeTimelapse extends CaptureMode
+public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEvents
 {
 
     private int             m_timelapseInterval;    // ms
     private int             m_timelapsePicCount;
     private int             m_timelapsePicsTaken;
     private int             m_autoPowerOffTimeBackup;
+
+    private final int TLS_SET_NONE = 0;
+    private final int TLS_SET_INTERVAL = 1;
+    private final int TLS_SET_PICCOUNT = 2;
+    private int currentdial = TLS_SET_INTERVAL;
+
 
     public CaptureModeTimelapse(ActivityInterface manualActivity)
     {
@@ -20,18 +27,20 @@ public class CaptureModeTimelapse extends CaptureMode
     public void reset()
     {
         m_timelapsePicCount = 0;
+        currentdial = TLS_SET_INTERVAL;
         updateTimelapsePictureCount();
     }
 
     @Override
     public void prepare() {
-        if (activityInterface.getDialMode() == ManualActivity.DialMode.timelapseSetInterval || activityInterface.getDialMode() == ManualActivity.DialMode.timelapseSetPicCount)
+        if (isActive())
             abort();
         else
         {
             activityInterface.setLeftViewVisibility(false);
 
-            activityInterface.setDialMode(ManualActivity.DialMode.timelapseSetInterval);
+            currentdial = TLS_SET_INTERVAL;
+            //activityInterface.setDialMode(ManualActivity.DialMode.timelapseSetInterval);
             m_timelapseInterval = 1000;
             updateTimelapseInterval();
             activityInterface.showHintMessage("\uE4CD to set timelapse interval, \uE04C to confirm");
@@ -68,7 +77,6 @@ public class CaptureModeTimelapse extends CaptureMode
         activityInterface.getMainHandler().removeCallbacks(m_timelapseRunnable);
         isActive = false;
         activityInterface.showMessageDelayed("Timelapse finished");
-        activityInterface.setDialMode(ManualActivity.DialMode.shutter);
         activityInterface.getCamera().startDirectShutter();
         activityInterface.getCamera().getNormalCamera().startPreview();
 
@@ -88,6 +96,7 @@ public class CaptureModeTimelapse extends CaptureMode
             catch (NoSuchMethodError e)
             {
             }
+        currentdial = TLS_SET_NONE;
 
     }
 
@@ -185,4 +194,94 @@ public class CaptureModeTimelapse extends CaptureMode
             activityInterface.takePicture();
         }
     };
+
+    @Override
+    public boolean onUpperDialChanged(int value) {
+        if (currentdial == TLS_SET_INTERVAL)
+        {
+            if (value <0)
+                decrement();
+            else
+                increment();
+        }
+        else
+            if (currentdial == TLS_SET_PICCOUNT)
+            {
+                if (value < 0)
+                    decrementPicCount();
+                else
+                    incrementPicCount();
+            }
+        onUpperDialChanged(value);
+        return false;
+    }
+
+    @Override
+    public boolean onLowerDialChanged(int value) {
+        return false;
+    }
+
+    @Override
+    public boolean onUpKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onUpKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onDownKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onDownKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onLeftKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onLeftKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onRightKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onRightKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onEnterKeyDown() {
+        if (currentdial == TLS_SET_NONE) {
+            prepare();
+            currentdial = TLS_SET_INTERVAL;
+        }
+        else if (currentdial == TLS_SET_INTERVAL) {
+            activityInterface.showHintMessage("\uE4CD to set picture count, \uE04C to confirm");
+            currentdial = TLS_SET_PICCOUNT;
+        }
+        else if (currentdial == TLS_SET_PICCOUNT)
+        {
+            activityInterface.getDialHandler().setDefaultListner();
+            startCountDown();
+            currentdial = TLS_SET_NONE;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onEnterKeyUp() {
+        return false;
+    }
 }

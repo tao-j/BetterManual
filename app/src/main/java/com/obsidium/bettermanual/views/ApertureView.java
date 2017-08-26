@@ -51,11 +51,8 @@ public class ApertureView extends BaseTextView implements CameraEx.ApertureChang
 
     @Override
     public void onScrolled(int distance) {
-        if (activityInterface.getIso().getCurrentIso() != 0)
-        {
-            m_notifyOnNextApertureChange = true;
-            activityInterface.getBackHandler().post(new ApertureSetRunner(distance));
-        }
+        m_notifyOnNextApertureChange = true;
+        activityInterface.getBackHandler().post(new ApertureSetRunner(distance));
     }
 
 

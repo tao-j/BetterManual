@@ -820,24 +820,22 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
             m_camera.setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
             return true;
         }
-        else if (view instanceof ShutterView)
+        else if (view instanceof ShutterView || bulbcapture)
         {
-            // Set minimum shutter speed
-            startActivity(MinShutterActivity.class);
-            return true;
-        }
-        else if ((view instanceof ShutterView && m_tvShutter.getText().equals("BULB")) || bulbcapture)
-        {
-            if (!bulbcapture) {
-                startBulbCapture();
-                return false;
+            if (m_tvShutter.getText().equals("BULB")) {
+                if (!bulbcapture) {
+                    startBulbCapture();
+                    return false;
 
-            }
-            else if (bulbcapture){
+                } else if (bulbcapture) {
 
-                stopBulbCapture();
-                return  false;
+                    stopBulbCapture();
+                    return false;
+                }
             }
+            else
+                getShutter().onClick();
+            return false;
         }
         else if (view == m_ivTimelapse)
         {

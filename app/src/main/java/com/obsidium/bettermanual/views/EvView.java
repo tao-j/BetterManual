@@ -51,9 +51,7 @@ public class EvView extends BaseTextView {
 
     @Override
     public void onScrolled(int distance) {
-        if (activityInterface.getIso().getCurrentIso() != 0) {
-            activityInterface.getBackHandler().post(new EvSetRunner(distance));
-        }
+        activityInterface.getBackHandler().post(new EvSetRunner(distance));
     }
 
     @Override

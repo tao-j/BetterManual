@@ -48,16 +48,12 @@ public class ShutterView extends BaseTextView {
 
     @Override
     public void onScrolled(int distance) {
-        if (activityInterface.getIso().getCurrentIso() != 0)
-        {
-            activityInterface.getBackHandler().post(new ShutterSetRunner(distance));
-        }
-
+        activityInterface.getBackHandler().post(new ShutterSetRunner(distance));
     }
 
     @Override
     public boolean onClick() {
-        if (activityInterface.getExposureMode().get() == ExposureModeView.ExposureModes.aperture)
+        if (activityInterface.getExposureMode().get() == ExposureModeView.ExposureModes.aperture && !getText().equals("BULB"))
         {
             // Set minimum shutter speed
             activityInterface.startActivity(MinShutterActivity.class);

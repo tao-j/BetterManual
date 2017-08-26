@@ -16,7 +16,7 @@ public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEven
     private final int TLS_SET_NONE = 0;
     private final int TLS_SET_INTERVAL = 1;
     private final int TLS_SET_PICCOUNT = 2;
-    private int currentdial = TLS_SET_INTERVAL;
+    private int currentdial = TLS_SET_NONE;
 
 
     public CaptureModeTimelapse(ActivityInterface manualActivity)
@@ -212,7 +212,6 @@ public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEven
                 else
                     incrementPicCount();
             }
-        onUpperDialChanged(value);
         return false;
     }
 
@@ -265,11 +264,12 @@ public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEven
     public boolean onEnterKeyDown() {
         if (currentdial == TLS_SET_NONE) {
             prepare();
-            currentdial = TLS_SET_INTERVAL;
+            updateTimelapseInterval();
         }
         else if (currentdial == TLS_SET_INTERVAL) {
             activityInterface.showHintMessage("\uE4CD to set picture count, \uE04C to confirm");
             currentdial = TLS_SET_PICCOUNT;
+            updateTimelapsePictureCount();
         }
         else if (currentdial == TLS_SET_PICCOUNT)
         {

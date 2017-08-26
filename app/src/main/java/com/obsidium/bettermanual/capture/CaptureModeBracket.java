@@ -210,6 +210,21 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
 
     @Override
     public boolean onUpperDialChanged(int value) {
+        if (currentDialMode == BRACKET_STEP)
+        {
+            if (value <0)
+                decrement();
+            else
+                increment();
+        }
+        else
+        if (currentDialMode == BRACKET_PICCOUNT)
+        {
+            if (value < 0)
+                decrementPicCount();
+            else
+                incrementPicCount();
+        }
         return false;
     }
 
@@ -264,11 +279,14 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
         {
             prepare();
             currentDialMode = BRACKET_STEP;
+            updateBracketStep();
         }
         else if(currentDialMode == BRACKET_STEP)
         {
             activityInterface.showHintMessage("\uE4CD to set picture count, \uE04C to confirm");
             currentDialMode = BRACKET_PICCOUNT;
+            reset();
+            updateBracketPicCount();
         }
         else
         {

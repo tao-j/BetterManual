@@ -1,26 +1,38 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        sign {
+            keyAlias 'bettermanual'
+            keyPassword 'bettermanual'
+            storeFile file('../key/key.jks')
+            storePassword 'bettermanual'
+        }
+    }
     compileSdkVersion 10
     buildToolsVersion '25.0.2'
-
     defaultConfig {
         applicationId "com.obsidium.bettermanual"
         minSdkVersion 10
         targetSdkVersion 10
         versionCode 7
         versionName "1.5"
+        signingConfig signingConfigs.sign
     }
     buildTypes {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+            signingConfig signingConfigs.sign
+        }
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_6
         targetCompatibility JavaVersion.VERSION_1_6
+    }
+    productFlavors {
     }
 }
 

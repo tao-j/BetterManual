@@ -3,7 +3,7 @@ package com.obsidium.bettermanual.views;
 import android.content.Context;
 import android.util.AttributeSet;
 
-import com.github.killerink.CustomFragmentActivity;
+import com.github.killerink.MainActivity;
 import com.obsidium.bettermanual.CameraUtil;
 
 public class ShutterView extends BaseTextView {
@@ -53,7 +53,7 @@ public class ShutterView extends BaseTextView {
         if (cameraUiInterface.getExposureMode().get() == ExposureModeView.ExposureModes.aperture && !getText().equals("BULB"))
         {
             // Set minimum shutter speed
-            cameraUiInterface.getActivityInterface().loadFragment(CustomFragmentActivity.FRAGMENT_MIN_SHUTTER);
+            cameraUiInterface.getActivityInterface().loadFragment(MainActivity.FRAGMENT_MIN_SHUTTER);
             return true;
         }
         return false;

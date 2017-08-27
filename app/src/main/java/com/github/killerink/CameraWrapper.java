@@ -1,8 +1,10 @@
 package com.github.killerink;
 
 import android.hardware.Camera;
+import android.util.Log;
 import android.util.Pair;
 import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 
 import com.sony.scalar.hardware.CameraEx;
 
@@ -13,21 +15,25 @@ import java.util.List;
  * Created by troop on 26.08.2017.
  */
 
-public class CameraWrapper
+public class CameraWrapper implements SurfaceHolder.Callback
 {
+    private final String TAG = CameraWrapper.class.getSimpleName();
     private CameraEx m_camera;
     private Camera.Parameters parameters;
     private CameraEx.ParametersModifier modifier;
 
     public CameraWrapper()
     {
+        Log.d(TAG,"Open Cam");
         m_camera = CameraEx.open(0, null);
+        Log.d(TAG,"Cam open");
         parameters = m_camera.getNormalCamera().getParameters();
         modifier = m_camera.createParametersModifier(parameters);
     }
 
     public void closeCamera()
     {
+        Log.d(TAG,"closeCamera");
         m_camera.getNormalCamera().stopPreview();
         m_camera.release();
         m_camera = null;
@@ -72,6 +78,7 @@ public class CameraWrapper
 
     public void setSurfaceHolder(SurfaceHolder surface)
     {
+        Log.d(TAG,"setSurfaceHolder");
         try {
             m_camera.getNormalCamera().setPreviewDisplay(surface);
         } catch (IOException e) {
@@ -234,5 +241,21 @@ public class CameraWrapper
     public void adjustShutterSpeed(int val)
     {
         m_camera.adjustShutterSpeed(val);
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder surfaceHolder) {
+        setSurfaceHolder(surfaceHolder);
+        startDisplay();
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
+
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+
     }
 }

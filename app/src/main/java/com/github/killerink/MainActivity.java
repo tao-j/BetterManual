@@ -7,7 +7,6 @@ import android.os.HandlerThread;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
-import android.widget.LinearLayout;
 
 import com.github.ma1co.pmcademo.app.BaseActivity;
 import com.obsidium.bettermanual.CameraUiFragment;
@@ -20,9 +19,9 @@ import com.obsidium.bettermanual.R;
  * Created by troop on 27.08.2017.
  */
 
-public class CustomFragmentActivity extends BaseActivity implements FragmentActivityInterface {
+public class MainActivity extends BaseActivity implements FragmentActivityInterface {
 
-    private final String TAG = CustomFragmentActivity.class.getSimpleName();
+    private final String TAG = MainActivity.class.getSimpleName();
     private Preferences preferences;
     private HandlerThread mHandlerThread;
     private Handler mbgHandler;
@@ -50,7 +49,7 @@ public class CustomFragmentActivity extends BaseActivity implements FragmentActi
         Log.d(TAG,"onResume");
         super.onResume();
         startBackgroundThread();
-        //wrapper = new CameraWrapper();
+        wrapper = new CameraWrapper();
         loadFragment(FRAGMENT_CAMERA_UI);
 
     }

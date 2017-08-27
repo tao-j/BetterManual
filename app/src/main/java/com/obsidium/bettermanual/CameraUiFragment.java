@@ -150,7 +150,7 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
         surfaceView.setOnTouchListener(new SurfaceSwipeTouchListener(getContext()));
         m_surfaceHolder = surfaceView.getHolder();
         m_surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        m_surfaceHolder.addCallback(this);
+
 
         exposureMode = (ExposureModeView) view.findViewById(R.id.ivMode);
         exposureMode.setOnClickListener(this);
@@ -239,18 +239,20 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
         Log.d(TAG,"onResume");
         super.onResume();
         fragmentActivityInterface.getDialHandler().setDialEventListner(this);
-
+        m_surfaceHolder.addCallback(fragmentActivityInterface.getCamera());
+        startCamera();
     }
 
     @Override
     public void onPause()
     {
-        super.onPause();
         Log.d(TAG,"onPause");
         saveDefaults();
-        m_surfaceHolder.removeCallback(this);
-        m_autoReviewControl.setPictureReviewTime(m_pictureReviewTime);
+        m_surfaceHolder.removeCallback(fragmentActivityInterface.getCamera());
+        if (m_autoReviewControl != null)
+            m_autoReviewControl.setPictureReviewTime(m_pictureReviewTime);
         fragmentActivityInterface.getCamera().getCameraEx().setAutoPictureReviewControl(null);
+        super.onPause();
     }
 
     @Override
@@ -258,7 +260,7 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
     {
         if(fragmentActivityInterface.getCamera() !=null) {
             fragmentActivityInterface.getCamera().setSurfaceHolder(holder);
-            startCamera();
+
             fragmentActivityInterface.getCamera().startDisplay();
         }
     }
@@ -271,7 +273,6 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {}
-
     private class SurfaceSwipeTouchListener extends OnSwipeTouchListener
     {
         public SurfaceSwipeTouchListener(Context context)
@@ -466,6 +467,7 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
 
     private void startCamera() {
         fragmentActivityInterface.getCamera().startPreview();
+        fragmentActivityInterface.getCamera().startDisplay();
         m_autoReviewControl = new CameraEx.AutoPictureReviewControl();
         fragmentActivityInterface.getCamera().getCameraEx().setAutoPictureReviewControl(m_autoReviewControl);
         // Disable picture review
@@ -548,10 +550,10 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
             {
                 // magnification / 100 = x.y
                 // magLevel = value passed to setPreviewMagnification
-                /*
+                //*
                 m_tvLog.setText("onChanged enabled:" + String.valueOf(enabled) + " magFactor:" + String.valueOf(magFactor) + " magLevel:" +
                     String.valueOf(magLevel) + " x:" + coords.first + " y:" + coords.second + "\n");
-                */
+                //*
                 if (enabled)
                 {
                     //log("m_curPreviewMagnificationMaxPos: " + String.valueOf(m_curPreviewMagnificationMaxPos) + "\n");
@@ -575,10 +577,10 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
             public void onInfoUpdated(boolean b, Pair coords, CameraEx cameraEx)
             {
                 // Useless?
-                /*
+                //*
                 log("onInfoUpdated b:" + String.valueOf(b) +
                                " x:" + coords.first + " y:" + coords.second + "\n");
-                */
+                //*
             }
         });
 

@@ -68,7 +68,7 @@ public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEven
         catch (NoSuchMethodError e)
         {
         }
-        activityInterface.takePicture();
+        activityInterface.getCamera().takePicture();
     }
 
     @Override
@@ -77,8 +77,8 @@ public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEven
         activityInterface.getMainHandler().removeCallbacks(m_timelapseRunnable);
         isActive = false;
         activityInterface.showMessageDelayed("Timelapse finished");
-        activityInterface.getCamera().startDirectShutter();
-        activityInterface.getCamera().getNormalCamera().startPreview();
+        activityInterface.getCamera().startPreview();
+        activityInterface.getCamera().startDisplay();
 
             // Update controls
         activityInterface.hideHintMessage();
@@ -121,7 +121,7 @@ public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEven
                 if (m_timelapseInterval != 0)
                     activityInterface.getMainHandler().postDelayed(m_timelapseRunnable, m_timelapseInterval);
                 else
-                    activityInterface.takePicture();
+                    activityInterface.getCamera().takePicture();
             }
         }
         else
@@ -191,7 +191,7 @@ public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEven
         @Override
         public void run()
         {
-            activityInterface.takePicture();
+            activityInterface.getCamera().takePicture();
         }
     };
 

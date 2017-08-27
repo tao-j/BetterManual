@@ -3,7 +3,6 @@ package com.obsidium.bettermanual;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -17,8 +16,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.github.killerink.CameraWrapper;
 import com.github.ma1co.pmcademo.app.BaseActivity;
-import com.github.ma1co.pmcademo.app.DialPadKeysEvents;
 import com.obsidium.bettermanual.capture.CaptureModeBracket;
 import com.obsidium.bettermanual.capture.CaptureModeTimelapse;
 import com.obsidium.bettermanual.views.ApertureView;
@@ -37,7 +36,6 @@ import com.obsidium.bettermanual.views.ShutterView;
 import com.sony.scalar.hardware.CameraEx;
 import com.sony.scalar.sysutil.ScalarInput;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,11 +49,10 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     private final  String TAG  = ManualActivity.class.getSimpleName();
 
     private SurfaceHolder   m_surfaceHolder;
-    protected CameraEx        m_camera;
     private CameraEx.AutoPictureReviewControl m_autoReviewControl;
     private int             m_pictureReviewTime;
 
-    protected Preferences     m_prefs;
+    private Preferences     m_prefs;
 
     private ShutterView        m_tvShutter;
     private ApertureView aperture;
@@ -71,12 +68,12 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     private ImageView       m_ivTimelapse;
     private ImageView       m_ivBracket;
     private GridView m_vGrid;
-    protected TextView        m_tvHint;
+    private TextView        m_tvHint;
     private FocusScaleView m_focusScaleView;
     private View            m_lFocusScale;
 
     private LinearLayout bottomHolder;
-    LinearLayout leftHolder;
+    private LinearLayout leftHolder;
 
     private List<View> dialViews;
     private int lastDialView;
@@ -85,6 +82,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
 
     private CaptureModeTimelapse timelapse;
     private CaptureModeBracket bracket;
+    private CameraWrapper wrapper;
 
     private final Runnable m_hideFocusScaleRunnable = new Runnable()
     {
@@ -108,15 +106,8 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     private HandlerThread mHandlerThread;
     private Handler mbgHandler;
 
-/*    public enum DialMode { shutter, aperture, iso, exposure, mode, drive,
-        timelapse, bracket,
-        timelapseSetInterval, timelapseSetPicCount,
-        bracketSetStep, bracketSetPicCount
-    }
 
-    public DialMode        m_dialMode;*/
-
-    protected final Handler   m_handler = new Handler();
+    private final Handler   m_handler = new Handler();
 
     private final Runnable  m_hideMessageRunnable = new Runnable()
     {
@@ -136,17 +127,8 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     private static final int VIEW_FLAG_HISTOGRAM    = 0x02;
     private static final int VIEW_FLAG_EXPOSURE     = 0x04;
     private static final int VIEW_FLAG_MASK         = 0x07; // all flags combined
-    protected int             m_viewFlags;
-
-
-    private final int DIAL_EXPOSURE=0;
-    private final int DIAL_DRIVE =1;
-    private final int DIAL_TIMELAPSE =2;
-    private final int DIAL_BRACKET =3;
-    private final int DIAL_SHUTTER =4;
-    private final int DIAL_APERTURE =5;
-    private final int DIAL_ISO =6;
-    private final int DIAL_EV =7;
+    private int             m_viewFlags;
+    private boolean bulbcapture = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -226,8 +208,6 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
 
         m_tvMsg = (TextView)findViewById(R.id.tvMsg);
 
-
-
         m_vGrid = (GridView)findViewById(R.id.vGrid);
 
         m_tvHint = (TextView)findViewById(R.id.tvHint);
@@ -265,7 +245,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
             {
                 m_curPreviewMagnificationPos = new Pair<Integer, Integer>(Math.max(Math.min(m_curPreviewMagnificationMaxPos, m_curPreviewMagnificationPos.first + (int)distanceX), -m_curPreviewMagnificationMaxPos),
                         Math.max(Math.min(m_curPreviewMagnificationMaxPos, m_curPreviewMagnificationPos.second + (int)distanceY), -m_curPreviewMagnificationMaxPos));
-                m_camera.setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+                wrapper.getCameraEx().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
                 return true;
             }
             return false;
@@ -317,9 +297,9 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     }
 
 
-    public CameraEx getCamera()
+    public CameraWrapper getCamera()
     {
-        return m_camera;
+        return wrapper;
     }
 
     @Override
@@ -348,11 +328,6 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     }
 
     @Override
-    public void takePicture() {
-        m_camera.burstableTakePicture();
-    }
-
-    @Override
     public DialHandler getDialHandler() {
         return dialHandler;
     }
@@ -374,7 +349,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         }
         if (!bulbcapture) {
 
-            m_camera.cancelTakePicture();
+            wrapper.cancelTakePicture();
             if (timelapse.isActive())
                 timelapse.onShutter(i);
             else if (bracket.isActive())
@@ -425,13 +400,11 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
 
     private void saveDefaults()
     {
-        final Camera.Parameters params = m_camera.getNormalCamera().getParameters();
-        final CameraEx.ParametersModifier paramsModifier = m_camera.createParametersModifier(params);
         // Scene mode
-        m_prefs.setSceneMode(params.getSceneMode());
+        m_prefs.setSceneMode(wrapper.getSceneMode());
         // Drive mode and burst speed
-        m_prefs.setDriveMode(paramsModifier.getDriveMode());
-        m_prefs.setBurstDriveSpeed(paramsModifier.getBurstDriveSpeed());
+        m_prefs.setDriveMode(wrapper.getDriveMode());
+        m_prefs.setBurstDriveSpeed(wrapper.getBurstDriveSpeed());
         // View visibility
         m_prefs.setViewFlags(m_viewFlags);
 
@@ -441,38 +414,33 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     private void disableLENR()
     {
         // Disable long exposure noise reduction
-        final Camera.Parameters params = m_camera.createEmptyParameters();
-        final CameraEx.ParametersModifier paramsModifier = m_camera.createParametersModifier(m_camera.getNormalCamera().getParameters());
-        final CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(params);
-        if (paramsModifier.isSupportedLongExposureNR())
-            modifier.setLongExposureNR(false);
-        m_camera.getNormalCamera().setParameters(params);
+        if(wrapper.isLongExposureNoiseReductionSupported())
+            wrapper.setLongExposureNoiseReduction(false);
     }
 
     private void loadDefaults()
     {
-        final Camera.Parameters params = m_camera.createEmptyParameters();
-        final CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(params);
+
         //Log.d(TAG,"Parameters: " + params.flatten());
         // Focus mode
-        params.setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
+        wrapper.setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
         // Scene mode
         final String sceneMode = m_prefs.getSceneMode();
-        params.setSceneMode(sceneMode);
+        wrapper.setSceneMode(sceneMode);
         // Drive mode and burst speed
-        modifier.setDriveMode(m_prefs.getDriveMode());
-        modifier.setBurstDriveSpeed(m_prefs.getBurstDriveSpeed());
+        wrapper.setDriveMode(m_prefs.getDriveMode());
+        wrapper.setBurstDriveSpeed(m_prefs.getBurstDriveSpeed());
         // Minimum shutter speed
-        if (sceneMode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
-            modifier.setAutoShutterSpeedLowLimit(-1);
-        else
-            modifier.setAutoShutterSpeedLowLimit(m_prefs.getMinShutterSpeed());
+        if(wrapper.isAutoShutterSpeedLowLimitSupported()) {
+            if (sceneMode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
+                wrapper.setAutoShutterSpeedLowLimit(-1);
+            else
+                wrapper.setAutoShutterSpeedLowLimit(m_prefs.getMinShutterSpeed());
+        }
         // Disable self timer
-        modifier.setSelfTimer(0);
+        wrapper.setSelfTimer(0);
         // Force aspect ratio to 3:2
-        modifier.setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
-        // Apply
-        m_camera.getNormalCamera().setParameters(params);
+        wrapper.setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
         // View visibility
         m_viewFlags = m_prefs.getViewFlags(VIEW_FLAG_GRID | VIEW_FLAG_HISTOGRAM);
         // TODO: Dial mode?
@@ -489,25 +457,22 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         super.onResume();
         dialHandler.setDialEventListner(this);
         startBackgroundThread();
-        m_camera = CameraEx.open(0, null);
+        wrapper = new CameraWrapper();
         m_surfaceHolder.addCallback(this);
-        m_camera.startDirectShutter();
+        wrapper.startPreview();
         m_autoReviewControl = new CameraEx.AutoPictureReviewControl();
-        m_camera.setAutoPictureReviewControl(m_autoReviewControl);
+        wrapper.getCameraEx().setAutoPictureReviewControl(m_autoReviewControl);
         // Disable picture review
         m_pictureReviewTime = m_autoReviewControl.getPictureReviewTime();
         m_autoReviewControl.setPictureReviewTime(0);
 
         m_vGrid.setVideoRect(getDisplayManager().getDisplayedVideoRect());
 
-        final Camera.Parameters params = m_camera.getNormalCamera().getParameters();
-        final CameraEx.ParametersModifier paramsModifier = m_camera.createParametersModifier(params);
-
         // Exposure compensation
-        evCompensation.init(params.getMaxExposureCompensation(),params.getMinExposureCompensation(),params.getExposureCompensationStep(),params.getExposureCompensation());
+        evCompensation.init(wrapper);
 
         // Preview/Histogram
-        m_camera.setPreviewAnalizeListener(new CameraEx.PreviewAnalizeListener()
+        wrapper.getCameraEx().setPreviewAnalizeListener(new CameraEx.PreviewAnalizeListener()
         {
             @Override
             public void onAnalizedData(CameraEx.AnalizedData analizedData, CameraEx cameraEx)
@@ -519,21 +484,21 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
 
 
         // ISO
-        m_camera.setAutoISOSensitivityListener(iso);
+        wrapper.getCameraEx().setAutoISOSensitivityListener(iso);
 
         // Shutter
-        m_camera.setShutterSpeedChangeListener(bracket);
+        wrapper.getCameraEx().setShutterSpeedChangeListener(bracket);
         //returns when a capture is done, seems to replace the default android camera1 api CaptureCallback that get called with Camera.takePicture(shutter,raw, jpeg)
         //also it seems Camera.takePicture is nonfunctional/crash on a6000
-        m_camera.setShutterListener(this);
+        wrapper.getCameraEx().setShutterListener(this);
 
         //m_camera.setJpegListener(); maybe is used to get jpeg/raw data returned
 
         // Aperture
-        m_camera.setApertureChangeListener(aperture);
+        wrapper.getCameraEx().setApertureChangeListener(aperture);
 
         // Exposure metering
-        m_camera.setProgramLineRangeOverListener(new CameraEx.ProgramLineRangeOverListener()
+        wrapper.getCameraEx().setProgramLineRangeOverListener(new CameraEx.ProgramLineRangeOverListener()
         {
             @Override
             public void onAERange(boolean b, boolean b1, boolean b2, CameraEx cameraEx)
@@ -562,15 +527,15 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
             }
         });
 
-        iso.init((List<Integer>)paramsModifier.getSupportedISOSensitivities(), paramsModifier.getISOSensitivity());
+        iso.init(wrapper);
 
-        aperture.setText(String.format("f%.1f", (float)paramsModifier.getAperture() / 100.0f));
+        aperture.setText(String.format("f%.1f", (float)wrapper.getParametersModifier().getAperture() / 100.0f));
 
-        Pair<Integer, Integer> sp = paramsModifier.getShutterSpeed();
+        Pair<Integer, Integer> sp = wrapper.getParametersModifier().getShutterSpeed();
         m_tvShutter.updateShutterSpeed(sp.first, sp.second);
 
-        m_supportedPreviewMagnifications = (List<Integer>)paramsModifier.getSupportedPreviewMagnification();
-        m_camera.setPreviewMagnificationListener(new CameraEx.PreviewMagnificationListener()
+        m_supportedPreviewMagnifications = (List<Integer>)wrapper.getParametersModifier().getSupportedPreviewMagnification();
+        wrapper.getCameraEx().setPreviewMagnificationListener(new CameraEx.PreviewMagnificationListener()
         {
             @Override
             public void onChanged(boolean enabled, int magFactor, int magLevel, Pair coords, CameraEx cameraEx)
@@ -611,7 +576,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
             }
         });
 
-        m_camera.setFocusDriveListener(new CameraEx.FocusDriveListener()
+        wrapper.getCameraEx().setFocusDriveListener(new CameraEx.FocusDriveListener()
         {
             @Override
             public void onChanged(CameraEx.FocusPosition focusPosition, CameraEx cameraEx)
@@ -642,10 +607,9 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
 
         m_surfaceHolder.removeCallback(this);
         m_autoReviewControl.setPictureReviewTime(m_pictureReviewTime);
-        m_camera.setAutoPictureReviewControl(null);
-        m_camera.getNormalCamera().stopPreview();
-        m_camera.release();
-        m_camera = null;
+        wrapper.getCameraEx().setAutoPictureReviewControl(null);
+        wrapper.closeCamera();
+        wrapper = null;
         stopBackgroundThread();
     }
 
@@ -779,7 +743,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         else if (newY < -m_curPreviewMagnificationMaxPos)
             newY = -m_curPreviewMagnificationMaxPos;
         m_curPreviewMagnificationPos = new Pair<Integer, Integer>(m_curPreviewMagnificationPos.first, newY);
-        m_camera.setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+        wrapper.setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
     }
 
     private void movePreviewHorizontal(int delta)
@@ -790,7 +754,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         else if (newX < -m_curPreviewMagnificationMaxPos)
             newX = -m_curPreviewMagnificationMaxPos;
         m_curPreviewMagnificationPos = new Pair<Integer, Integer>(newX, m_curPreviewMagnificationPos.second);
-        m_camera.setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+        wrapper.setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
     }
 
     @Override
@@ -817,7 +781,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         else if (m_curPreviewMagnification != 0)
         {
             m_curPreviewMagnificationPos = new Pair<Integer, Integer>(0, 0);
-            m_camera.setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+            wrapper.setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
             return true;
         }
         else if (view instanceof ShutterView || bulbcapture)
@@ -872,8 +836,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     private void stopBulbCapture() {
         Log.d(TAG, "Stop BULB");
         bulbcapture = false;
-        m_camera.cancelTakePicture();
-        m_camera.startDirectShutter();
+        wrapper.cancelTakePicture();
     }
 
     private void startBulbCapture()
@@ -881,13 +844,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         m_tvHint.setVisibility(View.GONE);
         m_tvMsg.setVisibility(View.GONE);
         bulbcapture = true;
-        m_camera.stopDirectShutter(new CameraEx.DirectShutterStoppedCallback() {
-            @Override
-            public void onShutterStopped(CameraEx cameraEx) {
-                Log.d(TAG,"start Bulb");
-                takePicture();
-            }
-        });
+        wrapper.takePicture();
     }
 
 
@@ -999,7 +956,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         return false;
     }
 
-    boolean bulbcapture = false;
+
 
     @Override
     protected boolean onShutterKeyUp()
@@ -1107,16 +1064,8 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     @Override
     public void surfaceCreated(SurfaceHolder holder)
     {
-        try
-        {
-            Camera cam = m_camera.getNormalCamera();
-            cam.setPreviewDisplay(holder);
-            cam.startPreview();
-        }
-        catch (IOException e)
-        {
-            m_tvMsg.setText("Error starting preview!");
-        }
+        wrapper.setSurfaceHolder(holder);
+        wrapper.startDisplay();
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.obsidium.bettermanual;
 
 import android.os.Handler;
 
+import com.github.killerink.CameraWrapper;
 import com.obsidium.bettermanual.views.ApertureView;
 import com.obsidium.bettermanual.views.DriveMode;
 import com.obsidium.bettermanual.views.ExposureModeView;
@@ -19,7 +20,7 @@ public interface ActivityInterface
     int getActiveViewsFlag();
     void setActiveViewFlag(int viewsToShow);
     Preferences getPreferences();
-    CameraEx getCamera();
+    CameraWrapper getCamera();
     ExposureModeView getExposureMode();
     Handler getMainHandler();
     Handler getBackHandler();
@@ -30,6 +31,5 @@ public interface ActivityInterface
     ApertureView getAperture();
     IsoView getIso();
     void startActivity(Class<?> activity);
-    void takePicture();
     DialHandler getDialHandler();
 }

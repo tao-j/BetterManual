@@ -44,7 +44,7 @@ public class ExposureModeView extends BaseImageView {
 
     public void updateImage()
     {
-        String mode = activity.getCamera().getNormalCamera().getParameters().getSceneMode();
+        String mode = activity.getCamera().getSceneMode();
         Log.d(TAG, "updateImage:" + mode);
         //log(String.format("updateImage %s\n", mode));
         if (mode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
@@ -83,32 +83,18 @@ public class ExposureModeView extends BaseImageView {
                 newMode = CameraEx.ParametersModifier.SCENE_MODE_APERTURE_PRIORITY;
                 /*if (activity.getDialMode() != ManualActivity.DialMode.mode)
                     activity.setDialMode(activity.getAperture().haveApertureControl() ? ManualActivity.DialMode.aperture : ManualActivity.DialMode.iso);*/
-                setMinShutterSpeed(activity.getPreferences().getMinShutterSpeed());
+                activity.getCamera().setAutoShutterSpeedLowLimit(activity.getPreferences().getMinShutterSpeed());
                 break;
             default:
                 newMode = CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE;
                 /*if (activity.getDialMode() != ManualActivity.DialMode.mode)
                     activity.setDialMode(ManualActivity.DialMode.shutter);*/
-                setMinShutterSpeed(-1);
+                activity.getCamera().setAutoShutterSpeedLowLimit(-1);
                 break;
         }
         Log.d(TAG,"newmode:" + newMode);
-        setSceneMode(newMode);
-    }
-
-    private void setSceneMode(String mode)
-    {
-        Camera.Parameters params = activity.getCamera().createEmptyParameters();
-        params.setSceneMode(mode);
-        activity.getCamera().getNormalCamera().setParameters(params);
+        activity.getCamera().setSceneMode(newMode);
         updateImage();
     }
 
-    private void setMinShutterSpeed(int speed)
-    {
-        final Camera.Parameters params = activity.getCamera().createEmptyParameters();
-        final CameraEx.ParametersModifier modifier = activity.getCamera().createParametersModifier(params);
-        modifier.setAutoShutterSpeedLowLimit(speed);
-        activity.getCamera().getNormalCamera().setParameters(params);
-    }
 }

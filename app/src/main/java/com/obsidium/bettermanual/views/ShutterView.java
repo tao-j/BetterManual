@@ -74,10 +74,4 @@ public class ShutterView extends BaseTextView {
         }
     }
 
-    public Pair<Integer, Integer> getCurrentShutterSpeed()
-    {
-        final Camera.Parameters params = activityInterface.getCamera().getNormalCamera().getParameters();
-        final CameraEx.ParametersModifier paramsModifier = activityInterface.getCamera().createParametersModifier(params);
-        return paramsModifier.getShutterSpeed();
-    }
 }

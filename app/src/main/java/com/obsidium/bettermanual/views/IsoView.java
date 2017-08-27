@@ -4,6 +4,7 @@ import android.content.Context;
 import android.hardware.Camera;
 import android.util.AttributeSet;
 
+import com.github.killerink.CameraWrapper;
 import com.sony.scalar.hardware.CameraEx;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class IsoView extends BaseTextView implements CameraEx.AutoISOSensitivity
     // ISO
     private int m_curIso;
     private List<Integer> m_supportedIsos;
+    private CameraWrapper wrapper;
 
     public IsoView(Context context) {
         super(context);
@@ -30,10 +32,11 @@ public class IsoView extends BaseTextView implements CameraEx.AutoISOSensitivity
         super(context, attrs, defStyle);
     }
 
-    public void init(List<Integer> m_supportedIsos, int curIso)
+    public void init(CameraWrapper wrapper)
     {
-        this.m_supportedIsos = m_supportedIsos;
-        m_curIso = curIso;
+        this.wrapper =wrapper;
+        this.m_supportedIsos = wrapper.getSupportedISOSensitivities();
+        m_curIso = wrapper.getISOSensitivity();
         setText(String.format("\uE488 %d", m_curIso));
     }
 
@@ -64,9 +67,7 @@ public class IsoView extends BaseTextView implements CameraEx.AutoISOSensitivity
         //log("setIso: " + String.valueOf(iso) + "\n");
         m_curIso = iso;
         setText(String.format("\uE488 %s", (iso == 0 ? "AUTO" : String.valueOf(iso))));
-        Camera.Parameters params = activityInterface.getCamera().createEmptyParameters();
-        activityInterface.getCamera().createParametersModifier(params).setISOSensitivity(iso);
-        activityInterface.getCamera().getNormalCamera().setParameters(params);
+        wrapper.setISOSensitivity(iso);
     }
 
     private int getPreviousIso(int current) {

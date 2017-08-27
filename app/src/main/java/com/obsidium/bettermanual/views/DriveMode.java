@@ -23,8 +23,7 @@ public class DriveMode extends BaseImageView
 
     @Override
     public void updateImage() {
-        final CameraEx.ParametersModifier paramsModifier = activity.getCamera().createParametersModifier(activity.getCamera().getNormalCamera().getParameters());
-        final String driveMode = paramsModifier.getDriveMode();
+        final String driveMode = activity.getCamera().getDriveMode();
         if (driveMode.equals(CameraEx.ParametersModifier.DRIVE_MODE_SINGLE))
         {
             //noinspection ResourceType
@@ -32,7 +31,7 @@ public class DriveMode extends BaseImageView
         }
         else if (driveMode.equals(CameraEx.ParametersModifier.DRIVE_MODE_BURST))
         {
-            final String burstDriveSpeed = paramsModifier.getBurstDriveSpeed();
+            final String burstDriveSpeed = activity.getCamera().getBurstDriveSpeed();
             if (burstDriveSpeed.equals(CameraEx.ParametersModifier.BURST_DRIVE_SPEED_LOW))
             {
                 //noinspection ResourceType
@@ -54,9 +53,7 @@ public class DriveMode extends BaseImageView
 
     @Override
     public void toggle() {
-        final Camera normalCamera = activity.getCamera().getNormalCamera();
-        final CameraEx.ParametersModifier paramsModifier = activity.getCamera().createParametersModifier(normalCamera.getParameters());
-        final String driveMode = paramsModifier.getDriveMode();
+        final String driveMode = activity.getCamera().getDriveMode();
         final String newMode;
         final String newBurstSpeed;
         if (driveMode.equals(CameraEx.ParametersModifier.DRIVE_MODE_SINGLE))
@@ -66,7 +63,7 @@ public class DriveMode extends BaseImageView
         }
         else if (driveMode.equals(CameraEx.ParametersModifier.DRIVE_MODE_BURST))
         {
-            final String burstDriveSpeed = paramsModifier.getBurstDriveSpeed();
+            final String burstDriveSpeed = activity.getCamera().getBurstDriveSpeed();
             if (burstDriveSpeed.equals(CameraEx.ParametersModifier.BURST_DRIVE_SPEED_LOW))
             {
                 newMode = CameraEx.ParametersModifier.DRIVE_MODE_SINGLE;
@@ -85,11 +82,8 @@ public class DriveMode extends BaseImageView
             newBurstSpeed = CameraEx.ParametersModifier.BURST_DRIVE_SPEED_HIGH;
         }
 
-        final Camera.Parameters params = activity.getCamera().createEmptyParameters();
-        final CameraEx.ParametersModifier newParamsModifier = activity.getCamera().createParametersModifier(params);
-        newParamsModifier.setDriveMode(newMode);
-        newParamsModifier.setBurstDriveSpeed(newBurstSpeed);
-        activity.getCamera().getNormalCamera().setParameters(params);
+        activity.getCamera().setDriveMode(newMode);
+        activity.getCamera().setBurstDriveSpeed(newBurstSpeed);
 
         updateImage();
     }

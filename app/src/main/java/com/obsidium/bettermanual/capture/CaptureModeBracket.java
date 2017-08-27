@@ -5,7 +5,6 @@ import android.util.Pair;
 import com.github.ma1co.pmcademo.app.DialPadKeysEvents;
 import com.obsidium.bettermanual.ActivityInterface;
 import com.obsidium.bettermanual.CameraUtil;
-import com.obsidium.bettermanual.ManualActivity;
 import com.obsidium.bettermanual.views.ExposureModeView;
 import com.sony.scalar.hardware.CameraEx;
 
@@ -61,7 +60,7 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
             updateBracketStep();
 
             // Remember current shutter speed
-            m_bracketNeutralShutterIndex = CameraUtil.getShutterValueIndex(activityInterface.getShutter().getCurrentShutterSpeed());
+            m_bracketNeutralShutterIndex = CameraUtil.getShutterValueIndex(activityInterface.getCamera().getShutterSpeed());
         }
     }
 
@@ -70,7 +69,7 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
         activityInterface.hideHintMessage();
         activityInterface.hideMessage();
         // Take first picture at set shutter speed
-        activityInterface.takePicture();
+        activityInterface.getCamera().takePicture();
     }
 
     @Override
@@ -79,8 +78,8 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
         //m_handler.removeCallbacks(m_timelapseRunnable);
         isActive = false;
         activityInterface.showMessageDelayed("Bracketing finished");
-        activityInterface.getCamera().startDirectShutter();
-        activityInterface.getCamera().getNormalCamera().startPreview();
+        activityInterface.getCamera().startPreview();
+        activityInterface.getCamera().startDisplay();
 
         // Update controls
         activityInterface.hideHintMessage();
@@ -92,7 +91,7 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
         activityInterface.updateViewVisibility();
 
         // Reset to previous shutter speed
-        final int shutterDiff = m_bracketNeutralShutterIndex - CameraUtil.getShutterValueIndex(activityInterface.getShutter().getCurrentShutterSpeed());
+        final int shutterDiff = m_bracketNeutralShutterIndex - CameraUtil.getShutterValueIndex(activityInterface.getCamera().getShutterSpeed());
         if (shutterDiff != 0)
             activityInterface.getCamera().adjustShutterSpeed(-shutterDiff);
     }
@@ -106,7 +105,7 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
             else
             {
                 m_bracketShutterDelta += m_bracketStep;
-                final int shutterIndex = CameraUtil.getShutterValueIndex(activityInterface.getShutter().getCurrentShutterSpeed());
+                final int shutterIndex = CameraUtil.getShutterValueIndex(activityInterface.getCamera().getShutterSpeed());
                 if (m_bracketShutterDelta % 2 == 0)
                 {
                     // Even, reduce shutter speed
@@ -167,7 +166,7 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
 
     protected void calcMaxBracketPicCount()
     {
-        final int index = CameraUtil.getShutterValueIndex(activityInterface.getShutter().getCurrentShutterSpeed());
+        final int index = CameraUtil.getShutterValueIndex(activityInterface.getCamera().getShutterSpeed());
         final int maxSteps = Math.min(index, CameraUtil.SHUTTER_SPEEDS.length - 1 - index);
         m_bracketMaxPicCount = (maxSteps / m_bracketStep) * 2 + 1;
     }
@@ -203,7 +202,7 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
                     shutterSpeedInfo.currentShutterSpeed_d == m_bracketNextShutterSpeed.second)
             {
                 // Focus speed adjusted, take next picture
-                activityInterface.takePicture();
+                activityInterface.getCamera().takePicture();
             }
         }
     }

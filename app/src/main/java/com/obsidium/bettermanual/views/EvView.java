@@ -5,6 +5,8 @@ import android.hardware.Camera;
 import android.os.Looper;
 import android.util.AttributeSet;
 
+import com.github.killerink.CameraWrapper;
+
 /**
  * Created by KillerInk on 22.08.2017.
  */
@@ -36,6 +38,7 @@ public class EvView extends BaseTextView {
     private int             m_minExposureCompensation;
     private int             m_curExposureCompensation;
     private float           m_exposureCompensationStep;
+    private CameraWrapper wrapper;
 
     public EvView(Context context) {
         super(context);
@@ -61,21 +64,20 @@ public class EvView extends BaseTextView {
         return true;
     }
 
-    public void init(int max, int min, float step, int current)
+    public void init(CameraWrapper wrapper)
     {
-        m_maxExposureCompensation = max;
-        m_minExposureCompensation = min;
-        m_exposureCompensationStep = step;
-        m_curExposureCompensation =current;
+        this.wrapper = wrapper;
+        m_maxExposureCompensation = wrapper.getMaxExposureCompensation();
+        m_minExposureCompensation = wrapper.getMinExposureCompensation();
+        m_exposureCompensationStep = wrapper.getExposureCompensationStep();
+        m_curExposureCompensation = wrapper.getExposureCompensation();
         updateExposureCompensation(false);
     }
 
     private void setExposureCompensation(int value)
     {
+        wrapper.setExposureCompensation(value);
         m_curExposureCompensation = value;
-        Camera.Parameters params = activityInterface.getCamera().createEmptyParameters();
-        params.setExposureCompensation(value);
-        activityInterface.getCamera().getNormalCamera().setParameters(params);
         updateExposureCompensation(false);
     }
 
@@ -84,11 +86,7 @@ public class EvView extends BaseTextView {
         if (m_curExposureCompensation > m_minExposureCompensation)
         {
             --m_curExposureCompensation;
-
-            Camera.Parameters params = activityInterface.getCamera().createEmptyParameters();
-            params.setExposureCompensation(m_curExposureCompensation);
-            activityInterface.getCamera().getNormalCamera().setParameters(params);
-
+            wrapper.setExposureCompensation(m_curExposureCompensation);
             updateExposureCompensation(notify);
         }
     }
@@ -98,11 +96,7 @@ public class EvView extends BaseTextView {
         if (m_curExposureCompensation < m_maxExposureCompensation)
         {
             ++m_curExposureCompensation;
-
-            Camera.Parameters params = activityInterface.getCamera().createEmptyParameters();
-            params.setExposureCompensation(m_curExposureCompensation);
-            activityInterface.getCamera().getNormalCamera().setParameters(params);
-
+            wrapper.setExposureCompensation(m_curExposureCompensation);
             updateExposureCompensation(notify);
         }
     }

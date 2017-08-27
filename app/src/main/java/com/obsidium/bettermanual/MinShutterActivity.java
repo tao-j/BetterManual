@@ -1,53 +1,75 @@
 package com.obsidium.bettermanual;
 
+import android.content.Context;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.github.ma1co.pmcademo.app.BaseActivity;
-import com.github.ma1co.pmcademo.app.DialPadKeysEvents;
+import com.github.killerink.FragmentActivityInterface;
+import com.github.killerink.KeyEvents;
 import com.sony.scalar.hardware.CameraEx;
 
-public class MinShutterActivity extends BaseActivity implements SeekBar.OnSeekBarChangeListener, DialPadKeysEvents
+public class MinShutterActivity extends Fragment implements SeekBar.OnSeekBarChangeListener, KeyEvents
 {
     private SeekBar     m_sbShutter;
     private TextView    m_tvInfo;
 
     private CameraEx m_camera;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_min_shutter);
+    private FragmentActivityInterface activityInterface;
 
-        m_sbShutter = (SeekBar) findViewById(R.id.sbShutter);
+    public static MinShutterActivity getMinShutterActivity(FragmentActivityInterface activityInterface)
+    {
+        MinShutterActivity msa = new MinShutterActivity();
+        msa.setActivityInterface(activityInterface);
+        return msa;
+    }
+
+
+    public void setActivityInterface(FragmentActivityInterface fragmentActivityInterface) {
+        this.activityInterface = fragmentActivityInterface;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.activity_min_shutter,container,false);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        m_sbShutter = (SeekBar) view.findViewById(R.id.sbShutter);
         m_sbShutter.setOnSeekBarChangeListener(this);
         m_sbShutter.setMax(CameraUtil.MIN_SHUTTER_VALUES.length - 1);
 
-        m_tvInfo = (TextView) findViewById(R.id.tvInfo);
+        m_tvInfo = (TextView) view.findViewById(R.id.tvInfo);
 
-        Button btnOk = (Button) findViewById(R.id.btnOk);
+        Button btnOk = (Button) view.findViewById(R.id.btnOk);
         btnOk.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
             {
-                onBackPressed();
+
             }
         });
-
-        setTitle("Minimum Shutter Speed");
     }
 
     @Override
     public void onResume()
     {
-        dialHandler.setDialEventListner(this);
         super.onResume();
+        activityInterface.getDialHandler().setDialEventListner(this);
 
         m_camera = CameraEx.open(0, null);
 
@@ -67,12 +89,11 @@ public class MinShutterActivity extends BaseActivity implements SeekBar.OnSeekBa
     }
 
     @Override
-    protected void onPause()
+    public void onPause()
     {
         super.onPause();
-
         // Save minimum shutter speed
-        Preferences prefs = new Preferences(this);
+        Preferences prefs = activityInterface.getPreferences();
         final CameraEx.ParametersModifier paramsModifier = m_camera.createParametersModifier(m_camera.getNormalCamera().getParameters());
         prefs.setMinShutterSpeed(paramsModifier.getAutoShutterSpeedLowLimit());
 
@@ -80,15 +101,136 @@ public class MinShutterActivity extends BaseActivity implements SeekBar.OnSeekBa
         m_camera = null;
     }
 
+
+
     @Override
     public boolean onEnterKeyDown()
     {
-        onBackPressed();
         return true;
     }
 
     @Override
     public boolean onEnterKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onFnKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onFnKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onAelKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onAelKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onMenuKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onMenuKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onFocusKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onFocusKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onShutterKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onShutterKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onPlayKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onPlayKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onMovieKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onMovieKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onC1KeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onC1KeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onLensAttached() {
+        return false;
+    }
+
+    @Override
+    public boolean onLensDetached() {
+        return false;
+    }
+
+    @Override
+    public boolean onModeDialChanged(int value) {
+        return false;
+    }
+
+    @Override
+    public boolean onZoomTeleKey() {
+        return false;
+    }
+
+    @Override
+    public boolean onZoomWideKey() {
+        return false;
+    }
+
+    @Override
+    public boolean onZoomOffKey() {
+        return false;
+    }
+
+    @Override
+    public boolean onDeleteKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onDeleteKeyUp() {
         return false;
     }
 
@@ -164,9 +306,4 @@ public class MinShutterActivity extends BaseActivity implements SeekBar.OnSeekBa
     {
     }
 
-    @Override
-    protected void setColorDepth(boolean highQuality)
-    {
-        super.setColorDepth(false);
-    }
 }

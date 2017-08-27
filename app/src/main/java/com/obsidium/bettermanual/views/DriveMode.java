@@ -1,7 +1,6 @@
 package com.obsidium.bettermanual.views;
 
 import android.content.Context;
-import android.hardware.Camera;
 import android.util.AttributeSet;
 
 import com.obsidium.bettermanual.SonyDrawables;

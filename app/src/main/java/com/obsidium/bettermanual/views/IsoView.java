@@ -1,7 +1,6 @@
 package com.obsidium.bettermanual.views;
 
 import android.content.Context;
-import android.hardware.Camera;
 import android.util.AttributeSet;
 
 import com.github.killerink.CameraWrapper;
@@ -51,7 +50,7 @@ public class IsoView extends BaseTextView implements CameraEx.AutoISOSensitivity
             final int iso = distance < 0 ? getPreviousIso(m_curIso) : getNextIso(m_curIso);
             if (iso != 0) {
                 setIso(iso);
-                activityInterface.showMessageDelayed(String.format("\uE488 %d", iso));
+                cameraUiInterface.showMessageDelayed(String.format("\uE488 %d", iso));
             }
         }
     }
@@ -59,7 +58,7 @@ public class IsoView extends BaseTextView implements CameraEx.AutoISOSensitivity
     @Override
     public boolean onClick() {
         setIso(m_curIso == 0 ? getFirstManualIso() : 0);
-        activityInterface.showMessageDelayed(m_curIso == 0 ? "Auto \uE488" : "Manual \uE488");
+        cameraUiInterface.showMessageDelayed(m_curIso == 0 ? "Auto \uE488" : "Manual \uE488");
         return false;
     }
 

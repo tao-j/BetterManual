@@ -2,7 +2,6 @@ package com.github.killerink;
 
 import android.hardware.Camera;
 import android.util.Pair;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import com.sony.scalar.hardware.CameraEx;

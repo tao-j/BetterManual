@@ -1,11 +1,9 @@
 package com.obsidium.bettermanual.views;
 
 import android.content.Context;
-import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.util.Log;
 
-import com.obsidium.bettermanual.ManualActivity;
 import com.obsidium.bettermanual.SonyDrawables;
 import com.sony.scalar.hardware.CameraEx;
 
@@ -81,14 +79,14 @@ public class ExposureModeView extends BaseImageView {
         {
             case manual:
                 newMode = CameraEx.ParametersModifier.SCENE_MODE_APERTURE_PRIORITY;
-                /*if (activity.getDialMode() != ManualActivity.DialMode.mode)
-                    activity.setDialMode(activity.getAperture().haveApertureControl() ? ManualActivity.DialMode.aperture : ManualActivity.DialMode.iso);*/
+                /*if (activity.getDialMode() != CameraUiFragment.DialMode.mode)
+                    activity.setDialMode(activity.getAperture().haveApertureControl() ? CameraUiFragment.DialMode.aperture : CameraUiFragment.DialMode.iso);*/
                 activity.getCamera().setAutoShutterSpeedLowLimit(activity.getPreferences().getMinShutterSpeed());
                 break;
             default:
                 newMode = CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE;
-                /*if (activity.getDialMode() != ManualActivity.DialMode.mode)
-                    activity.setDialMode(ManualActivity.DialMode.shutter);*/
+                /*if (activity.getDialMode() != CameraUiFragment.DialMode.mode)
+                    activity.setDialMode(CameraUiFragment.DialMode.shutter);*/
                 activity.getCamera().setAutoShutterSpeedLowLimit(-1);
                 break;
         }

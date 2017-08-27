@@ -1,8 +1,6 @@
 package com.obsidium.bettermanual.views;
 
 import android.content.Context;
-import android.hardware.Camera;
-import android.os.Looper;
 import android.util.AttributeSet;
 
 import com.github.killerink.CameraWrapper;
@@ -54,7 +52,7 @@ public class EvView extends BaseTextView {
 
     @Override
     public void onScrolled(int distance) {
-        activityInterface.getBackHandler().post(new EvSetRunner(distance));
+        cameraUiInterface.getActivityInterface().getBackHandler().post(new EvSetRunner(distance));
     }
 
     @Override
@@ -103,7 +101,7 @@ public class EvView extends BaseTextView {
 
     private void updateExposureCompensation(final boolean notify)
     {
-        activityInterface.getMainHandler().post(new Runnable() {
+        cameraUiInterface.getActivityInterface().getMainHandler().post(new Runnable() {
             @Override
             public void run() {
                 final String text;
@@ -115,7 +113,7 @@ public class EvView extends BaseTextView {
                     text = String.format("\uEB18%.1f", m_curExposureCompensation * m_exposureCompensationStep);
                 setText(text);
                 if (notify)
-                    activityInterface.showMessageDelayed(text);
+                    cameraUiInterface.showMessageDelayed(text);
             }
         });
 

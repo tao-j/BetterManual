@@ -1,23 +1,26 @@
 package com.obsidium.bettermanual;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
-import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.github.killerink.CameraWrapper;
-import com.github.ma1co.pmcademo.app.BaseActivity;
+import com.github.killerink.FragmentActivityInterface;
+import com.github.killerink.KeyEvents;
+
 import com.obsidium.bettermanual.capture.CaptureModeBracket;
 import com.obsidium.bettermanual.capture.CaptureModeTimelapse;
 import com.obsidium.bettermanual.views.ApertureView;
@@ -34,25 +37,22 @@ import com.obsidium.bettermanual.views.IsoView;
 import com.obsidium.bettermanual.views.PreviewNavView;
 import com.obsidium.bettermanual.views.ShutterView;
 import com.sony.scalar.hardware.CameraEx;
-import com.sony.scalar.sysutil.ScalarInput;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
 
-public class ManualActivity extends BaseActivity implements SurfaceHolder.Callback, View.OnClickListener, CameraEx.ShutterListener, ActivityInterface
+public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback, View.OnClickListener, CameraEx.ShutterListener, CameraUiInterface, KeyEvents
 {
 
     private static final boolean LOGGING_ENABLED = false;
     private static final int MESSAGE_TIMEOUT = 1000;
-    private final  String TAG  = ManualActivity.class.getSimpleName();
+    private final  String TAG  = CameraUiFragment.class.getSimpleName();
 
     private SurfaceHolder   m_surfaceHolder;
     private CameraEx.AutoPictureReviewControl m_autoReviewControl;
     private int             m_pictureReviewTime;
-
-    private Preferences     m_prefs;
 
     private ShutterView        m_tvShutter;
     private ApertureView aperture;
@@ -82,7 +82,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
 
     private CaptureModeTimelapse timelapse;
     private CaptureModeBracket bracket;
-    private CameraWrapper wrapper;
+
 
     private final Runnable m_hideFocusScaleRunnable = new Runnable()
     {
@@ -93,8 +93,6 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         }
     };
 
-    // Exposure compensation
-
     // Preview magnification
     private List<Integer>   m_supportedPreviewMagnifications;
     private boolean         m_zoomLeverPressed;
@@ -103,11 +101,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     private Pair<Integer, Integer>  m_curPreviewMagnificationPos = new Pair<Integer, Integer>(0, 0);
     private int             m_curPreviewMagnificationMaxPos;
     private PreviewNavView m_previewNavView;
-    private HandlerThread mHandlerThread;
-    private Handler mbgHandler;
 
-
-    private final Handler   m_handler = new Handler();
 
     private final Runnable  m_hideMessageRunnable = new Runnable()
     {
@@ -118,11 +112,6 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         }
     };
 
-    private boolean         m_takingPicture;
-    private boolean         m_shutterKeyDown;
-
-    private boolean         m_haveTouchscreen;
-
     private static final int VIEW_FLAG_GRID         = 0x01;
     private static final int VIEW_FLAG_HISTOGRAM    = 0x02;
     private static final int VIEW_FLAG_EXPOSURE     = 0x04;
@@ -130,106 +119,158 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     private int             m_viewFlags;
     private boolean bulbcapture = false;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState)
+    private FragmentActivityInterface fragmentActivityInterface;
+
+
+    public static CameraUiFragment getCameraUiFragment(FragmentActivityInterface activityInterface)
     {
-        super.onCreate(savedInstanceState);
+        CameraUiFragment cu = new CameraUiFragment();
+        cu.setActivityInterface(activityInterface);
+        return cu;
+    }
 
-        setContentView(R.layout.activity_manual);
+    public void setActivityInterface(FragmentActivityInterface fragmentActivityInterface) {
+        this.fragmentActivityInterface = fragmentActivityInterface;
+    }
 
-        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler))
-            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Log.d(TAG,"onCreateView");
+        return inflater.inflate(R.layout.activity_manual,container,false);
+    }
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        Log.d(TAG,"onViewCreated");
+        super.onViewCreated(view, savedInstanceState);
         dialViews = new ArrayList<View>();
 
-        SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surfaceView);
-        surfaceView.setOnTouchListener(new SurfaceSwipeTouchListener(this));
+        SurfaceView surfaceView = (SurfaceView)view.findViewById(R.id.surfaceView);
+        surfaceView.setOnTouchListener(new SurfaceSwipeTouchListener(getContext()));
         m_surfaceHolder = surfaceView.getHolder();
         m_surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        m_surfaceHolder.addCallback(this);
 
-        exposureMode = (ExposureModeView) findViewById(R.id.ivMode);
+        exposureMode = (ExposureModeView) view.findViewById(R.id.ivMode);
         exposureMode.setOnClickListener(this);
-        exposureMode.setActivity(this);
+        exposureMode.setActivity(fragmentActivityInterface);
         dialViews.add(exposureMode);
 
-        driveMode = (DriveMode) findViewById(R.id.ivDriveMode);
+        driveMode = (DriveMode) view.findViewById(R.id.ivDriveMode);
         driveMode.setOnClickListener(this);
-        driveMode.setActivity(this);
+        driveMode.setActivity(fragmentActivityInterface);
         dialViews.add(driveMode);
 
-        m_ivTimelapse = (ImageView)findViewById(R.id.ivTimelapse);
+        m_ivTimelapse = (ImageView)view.findViewById(R.id.ivTimelapse);
         //noinspection ResourceType
         m_ivTimelapse.setImageResource(SonyDrawables.p_16_dd_parts_43_shoot_icon_setting_drivemode_invalid);
         m_ivTimelapse.setOnClickListener(this);
         dialViews.add(m_ivTimelapse);
 
-        m_ivBracket = (ImageView)findViewById(R.id.ivBracket);
+        m_ivBracket = (ImageView)view.findViewById(R.id.ivBracket);
         //noinspection ResourceType
         m_ivBracket.setImageResource(SonyDrawables.p_16_dd_parts_contshot);
         m_ivBracket.setOnClickListener(this);
         dialViews.add(m_ivBracket);
 
-        m_tvShutter = (ShutterView)findViewById(R.id.tvShutter);
+        m_tvShutter = (ShutterView)view.findViewById(R.id.tvShutter);
         m_tvShutter.setOnTouchListener(m_tvShutter.getSwipeTouchListner());
-        m_tvShutter.setActivityInterface(this);
+        m_tvShutter.setCameraUiInterface(this);
         dialViews.add(m_tvShutter);
 
-        aperture = (ApertureView) findViewById(R.id.tvAperture);
+        aperture = (ApertureView) view.findViewById(R.id.tvAperture);
         aperture.setOnTouchListener(aperture.getSwipeTouchListner());
-        aperture.setActivityInterface(this);
+        aperture.setCameraUiInterface(this);
         dialViews.add(aperture);
 
-        iso = (IsoView) findViewById(R.id.tvISO);
+        iso = (IsoView) view.findViewById(R.id.tvISO);
         iso.setOnTouchListener(iso.getSwipeTouchListner());
-        iso.setActivityInterface(this);
+        iso.setCameraUiInterface(this);
         dialViews.add(iso);
 
-        evCompensation = (EvView) findViewById(R.id.tvExposureCompensation);
+        evCompensation = (EvView) view.findViewById(R.id.tvExposureCompensation);
         evCompensation.setOnTouchListener(evCompensation.getSwipeTouchListner());
-        evCompensation.setActivityInterface(this);
+        evCompensation.setCameraUiInterface(this);
         dialViews.add(evCompensation);
 
-        bottomHolder = (LinearLayout)findViewById(R.id.bottom_holder);
-        leftHolder = (LinearLayout) findViewById(R.id.left_holder);
+        bottomHolder = (LinearLayout)view.findViewById(R.id.bottom_holder);
+        leftHolder = (LinearLayout) view.findViewById(R.id.left_holder);
 
-        m_tvExposure = (TextView)findViewById(R.id.tvExposure);
+        m_tvExposure = (TextView)view.findViewById(R.id.tvExposure);
         //noinspection ResourceType
         m_tvExposure.setCompoundDrawablesWithIntrinsicBounds(SonyDrawables.p_meteredmanualicon, 0, 0, 0);
 
-        m_tvLog = (TextView)findViewById(R.id.tvLog);
+        m_tvLog = (TextView)view.findViewById(R.id.tvLog);
         m_tvLog.setVisibility(LOGGING_ENABLED ? View.VISIBLE : View.GONE);
 
-        m_vHist = (HistogramView)findViewById(R.id.vHist);
+        m_vHist = (HistogramView)view.findViewById(R.id.vHist);
 
-        m_tvMagnification = (TextView)findViewById(R.id.tvMagnification);
+        m_tvMagnification = (TextView)view.findViewById(R.id.tvMagnification);
 
-        m_previewNavView = (PreviewNavView)findViewById(R.id.vPreviewNav);
+        m_previewNavView = (PreviewNavView)view.findViewById(R.id.vPreviewNav);
         m_previewNavView.setVisibility(View.GONE);
 
-        m_tvMsg = (TextView)findViewById(R.id.tvMsg);
+        m_tvMsg = (TextView)view.findViewById(R.id.tvMsg);
 
-        m_vGrid = (GridView)findViewById(R.id.vGrid);
+        m_vGrid = (GridView)view.findViewById(R.id.vGrid);
 
-        m_tvHint = (TextView)findViewById(R.id.tvHint);
+        m_tvHint = (TextView)view.findViewById(R.id.tvHint);
         m_tvHint.setVisibility(View.GONE);
 
-        m_focusScaleView = (FocusScaleView)findViewById(R.id.vFocusScale);
-        m_lFocusScale = findViewById(R.id.lFocusScale);
+        m_focusScaleView = (FocusScaleView)view.findViewById(R.id.vFocusScale);
+        m_lFocusScale = view.findViewById(R.id.lFocusScale);
         m_lFocusScale.setVisibility(View.GONE);
 
         //noinspection ResourceType
-        ((ImageView)findViewById(R.id.ivFocusRight)).setImageResource(SonyDrawables.p_16_dd_parts_rec_focuscontrol_far);
+        ((ImageView)view.findViewById(R.id.ivFocusRight)).setImageResource(SonyDrawables.p_16_dd_parts_rec_focuscontrol_far);
         //noinspection ResourceType
-        ((ImageView)findViewById(R.id.ivFocusLeft)).setImageResource(SonyDrawables.p_16_dd_parts_rec_focuscontrol_near);
+        ((ImageView)view.findViewById(R.id.ivFocusLeft)).setImageResource(SonyDrawables.p_16_dd_parts_rec_focuscontrol_near);
 
         setDialMode(0);
 
-        m_prefs = new Preferences(this);
-
-        m_haveTouchscreen = getDeviceInfo().getModel().compareTo("ILCE-5100") == 0;
         timelapse = new CaptureModeTimelapse(this);
         bracket = new CaptureModeBracket(this);
     }
+
+    @Override
+    public void onResume()
+    {
+        Log.d(TAG,"onResume");
+        super.onResume();
+        fragmentActivityInterface.getDialHandler().setDialEventListner(this);
+
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        Log.d(TAG,"onPause");
+        saveDefaults();
+        m_surfaceHolder.removeCallback(this);
+        m_autoReviewControl.setPictureReviewTime(m_pictureReviewTime);
+        fragmentActivityInterface.getCamera().getCameraEx().setAutoPictureReviewControl(null);
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder)
+    {
+        if(fragmentActivityInterface.getCamera() !=null) {
+            fragmentActivityInterface.getCamera().setSurfaceHolder(holder);
+            startCamera();
+            fragmentActivityInterface.getCamera().startDisplay();
+        }
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
+    {
+        //log(String.format("surfaceChanged width %d height %d\n", width, height));
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {}
 
     private class SurfaceSwipeTouchListener extends OnSwipeTouchListener
     {
@@ -245,7 +286,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
             {
                 m_curPreviewMagnificationPos = new Pair<Integer, Integer>(Math.max(Math.min(m_curPreviewMagnificationMaxPos, m_curPreviewMagnificationPos.first + (int)distanceX), -m_curPreviewMagnificationMaxPos),
                         Math.max(Math.min(m_curPreviewMagnificationMaxPos, m_curPreviewMagnificationPos.second + (int)distanceY), -m_curPreviewMagnificationMaxPos));
-                wrapper.getCameraEx().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+                fragmentActivityInterface.getCamera().getCameraEx().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
                 return true;
             }
             return false;
@@ -255,8 +296,8 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     public void showMessageDelayed(String msg)
     {
         showMessage(msg);
-        m_handler.removeCallbacks(m_hideMessageRunnable);
-        m_handler.postDelayed(m_hideMessageRunnable, MESSAGE_TIMEOUT);
+        fragmentActivityInterface.getMainHandler().removeCallbacks(m_hideMessageRunnable);
+        fragmentActivityInterface.getMainHandler().postDelayed(m_hideMessageRunnable, MESSAGE_TIMEOUT);
     }
 
     public void showMessage(String msg)
@@ -291,46 +332,23 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         m_viewFlags = viewsToShow;
     }
 
-    public Preferences getPreferences()
-    {
-        return m_prefs;
-    }
-
-
-    public CameraWrapper getCamera()
-    {
-        return wrapper;
-    }
-
     @Override
     public ExposureModeView getExposureMode() {
         return exposureMode;
     }
 
-    @Override
-    public Handler getMainHandler() {
-        return m_handler;
-    }
-
-    @Override
-    public Handler getBackHandler() {
-        return mbgHandler;
-    }
     private void log(final String str)
     {
         if (LOGGING_ENABLED)
             m_tvLog.append(str);
     }
 
-    @Override
-    public void startActivity(Class<?> activity) {
-        startActivity(new Intent(getApplicationContext(), activity));
-    }
 
     @Override
-    public DialHandler getDialHandler() {
-        return dialHandler;
+    public FragmentActivityInterface getActivityInterface() {
+        return fragmentActivityInterface;
     }
+
 
     /**
      * Returned from camera when a capture is done
@@ -343,13 +361,9 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     @Override
     public void onShutter(int i, CameraEx cameraEx)
     {
-        if (i != 0)
-        {
-            m_takingPicture = false;
-        }
         if (!bulbcapture) {
 
-            wrapper.cancelTakePicture();
+            fragmentActivityInterface.getCamera().cancelTakePicture();
             if (timelapse.isActive())
                 timelapse.onShutter(i);
             else if (bracket.isActive())
@@ -401,12 +415,12 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     private void saveDefaults()
     {
         // Scene mode
-        m_prefs.setSceneMode(wrapper.getSceneMode());
+        fragmentActivityInterface.getPreferences().setSceneMode(fragmentActivityInterface.getCamera().getSceneMode());
         // Drive mode and burst speed
-        m_prefs.setDriveMode(wrapper.getDriveMode());
-        m_prefs.setBurstDriveSpeed(wrapper.getBurstDriveSpeed());
+        fragmentActivityInterface.getPreferences().setDriveMode(fragmentActivityInterface.getCamera().getDriveMode());
+        fragmentActivityInterface.getPreferences().setBurstDriveSpeed(fragmentActivityInterface.getCamera().getBurstDriveSpeed());
         // View visibility
-        m_prefs.setViewFlags(m_viewFlags);
+        fragmentActivityInterface.getPreferences().setViewFlags(m_viewFlags);
 
         // TODO: Dial mode
     }
@@ -414,8 +428,8 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     private void disableLENR()
     {
         // Disable long exposure noise reduction
-        if(wrapper.isLongExposureNoiseReductionSupported())
-            wrapper.setLongExposureNoiseReduction(false);
+        if(fragmentActivityInterface.getCamera().isLongExposureNoiseReductionSupported())
+            fragmentActivityInterface.getCamera().setLongExposureNoiseReduction(false);
     }
 
     private void loadDefaults()
@@ -423,26 +437,26 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
 
         //Log.d(TAG,"Parameters: " + params.flatten());
         // Focus mode
-        wrapper.setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
+        fragmentActivityInterface.getCamera().setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
         // Scene mode
-        final String sceneMode = m_prefs.getSceneMode();
-        wrapper.setSceneMode(sceneMode);
+        final String sceneMode = fragmentActivityInterface.getPreferences().getSceneMode();
+        fragmentActivityInterface.getCamera().setSceneMode(sceneMode);
         // Drive mode and burst speed
-        wrapper.setDriveMode(m_prefs.getDriveMode());
-        wrapper.setBurstDriveSpeed(m_prefs.getBurstDriveSpeed());
+        fragmentActivityInterface.getCamera().setDriveMode(fragmentActivityInterface.getPreferences().getDriveMode());
+        fragmentActivityInterface.getCamera().setBurstDriveSpeed(fragmentActivityInterface.getPreferences().getBurstDriveSpeed());
         // Minimum shutter speed
-        if(wrapper.isAutoShutterSpeedLowLimitSupported()) {
+        if(fragmentActivityInterface.getCamera().isAutoShutterSpeedLowLimitSupported()) {
             if (sceneMode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
-                wrapper.setAutoShutterSpeedLowLimit(-1);
+                fragmentActivityInterface.getCamera().setAutoShutterSpeedLowLimit(-1);
             else
-                wrapper.setAutoShutterSpeedLowLimit(m_prefs.getMinShutterSpeed());
+                fragmentActivityInterface.getCamera().setAutoShutterSpeedLowLimit(fragmentActivityInterface.getPreferences().getMinShutterSpeed());
         }
         // Disable self timer
-        wrapper.setSelfTimer(0);
+        fragmentActivityInterface.getCamera().setSelfTimer(0);
         // Force aspect ratio to 3:2
-        wrapper.setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
+        fragmentActivityInterface.getCamera().setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
         // View visibility
-        m_viewFlags = m_prefs.getViewFlags(VIEW_FLAG_GRID | VIEW_FLAG_HISTOGRAM);
+        m_viewFlags = fragmentActivityInterface.getPreferences().getViewFlags(VIEW_FLAG_GRID | VIEW_FLAG_HISTOGRAM);
         // TODO: Dial mode?
         setDialMode(0);
 
@@ -450,29 +464,21 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     }
 
 
-
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-        dialHandler.setDialEventListner(this);
-        startBackgroundThread();
-        wrapper = new CameraWrapper();
-        m_surfaceHolder.addCallback(this);
-        wrapper.startPreview();
+    private void startCamera() {
+        fragmentActivityInterface.getCamera().startPreview();
         m_autoReviewControl = new CameraEx.AutoPictureReviewControl();
-        wrapper.getCameraEx().setAutoPictureReviewControl(m_autoReviewControl);
+        fragmentActivityInterface.getCamera().getCameraEx().setAutoPictureReviewControl(m_autoReviewControl);
         // Disable picture review
         m_pictureReviewTime = m_autoReviewControl.getPictureReviewTime();
         m_autoReviewControl.setPictureReviewTime(0);
 
-        m_vGrid.setVideoRect(getDisplayManager().getDisplayedVideoRect());
+        m_vGrid.setVideoRect(fragmentActivityInterface.getDisplayManager().getDisplayedVideoRect());
 
         // Exposure compensation
-        evCompensation.init(wrapper);
+        evCompensation.init(fragmentActivityInterface.getCamera());
 
         // Preview/Histogram
-        wrapper.getCameraEx().setPreviewAnalizeListener(new CameraEx.PreviewAnalizeListener()
+        fragmentActivityInterface.getCamera().getCameraEx().setPreviewAnalizeListener(new CameraEx.PreviewAnalizeListener()
         {
             @Override
             public void onAnalizedData(CameraEx.AnalizedData analizedData, CameraEx cameraEx)
@@ -484,21 +490,21 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
 
 
         // ISO
-        wrapper.getCameraEx().setAutoISOSensitivityListener(iso);
+        fragmentActivityInterface.getCamera().getCameraEx().setAutoISOSensitivityListener(iso);
 
         // Shutter
-        wrapper.getCameraEx().setShutterSpeedChangeListener(bracket);
+        fragmentActivityInterface.getCamera().getCameraEx().setShutterSpeedChangeListener(bracket);
         //returns when a capture is done, seems to replace the default android camera1 api CaptureCallback that get called with Camera.takePicture(shutter,raw, jpeg)
         //also it seems Camera.takePicture is nonfunctional/crash on a6000
-        wrapper.getCameraEx().setShutterListener(this);
+        fragmentActivityInterface.getCamera().getCameraEx().setShutterListener(this);
 
         //m_camera.setJpegListener(); maybe is used to get jpeg/raw data returned
 
         // Aperture
-        wrapper.getCameraEx().setApertureChangeListener(aperture);
+        fragmentActivityInterface.getCamera().getCameraEx().setApertureChangeListener(aperture);
 
         // Exposure metering
-        wrapper.getCameraEx().setProgramLineRangeOverListener(new CameraEx.ProgramLineRangeOverListener()
+        fragmentActivityInterface.getCamera().getCameraEx().setProgramLineRangeOverListener(new CameraEx.ProgramLineRangeOverListener()
         {
             @Override
             public void onAERange(boolean b, boolean b1, boolean b2, CameraEx cameraEx)
@@ -527,15 +533,15 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
             }
         });
 
-        iso.init(wrapper);
+        iso.init(fragmentActivityInterface.getCamera());
 
-        aperture.setText(String.format("f%.1f", (float)wrapper.getParametersModifier().getAperture() / 100.0f));
+        aperture.setText(String.format("f%.1f", (float)fragmentActivityInterface.getCamera().getParametersModifier().getAperture() / 100.0f));
 
-        Pair<Integer, Integer> sp = wrapper.getParametersModifier().getShutterSpeed();
+        Pair<Integer, Integer> sp = fragmentActivityInterface.getCamera().getParametersModifier().getShutterSpeed();
         m_tvShutter.updateShutterSpeed(sp.first, sp.second);
 
-        m_supportedPreviewMagnifications = (List<Integer>)wrapper.getParametersModifier().getSupportedPreviewMagnification();
-        wrapper.getCameraEx().setPreviewMagnificationListener(new CameraEx.PreviewMagnificationListener()
+        m_supportedPreviewMagnifications = (List<Integer>)fragmentActivityInterface.getCamera().getParametersModifier().getSupportedPreviewMagnification();
+        fragmentActivityInterface.getCamera().getCameraEx().setPreviewMagnificationListener(new CameraEx.PreviewMagnificationListener()
         {
             @Override
             public void onChanged(boolean enabled, int magFactor, int magLevel, Pair coords, CameraEx cameraEx)
@@ -576,7 +582,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
             }
         });
 
-        wrapper.getCameraEx().setFocusDriveListener(new CameraEx.FocusDriveListener()
+        fragmentActivityInterface.getCamera().getCameraEx().setFocusDriveListener(new CameraEx.FocusDriveListener()
         {
             @Override
             public void onChanged(CameraEx.FocusPosition focusPosition, CameraEx cameraEx)
@@ -586,8 +592,8 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
                     m_lFocusScale.setVisibility(View.VISIBLE);
                     m_focusScaleView.setMaxPosition(focusPosition.maxPosition);
                     m_focusScaleView.setCurPosition(focusPosition.currentPosition);
-                    m_handler.removeCallbacks(m_hideFocusScaleRunnable);
-                    m_handler.postDelayed(m_hideFocusScaleRunnable, 2000);
+                    fragmentActivityInterface.getMainHandler().removeCallbacks(m_hideFocusScaleRunnable);
+                    fragmentActivityInterface.getMainHandler().postDelayed(m_hideFocusScaleRunnable, 2000);
                 }
             }
         });
@@ -596,21 +602,6 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         driveMode.updateImage();
         exposureMode.updateImage();
         updateViewVisibility();
-    }
-
-    @Override
-    protected void onPause()
-    {
-        super.onPause();
-
-        saveDefaults();
-
-        m_surfaceHolder.removeCallback(this);
-        m_autoReviewControl.setPictureReviewTime(m_pictureReviewTime);
-        wrapper.getCameraEx().setAutoPictureReviewControl(null);
-        wrapper.closeCamera();
-        wrapper = null;
-        stopBackgroundThread();
     }
 
     // OnClickListener
@@ -710,30 +701,6 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
             ((ImageView)lastView).setColorFilter(Color.GREEN);
     }
 
-    /*public void setDialMode(DialMode newMode)
-    {
-        m_dialMode = newMode;
-        m_tvShutter.setTextColor(newMode == DialMode.shutter ? Color.GREEN : Color.WHITE);
-        aperture.setTextColor(newMode == DialMode.aperture ? Color.GREEN : Color.WHITE);
-        iso.setTextColor(newMode == DialMode.iso ? Color.GREEN : Color.WHITE);
-        evCompensation.setTextColor(newMode == DialMode.exposure ? Color.GREEN : Color.WHITE);
-        if (newMode == DialMode.mode)
-            exposureMode.setColorFilter(Color.GREEN);
-        else
-            exposureMode.setColorFilter(null);
-        if (newMode == DialMode.drive)
-            driveMode.setColorFilter(Color.GREEN);
-        else
-            driveMode.setColorFilter(null);
-        if (newMode == DialMode.timelapse)
-            m_ivTimelapse.setColorFilter(Color.GREEN);
-        else
-            m_ivTimelapse.setColorFilter(null);
-        if (newMode == DialMode.bracket)
-            m_ivBracket.setColorFilter(Color.GREEN);
-        else
-            m_ivBracket.setColorFilter(null);
-    }*/
 
     private void movePreviewVertical(int delta)
     {
@@ -743,7 +710,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         else if (newY < -m_curPreviewMagnificationMaxPos)
             newY = -m_curPreviewMagnificationMaxPos;
         m_curPreviewMagnificationPos = new Pair<Integer, Integer>(m_curPreviewMagnificationPos.first, newY);
-        wrapper.setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+        fragmentActivityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
     }
 
     private void movePreviewHorizontal(int delta)
@@ -754,13 +721,53 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         else if (newX < -m_curPreviewMagnificationMaxPos)
             newX = -m_curPreviewMagnificationMaxPos;
         m_curPreviewMagnificationPos = new Pair<Integer, Integer>(newX, m_curPreviewMagnificationPos.second);
-        wrapper.setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+        fragmentActivityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
     }
 
     @Override
     public boolean onEnterKeyUp()
     {
         return true;
+    }
+
+    @Override
+    public boolean onFnKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onFnKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onAelKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onAelKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onMenuKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onMenuKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onFocusKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onFocusKeyUp() {
+        return false;
     }
 
     @Override
@@ -781,7 +788,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         else if (m_curPreviewMagnification != 0)
         {
             m_curPreviewMagnificationPos = new Pair<Integer, Integer>(0, 0);
-            wrapper.setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+            fragmentActivityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
             return true;
         }
         else if (view instanceof ShutterView || bulbcapture)
@@ -803,14 +810,14 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         }
         else if (view == m_ivTimelapse)
         {
-            dialHandler.setDialEventListner(timelapse);
+            fragmentActivityInterface.getDialHandler().setDialEventListner(timelapse);
             timelapse.onEnterKeyDown();
 
             return false;
         }
         else if (view == m_ivBracket)
         {
-            dialHandler.setDialEventListner(bracket);
+            fragmentActivityInterface.getDialHandler().setDialEventListner(bracket);
             bracket.onEnterKeyDown();
             //setDialMode(DialMode.bracketSetPicCount);
 
@@ -836,7 +843,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     private void stopBulbCapture() {
         Log.d(TAG, "Stop BULB");
         bulbcapture = false;
-        wrapper.cancelTakePicture();
+        fragmentActivityInterface.getCamera().cancelTakePicture();
     }
 
     private void startBulbCapture()
@@ -844,10 +851,8 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         m_tvHint.setVisibility(View.GONE);
         m_tvMsg.setVisibility(View.GONE);
         bulbcapture = true;
-        wrapper.takePicture();
+        fragmentActivityInterface.getCamera().takePicture();
     }
-
-
 
     @Override
     public boolean onUpKeyDown()
@@ -880,45 +885,6 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     @Override
     public boolean onDownKeyUp()
     {
-        /*if (m_curPreviewMagnification != 0)
-        {
-            movePreviewVertical((int)(500.0f / m_curPreviewMagnificationFactor));
-            return true;
-        }
-        else
-        {
-            switch (m_dialMode)
-            {
-                case shutter:
-                    if (aperture.haveApertureControl())
-                    {
-                        setDialMode(DialMode.aperture);
-                        break;
-                    }
-                case aperture:
-                    setDialMode(DialMode.iso);
-                    break;
-                case iso:
-                    setDialMode(DialMode.exposure);
-                    break;
-                case exposure:
-                    setDialMode(m_haveTouchscreen ? DialMode.shutter : DialMode.mode);
-                    break;
-                case mode:
-                    setDialMode(DialMode.drive);
-                    break;
-                case drive:
-                    setDialMode(DialMode.timelapse);
-                    break;
-                case timelapse:
-                    setDialMode(DialMode.bracket);
-                    break;
-                case bracket:
-                    setDialMode(DialMode.shutter);
-                    break;
-            }
-            return true;
-        }*/
         return true;
     }
 
@@ -959,15 +925,79 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
 
 
     @Override
-    protected boolean onShutterKeyUp()
+    public boolean onShutterKeyUp()
     {
         Log.d(TAG,"onShutterKeyUp");
-        m_shutterKeyDown = false;
         return false;
     }
 
     @Override
-    protected boolean onShutterKeyDown()
+    public boolean onPlayKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onPlayKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onMovieKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onMovieKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onC1KeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onC1KeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onLensAttached() {
+        return false;
+    }
+
+    @Override
+    public boolean onLensDetached() {
+        return false;
+    }
+
+    @Override
+    public boolean onModeDialChanged(int value) {
+        return false;
+    }
+
+    @Override
+    public boolean onZoomTeleKey() {
+        return false;
+    }
+
+    @Override
+    public boolean onZoomWideKey() {
+        return false;
+    }
+
+    @Override
+    public boolean onZoomOffKey() {
+        return false;
+    }
+
+    @Override
+    public boolean onDeleteKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onShutterKeyDown()
     {
         Log.d(TAG,"onShutterKeyDown");
         // direct shutter...
@@ -984,20 +1014,14 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
     }
 
     @Override
-    protected boolean onDeleteKeyUp()
+    public boolean onDeleteKeyUp()
     {
         // Exiting, make sure the app isn't restarted
-        Intent intent = new Intent("com.android.server.DAConnectionManagerService.AppInfoReceive");
-        intent.putExtra("package_name", getComponentName().getPackageName());
-        intent.putExtra("class_name", getComponentName().getClassName());
-        intent.putExtra("pullingback_key", new String[] {});
-        intent.putExtra("resume_key", new String[] {});
-        sendBroadcast(intent);
-        onBackPressed();
+        fragmentActivityInterface.closeApp();
         return true;
     }
 
-    @Override
+    /*@Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
         Log.d(TAG, "onkeydown:"+event.getScanCode()+ " event:" + event.getAction());
@@ -1005,7 +1029,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
         if (timelapse.isActive() && scanCode != ScalarInput.ISV_KEY_ENTER)
             return true;
         // TODO: Use m_supportedPreviewMagnifications
-        /*if (m_dialMode != DialMode.timelapseSetInterval && m_dialMode != DialMode.timelapseSetPicCount)
+        *//*if (m_dialMode != DialMode.timelapseSetInterval && m_dialMode != DialMode.timelapseSetPicCount)
         {
             if (scanCode == ScalarInput.ISV_KEY_ZOOM_TELE && !m_zoomLeverPressed)
             {
@@ -1043,7 +1067,7 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
                 m_zoomLeverPressed = false;
                 return true;
             }
-        }*/
+        }*//*
 
         if (scanCode == ScalarInput.ISV_KEY_S2) {
             Log.d(TAG, "S2");
@@ -1053,55 +1077,6 @@ public class ManualActivity extends BaseActivity implements SurfaceHolder.Callba
             Log.d(TAG, "S1_1");
 
         return super.onKeyDown(keyCode, event);
-    }
+    }*/
 
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        Log.d(TAG, "onkeyup:"+event.getScanCode()+ " event:" + event.getAction());
-        return super.onKeyUp(keyCode, event);
-    }
-
-    @Override
-    public void surfaceCreated(SurfaceHolder holder)
-    {
-        wrapper.setSurfaceHolder(holder);
-        wrapper.startDisplay();
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
-    {
-        //log(String.format("surfaceChanged width %d height %d\n", width, height));
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {}
-
-    @Override
-    protected void setColorDepth(boolean highQuality)
-    {
-        super.setColorDepth(false);
-    }
-
-    public void startBackgroundThread(){
-        mHandlerThread = new HandlerThread("HandlerThread");
-        mHandlerThread.start();
-        mbgHandler = new Handler(mHandlerThread.getLooper());
-    }
-
-    private void stopBackgroundThread()
-    {
-        Log.d(TAG,"stopBackgroundThread");
-        if(mHandlerThread == null)
-            return;
-
-            mHandlerThread.quit();
-        try {
-            mHandlerThread.join();
-            mHandlerThread = null;
-            mHandlerThread = null;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 }

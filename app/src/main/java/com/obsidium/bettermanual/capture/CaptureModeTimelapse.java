@@ -1,11 +1,10 @@
 package com.obsidium.bettermanual.capture;
 
-import com.github.ma1co.pmcademo.app.DialPadKeysEvents;
-import com.obsidium.bettermanual.ActivityInterface;
-import com.obsidium.bettermanual.ManualActivity;
+import com.github.killerink.KeyEvents;
+import com.obsidium.bettermanual.CameraUiInterface;
 import com.sony.scalar.sysutil.didep.Settings;
 
-public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEvents
+public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
 {
 
     private int             m_timelapseInterval;    // ms
@@ -19,7 +18,7 @@ public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEven
     private int currentdial = TLS_SET_NONE;
 
 
-    public CaptureModeTimelapse(ActivityInterface manualActivity)
+    public CaptureModeTimelapse(CameraUiInterface manualActivity)
     {
         super(manualActivity);
     }
@@ -37,13 +36,13 @@ public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEven
             abort();
         else
         {
-            activityInterface.setLeftViewVisibility(false);
+            cameraUiInterface.setLeftViewVisibility(false);
 
             currentdial = TLS_SET_INTERVAL;
-            //activityInterface.setDialMode(ManualActivity.DialMode.timelapseSetInterval);
+            //cameraUiInterface.setDialMode(CameraUiFragment.DialMode.timelapseSetInterval);
             m_timelapseInterval = 1000;
             updateTimelapseInterval();
-            activityInterface.showHintMessage("\uE4CD to set timelapse interval, \uE04C to confirm");
+            cameraUiInterface.showHintMessage("\uE4CD to set timelapse interval, \uE04C to confirm");
 
 
             // Not supported on some camera models
@@ -59,8 +58,8 @@ public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEven
 
     @Override
     public void startShooting() {
-        activityInterface.hideHintMessage();
-        activityInterface.hideMessage();
+        cameraUiInterface.hideHintMessage();
+        cameraUiInterface.hideMessage();
         try
         {
             Settings.setAutoPowerOffTime(m_timelapseInterval / 1000 * 2);
@@ -68,26 +67,26 @@ public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEven
         catch (NoSuchMethodError e)
         {
         }
-        activityInterface.getCamera().takePicture();
+        cameraUiInterface.getActivityInterface().getCamera().takePicture();
     }
 
     @Override
     public void abort() {
-        activityInterface.getMainHandler().removeCallbacks(m_countDownRunnable);
-        activityInterface.getMainHandler().removeCallbacks(m_timelapseRunnable);
+        cameraUiInterface.getActivityInterface().getMainHandler().removeCallbacks(m_countDownRunnable);
+        cameraUiInterface.getActivityInterface().getMainHandler().removeCallbacks(m_timelapseRunnable);
         isActive = false;
-        activityInterface.showMessageDelayed("Timelapse finished");
-        activityInterface.getCamera().startPreview();
-        activityInterface.getCamera().startDisplay();
+        cameraUiInterface.showMessageDelayed("Timelapse finished");
+        cameraUiInterface.getActivityInterface().getCamera().startPreview();
+        cameraUiInterface.getActivityInterface().getCamera().startDisplay();
 
             // Update controls
-        activityInterface.hideHintMessage();
-        activityInterface.setLeftViewVisibility(true);
-        activityInterface.getExposureMode().updateImage();
-        activityInterface.getDriveMode().updateImage();
+        cameraUiInterface.hideHintMessage();
+        cameraUiInterface.setLeftViewVisibility(true);
+        cameraUiInterface.getExposureMode().updateImage();
+        cameraUiInterface.getDriveMode().updateImage();
 
-        activityInterface.setActiveViewFlag(activityInterface.getPreferences().getViewFlags(activityInterface.getActiveViewsFlag()));
-        activityInterface.updateViewVisibility();
+        cameraUiInterface.setActiveViewFlag(cameraUiInterface.getActivityInterface().getPreferences().getViewFlags(cameraUiInterface.getActiveViewsFlag()));
+        cameraUiInterface.updateViewVisibility();
 
             try
             {
@@ -114,14 +113,14 @@ public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEven
                 if (m_timelapseInterval >= 1000)
                 {
                     if (m_timelapsePicCount > 0)
-                        activityInterface.showMessageDelayed(String.format("%d pictures remaining", m_timelapsePicCount));
+                        cameraUiInterface.showMessageDelayed(String.format("%d pictures remaining", m_timelapsePicCount));
                     else
-                        activityInterface.showMessageDelayed(String.format("%d pictures taken", m_timelapsePicsTaken));
+                        cameraUiInterface.showMessageDelayed(String.format("%d pictures taken", m_timelapsePicsTaken));
                 }
                 if (m_timelapseInterval != 0)
-                    activityInterface.getMainHandler().postDelayed(m_timelapseRunnable, m_timelapseInterval);
+                    cameraUiInterface.getActivityInterface().getMainHandler().postDelayed(m_timelapseRunnable, m_timelapseInterval);
                 else
-                    activityInterface.getCamera().takePicture();
+                    cameraUiInterface.getActivityInterface().getCamera().takePicture();
             }
         }
         else
@@ -156,21 +155,21 @@ public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEven
     protected void updateTimelapseInterval()
     {
         if (m_timelapseInterval == 0)
-            activityInterface.showMessage("No delay");
+            cameraUiInterface.showMessage("No delay");
         else if (m_timelapseInterval < 1000)
-            activityInterface.showMessage(String.format("%d msec", m_timelapseInterval));
+            cameraUiInterface.showMessage(String.format("%d msec", m_timelapseInterval));
         else if (m_timelapseInterval == 1000)
-            activityInterface.showMessage("1 second");
+            cameraUiInterface.showMessage("1 second");
         else
-            activityInterface.showMessage(String.format("%d seconds", m_timelapseInterval / 1000));
+            cameraUiInterface.showMessage(String.format("%d seconds", m_timelapseInterval / 1000));
     }
 
     public void updateTimelapsePictureCount()
     {
         if (m_timelapsePicCount == 0)
-            activityInterface.showMessage("No picture limit");
+            cameraUiInterface.showMessage("No picture limit");
         else
-            activityInterface.showMessage(String.format("%d pictures", m_timelapsePicCount));
+            cameraUiInterface.showMessage(String.format("%d pictures", m_timelapsePicCount));
     }
 
     public void decrementPicCount()
@@ -191,7 +190,7 @@ public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEven
         @Override
         public void run()
         {
-            activityInterface.getCamera().takePicture();
+            cameraUiInterface.getActivityInterface().getCamera().takePicture();
         }
     };
 
@@ -267,13 +266,13 @@ public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEven
             updateTimelapseInterval();
         }
         else if (currentdial == TLS_SET_INTERVAL) {
-            activityInterface.showHintMessage("\uE4CD to set picture count, \uE04C to confirm");
+            cameraUiInterface.showHintMessage("\uE4CD to set picture count, \uE04C to confirm");
             currentdial = TLS_SET_PICCOUNT;
             updateTimelapsePictureCount();
         }
         else if (currentdial == TLS_SET_PICCOUNT)
         {
-            activityInterface.getDialHandler().setDefaultListner();
+            cameraUiInterface.getActivityInterface().getDialHandler().setDefaultListner();
             startCountDown();
             currentdial = TLS_SET_NONE;
         }
@@ -282,6 +281,126 @@ public class CaptureModeTimelapse extends CaptureMode implements DialPadKeysEven
 
     @Override
     public boolean onEnterKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onFnKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onFnKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onAelKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onAelKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onMenuKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onMenuKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onFocusKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onFocusKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onShutterKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onShutterKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onPlayKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onPlayKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onMovieKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onMovieKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onC1KeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onC1KeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onLensAttached() {
+        return false;
+    }
+
+    @Override
+    public boolean onLensDetached() {
+        return false;
+    }
+
+    @Override
+    public boolean onModeDialChanged(int value) {
+        return false;
+    }
+
+    @Override
+    public boolean onZoomTeleKey() {
+        return false;
+    }
+
+    @Override
+    public boolean onZoomWideKey() {
+        return false;
+    }
+
+    @Override
+    public boolean onZoomOffKey() {
+        return false;
+    }
+
+    @Override
+    public boolean onDeleteKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onDeleteKeyUp() {
         return false;
     }
 }

@@ -1,13 +1,10 @@
 package com.obsidium.bettermanual.views;
 
 import android.content.Context;
-import android.hardware.Camera;
 import android.util.AttributeSet;
-import android.util.Pair;
 
+import com.github.killerink.CustomFragmentActivity;
 import com.obsidium.bettermanual.CameraUtil;
-import com.obsidium.bettermanual.MinShutterActivity;
-import com.sony.scalar.hardware.CameraEx;
 
 public class ShutterView extends BaseTextView {
 
@@ -26,9 +23,9 @@ public class ShutterView extends BaseTextView {
         @Override
         public void run() {
             if (direction > 0)
-                activityInterface.getCamera().decrementShutterSpeed();
+                cameraUiInterface.getActivityInterface().getCamera().decrementShutterSpeed();
             else
-                activityInterface.getCamera().incrementShutterSpeed();
+                cameraUiInterface.getActivityInterface().getCamera().incrementShutterSpeed();
         }
     }
 
@@ -48,15 +45,15 @@ public class ShutterView extends BaseTextView {
 
     @Override
     public void onScrolled(int distance) {
-        activityInterface.getBackHandler().post(new ShutterSetRunner(distance));
+        cameraUiInterface.getActivityInterface().getBackHandler().post(new ShutterSetRunner(distance));
     }
 
     @Override
     public boolean onClick() {
-        if (activityInterface.getExposureMode().get() == ExposureModeView.ExposureModes.aperture && !getText().equals("BULB"))
+        if (cameraUiInterface.getExposureMode().get() == ExposureModeView.ExposureModes.aperture && !getText().equals("BULB"))
         {
             // Set minimum shutter speed
-            activityInterface.startActivity(MinShutterActivity.class);
+            cameraUiInterface.getActivityInterface().loadFragment(CustomFragmentActivity.FRAGMENT_MIN_SHUTTER);
             return true;
         }
         return false;
@@ -69,7 +66,7 @@ public class ShutterView extends BaseTextView {
         setText(text);
         if (m_notifyOnNextShutterSpeedChange)
         {
-            activityInterface.showMessageDelayed(text);
+            cameraUiInterface.showMessageDelayed(text);
             m_notifyOnNextShutterSpeedChange = false;
         }
     }

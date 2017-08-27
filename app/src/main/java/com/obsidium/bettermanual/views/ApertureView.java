@@ -27,9 +27,9 @@ public class ApertureView extends BaseTextView implements CameraEx.ApertureChang
         @Override
         public void run() {
             if (direction > 0)
-                activityInterface.getCamera().decrementAperture();
+                cameraUiInterface.getActivityInterface().getCamera().decrementAperture();
             else
-                activityInterface.getCamera().incrementAperture();
+                cameraUiInterface.getActivityInterface().getCamera().incrementAperture();
         }
     }
 
@@ -52,7 +52,7 @@ public class ApertureView extends BaseTextView implements CameraEx.ApertureChang
     @Override
     public void onScrolled(int distance) {
         m_notifyOnNextApertureChange = true;
-        activityInterface.getBackHandler().post(new ApertureSetRunner(distance));
+        cameraUiInterface.getActivityInterface().getBackHandler().post(new ApertureSetRunner(distance));
     }
 
 
@@ -81,7 +81,7 @@ public class ApertureView extends BaseTextView implements CameraEx.ApertureChang
         if (m_notifyOnNextApertureChange)
         {
             m_notifyOnNextApertureChange = false;
-            activityInterface.showMessageDelayed(text);
+            cameraUiInterface.showMessageDelayed(text);
         }
     }
 }

@@ -2,13 +2,13 @@ package com.obsidium.bettermanual.capture;
 
 import android.util.Pair;
 
-import com.github.ma1co.pmcademo.app.DialPadKeysEvents;
-import com.obsidium.bettermanual.ActivityInterface;
+import com.github.killerink.KeyEvents;
+import com.obsidium.bettermanual.CameraUiInterface;
 import com.obsidium.bettermanual.CameraUtil;
 import com.obsidium.bettermanual.views.ExposureModeView;
 import com.sony.scalar.hardware.CameraEx;
 
-public class CaptureModeBracket extends CaptureMode implements  CameraEx.ShutterSpeedChangeListener, DialPadKeysEvents {
+public class CaptureModeBracket extends CaptureMode implements  CameraEx.ShutterSpeedChangeListener, KeyEvents {
 
     // Bracketing
     private int             m_bracketStep;  // in 1/3 stops
@@ -24,9 +24,9 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
     private int currentDialMode = BRACKET_NON;
 
 
-    public CaptureModeBracket(ActivityInterface activityInterface)
+    public CaptureModeBracket(CameraUiInterface cameraUiInterface)
     {
-        super(activityInterface);
+        super(cameraUiInterface);
     }
 
     @Override
@@ -41,18 +41,18 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
             abort();
         else
         {
-            if (activityInterface.getExposureMode().get() != ExposureModeView.ExposureModes.manual)
+            if (cameraUiInterface.getExposureMode().get() != ExposureModeView.ExposureModes.manual)
             {
-                activityInterface.showMessageDelayed("Scene mode must be set to manual");
+                cameraUiInterface.showMessageDelayed("Scene mode must be set to manual");
                 return;
             }
-            if (activityInterface.getIso().getCurrentIso() == 0)
+            if (cameraUiInterface.getIso().getCurrentIso() == 0)
             {
-                activityInterface.showMessageDelayed("ISO must be set to manual");
+                cameraUiInterface.showMessageDelayed("ISO must be set to manual");
                 return;
             }
 
-            activityInterface.setLeftViewVisibility(false);
+            cameraUiInterface.setLeftViewVisibility(false);
 
             m_bracketPicCount = 3;
             m_bracketStep = 3;
@@ -60,40 +60,40 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
             updateBracketStep();
 
             // Remember current shutter speed
-            m_bracketNeutralShutterIndex = CameraUtil.getShutterValueIndex(activityInterface.getCamera().getShutterSpeed());
+            m_bracketNeutralShutterIndex = CameraUtil.getShutterValueIndex(cameraUiInterface.getActivityInterface().getCamera().getShutterSpeed());
         }
     }
 
     @Override
     public void startShooting() {
-        activityInterface.hideHintMessage();
-        activityInterface.hideMessage();
+        cameraUiInterface.hideHintMessage();
+        cameraUiInterface.hideMessage();
         // Take first picture at set shutter speed
-        activityInterface.getCamera().takePicture();
+        cameraUiInterface.getActivityInterface().getCamera().takePicture();
     }
 
     @Override
     public void abort() {
-        activityInterface.getMainHandler().removeCallbacks(m_countDownRunnable);
+        cameraUiInterface.getActivityInterface().getMainHandler().removeCallbacks(m_countDownRunnable);
         //m_handler.removeCallbacks(m_timelapseRunnable);
         isActive = false;
-        activityInterface.showMessageDelayed("Bracketing finished");
-        activityInterface.getCamera().startPreview();
-        activityInterface.getCamera().startDisplay();
+        cameraUiInterface.showMessageDelayed("Bracketing finished");
+        cameraUiInterface.getActivityInterface().getCamera().startPreview();
+        cameraUiInterface.getActivityInterface().getCamera().startDisplay();
 
         // Update controls
-        activityInterface.hideHintMessage();
-        activityInterface.setLeftViewVisibility(true);
-        activityInterface.getExposureMode().updateImage();
-        activityInterface.getDriveMode().updateImage();
+        cameraUiInterface.hideHintMessage();
+        cameraUiInterface.setLeftViewVisibility(true);
+        cameraUiInterface.getExposureMode().updateImage();
+        cameraUiInterface.getDriveMode().updateImage();
 
-        activityInterface.setActiveViewFlag(activityInterface.getPreferences().getViewFlags(activityInterface.getActiveViewsFlag()));
-        activityInterface.updateViewVisibility();
+        cameraUiInterface.setActiveViewFlag(cameraUiInterface.getActivityInterface().getPreferences().getViewFlags(cameraUiInterface.getActiveViewsFlag()));
+        cameraUiInterface.updateViewVisibility();
 
         // Reset to previous shutter speed
-        final int shutterDiff = m_bracketNeutralShutterIndex - CameraUtil.getShutterValueIndex(activityInterface.getCamera().getShutterSpeed());
+        final int shutterDiff = m_bracketNeutralShutterIndex - CameraUtil.getShutterValueIndex(cameraUiInterface.getActivityInterface().getCamera().getShutterSpeed());
         if (shutterDiff != 0)
-            activityInterface.getCamera().adjustShutterSpeed(-shutterDiff);
+            cameraUiInterface.getActivityInterface().getCamera().adjustShutterSpeed(-shutterDiff);
     }
 
     @Override
@@ -105,20 +105,20 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
             else
             {
                 m_bracketShutterDelta += m_bracketStep;
-                final int shutterIndex = CameraUtil.getShutterValueIndex(activityInterface.getCamera().getShutterSpeed());
+                final int shutterIndex = CameraUtil.getShutterValueIndex(cameraUiInterface.getActivityInterface().getCamera().getShutterSpeed());
                 if (m_bracketShutterDelta % 2 == 0)
                 {
                     // Even, reduce shutter speed
                     m_bracketNextShutterSpeed = new Pair<Integer, Integer>(CameraUtil.SHUTTER_SPEEDS[shutterIndex + m_bracketShutterDelta][0],
                             CameraUtil.SHUTTER_SPEEDS[shutterIndex + m_bracketShutterDelta][1]);
-                    activityInterface.getCamera().adjustShutterSpeed(-m_bracketShutterDelta);
+                    cameraUiInterface.getActivityInterface().getCamera().adjustShutterSpeed(-m_bracketShutterDelta);
                 }
                 else
                 {
                     // Odd, increase shutter speed
                     m_bracketNextShutterSpeed = new Pair<Integer, Integer>(CameraUtil.SHUTTER_SPEEDS[shutterIndex - m_bracketShutterDelta][0],
                             CameraUtil.SHUTTER_SPEEDS[shutterIndex - m_bracketShutterDelta][1]);
-                    activityInterface.getCamera().adjustShutterSpeed(m_bracketShutterDelta);
+                    cameraUiInterface.getActivityInterface().getCamera().adjustShutterSpeed(m_bracketShutterDelta);
                 }
             }
         }
@@ -166,7 +166,7 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
 
     protected void calcMaxBracketPicCount()
     {
-        final int index = CameraUtil.getShutterValueIndex(activityInterface.getCamera().getShutterSpeed());
+        final int index = CameraUtil.getShutterValueIndex(cameraUiInterface.getActivityInterface().getCamera().getShutterSpeed());
         final int maxSteps = Math.min(index, CameraUtil.SHUTTER_SPEEDS.length - 1 - index);
         m_bracketMaxPicCount = (maxSteps / m_bracketStep) * 2 + 1;
     }
@@ -182,19 +182,19 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
             ev = 3;
         else
             ev = 7;
-        activityInterface.showMessage(String.format("%d.%dEV", m_bracketStep / 3, ev));
+        cameraUiInterface.showMessage(String.format("%d.%dEV", m_bracketStep / 3, ev));
     }
 
     protected void updateBracketPicCount()
     {
-        activityInterface.showMessage(String.format("%d pictures", m_bracketPicCount));
+        cameraUiInterface.showMessage(String.format("%d pictures", m_bracketPicCount));
     }
 
 
     @Override
     public void onShutterSpeedChange(CameraEx.ShutterSpeedInfo shutterSpeedInfo, CameraEx cameraEx)
     {
-        activityInterface.getShutter().updateShutterSpeed(shutterSpeedInfo.currentShutterSpeed_n, shutterSpeedInfo.currentShutterSpeed_d);
+        cameraUiInterface.getShutter().updateShutterSpeed(shutterSpeedInfo.currentShutterSpeed_n, shutterSpeedInfo.currentShutterSpeed_d);
         if (m_bracketNextShutterSpeed != null)
         {
 
@@ -202,7 +202,7 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
                     shutterSpeedInfo.currentShutterSpeed_d == m_bracketNextShutterSpeed.second)
             {
                 // Focus speed adjusted, take next picture
-                activityInterface.getCamera().takePicture();
+                cameraUiInterface.getActivityInterface().getCamera().takePicture();
             }
         }
     }
@@ -282,14 +282,14 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
         }
         else if(currentDialMode == BRACKET_STEP)
         {
-            activityInterface.showHintMessage("\uE4CD to set picture count, \uE04C to confirm");
+            cameraUiInterface.showHintMessage("\uE4CD to set picture count, \uE04C to confirm");
             currentDialMode = BRACKET_PICCOUNT;
             reset();
             updateBracketPicCount();
         }
         else
         {
-            activityInterface.getDialHandler().setDefaultListner();
+            cameraUiInterface.getActivityInterface().getDialHandler().setDefaultListner();
             startCountDown();
             currentDialMode = BRACKET_NON;
         }
@@ -299,6 +299,126 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
 
     @Override
     public boolean onEnterKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onFnKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onFnKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onAelKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onAelKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onMenuKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onMenuKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onFocusKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onFocusKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onShutterKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onShutterKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onPlayKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onPlayKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onMovieKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onMovieKeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onC1KeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onC1KeyUp() {
+        return false;
+    }
+
+    @Override
+    public boolean onLensAttached() {
+        return false;
+    }
+
+    @Override
+    public boolean onLensDetached() {
+        return false;
+    }
+
+    @Override
+    public boolean onModeDialChanged(int value) {
+        return false;
+    }
+
+    @Override
+    public boolean onZoomTeleKey() {
+        return false;
+    }
+
+    @Override
+    public boolean onZoomWideKey() {
+        return false;
+    }
+
+    @Override
+    public boolean onZoomOffKey() {
+        return false;
+    }
+
+    @Override
+    public boolean onDeleteKeyDown() {
+        return false;
+    }
+
+    @Override
+    public boolean onDeleteKeyUp() {
         return false;
     }
 }

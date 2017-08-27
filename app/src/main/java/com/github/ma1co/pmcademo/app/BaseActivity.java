@@ -3,15 +3,20 @@ package com.github.ma1co.pmcademo.app;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 
+import com.github.killerink.KeyEventHandler;
+import com.github.killerink.KeyEvents;
 import com.github.ma1co.openmemories.framework.DeviceInfo;
-import com.obsidium.bettermanual.DialHandler;
 import com.sony.scalar.hardware.avio.DisplayManager;
-import com.sony.scalar.sysutil.ScalarInput;
 import com.sony.scalar.sysutil.didep.Gpelibrary;
 
-public class BaseActivity extends Activity implements DialPadKeysEvents {
+public class BaseActivity extends FragmentActivity implements KeyEvents {
+
+    private final String TAG = BaseActivity.class.getSimpleName();
+
     public static final String NOTIFICATION_DISPLAY_CHANGED = "NOTIFICATION_DISPLAY_CHANGED";
 
     public static final String KEY_ACCESSORY_APO = "KEY_ACCESSORY_APO";
@@ -26,17 +31,18 @@ public class BaseActivity extends Activity implements DialPadKeysEvents {
 
     private DisplayManager displayManager;
 
-    protected DialHandler dialHandler;
+    protected KeyEventHandler keyEventHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG,"onCreate");
         super.onCreate(savedInstanceState);
-        dialHandler = new DialHandler(this);
+        keyEventHandler = new KeyEventHandler(this);
     }
 
     @Override
     protected void onResume() {
-        Logger.info("Resume " + getComponentName().getClassName());
+        Log.d(TAG,"onResume");
         super.onResume();
 
         setColorDepth(true);
@@ -54,7 +60,7 @@ public class BaseActivity extends Activity implements DialPadKeysEvents {
 
     @Override
     protected void onPause() {
-        Logger.info("Pause " + getComponentName().getClassName());
+        Log.d(TAG,"onPause");
         super.onPause();
 
         setColorDepth(false);
@@ -66,112 +72,43 @@ public class BaseActivity extends Activity implements DialPadKeysEvents {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        dialHandler.onKeyDown(keyCode,event);
-        switch (event.getScanCode()) {
-            case ScalarInput.ISV_KEY_FN:
-                return onFnKeyDown();
-            case ScalarInput.ISV_KEY_AEL:
-                return onAelKeyDown();
-            case ScalarInput.ISV_KEY_MENU:
-            case ScalarInput.ISV_KEY_SK1:
-                return onMenuKeyDown();
-            case ScalarInput.ISV_KEY_S1_1:
-                return onFocusKeyDown();
-            case ScalarInput.ISV_KEY_S1_2:
-                return true;
-            case ScalarInput.ISV_KEY_S2:
-                return onShutterKeyDown();
-            case ScalarInput.ISV_KEY_PLAY:
-                return onPlayKeyDown();
-            case ScalarInput.ISV_KEY_STASTOP:
-                return onMovieKeyDown();
-            case ScalarInput.ISV_KEY_CUSTOM1:
-                return onC1KeyDown();
-            case ScalarInput.ISV_KEY_DELETE:
-            case ScalarInput.ISV_KEY_SK2:
-                return onDeleteKeyDown();
-            case ScalarInput.ISV_KEY_LENS_ATTACH:
-                return onLensAttached();
-            case ScalarInput.ISV_KEY_MODE_DIAL:
-                return onModeDialChanged(getDialStatus(ScalarInput.ISV_KEY_MODE_DIAL));
-            case ScalarInput.ISV_KEY_ZOOM_OFF: // zoom not active
-                return onZoomOffKey();
-            case ScalarInput.ISV_KEY_ZOOM_TELE: //zoom in
-                return onZoomTeleKey();
-            case ScalarInput.ISV_KEY_IR_ZOOM_WIDE: //zoom out
-                return onZoomWideKey();
-            default:
-                return super.onKeyDown(keyCode, event);
-        }
+        return keyEventHandler.onKeyDown(keyCode,event);
     }
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        dialHandler.onKeyUp(keyCode,event);
-        switch (event.getScanCode()) {
-
-            case ScalarInput.ISV_KEY_FN:
-                return onFnKeyUp();
-            case ScalarInput.ISV_KEY_AEL:
-                return onAelKeyUp();
-            case ScalarInput.ISV_KEY_MENU:
-            case ScalarInput.ISV_KEY_SK1:
-                return onMenuKeyUp();
-            case ScalarInput.ISV_KEY_S1_1:
-                return onFocusKeyUp();
-            case ScalarInput.ISV_KEY_S1_2:
-                return true;
-            case ScalarInput.ISV_KEY_S2:
-                return onShutterKeyUp();
-            case ScalarInput.ISV_KEY_PLAY:
-                return onPlayKeyUp();
-            case ScalarInput.ISV_KEY_STASTOP:
-                return onMovieKeyUp();
-            case ScalarInput.ISV_KEY_CUSTOM1:
-                return onC1KeyUp();
-            case ScalarInput.ISV_KEY_DELETE:
-            case ScalarInput.ISV_KEY_SK2:
-                return onDeleteKeyUp();
-            case ScalarInput.ISV_KEY_LENS_ATTACH:
-                return onLensDetached();
-            default:
-                return super.onKeyUp(keyCode, event);
-        }
+       return keyEventHandler.onKeyUp(keyCode,event);
     }
 
-    protected int getDialStatus(int key) {
-        return ScalarInput.getKeyStatus(key).status;
-    }
+    public boolean onFnKeyDown() { return false; }
+    public boolean onFnKeyUp() { return false; }
+    public boolean onAelKeyDown() { return false; }
+    public boolean onAelKeyUp() { return false; }
+    public boolean onMenuKeyDown() { return false; }
+    public boolean onMenuKeyUp() { return false; }
+    public boolean onFocusKeyDown() { return false; }
+    public boolean onFocusKeyUp() { return false; }
+    public boolean onShutterKeyDown() { return false; }
+    public boolean onShutterKeyUp() { return false; }
+    public boolean onPlayKeyDown() { return false; }
+    public boolean onPlayKeyUp() { return false; }
+    public boolean onMovieKeyDown() { return false; }
+    public boolean onMovieKeyUp() { return false; }
+    public boolean onC1KeyDown() { return false; }
+    public boolean onC1KeyUp() { return false; }
+    public boolean onLensAttached() { return false; }
+    public boolean onLensDetached() { return false; }
+    public boolean onModeDialChanged(int value) { return false; }
 
-    protected boolean onFnKeyDown() { return false; }
-    protected boolean onFnKeyUp() { return false; }
-    protected boolean onAelKeyDown() { return false; }
-    protected boolean onAelKeyUp() { return false; }
-    protected boolean onMenuKeyDown() { return false; }
-    protected boolean onMenuKeyUp() { return false; }
-    protected boolean onFocusKeyDown() { return false; }
-    protected boolean onFocusKeyUp() { return false; }
-    protected boolean onShutterKeyDown() { return false; }
-    protected boolean onShutterKeyUp() { return false; }
-    protected boolean onPlayKeyDown() { return false; }
-    protected boolean onPlayKeyUp() { return false; }
-    protected boolean onMovieKeyDown() { return false; }
-    protected boolean onMovieKeyUp() { return false; }
-    protected boolean onC1KeyDown() { return false; }
-    protected boolean onC1KeyUp() { return false; }
-    protected boolean onLensAttached() { return false; }
-    protected boolean onLensDetached() { return false; }
-    protected boolean onModeDialChanged(int value) { return false; }
-
-    protected boolean onZoomTeleKey(){return false;}
-    protected boolean onZoomWideKey(){return false;}
-    protected boolean onZoomOffKey(){return false;}
+    public boolean onZoomTeleKey(){return false;}
+    public boolean onZoomWideKey(){return false;}
+    public boolean onZoomOffKey(){return false;}
 
 
-    protected boolean onDeleteKeyDown() {
+    public boolean onDeleteKeyDown() {
         return true;
     }
-    protected boolean onDeleteKeyUp() {
+    public boolean onDeleteKeyUp() {
         onBackPressed();
         return true;
     }

@@ -5,13 +5,13 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.obsidium.bettermanual.ActivityInterface;
+import com.obsidium.bettermanual.CameraUiInterface;
 import com.obsidium.bettermanual.OnSwipeTouchListener;
 
 public abstract class BaseTextView extends TextView implements DialValueSet
 {
 
-    protected ActivityInterface activityInterface;
+    protected CameraUiInterface cameraUiInterface;
 
     public BaseTextView(Context context) {
         super(context);
@@ -30,9 +30,9 @@ public abstract class BaseTextView extends TextView implements DialValueSet
         return new SwipeTouchListener(getContext());
     }
 
-    public void setActivityInterface(ActivityInterface activityInterface)
+    public void setCameraUiInterface(CameraUiInterface cameraUiInterface)
     {
-        this.activityInterface = activityInterface;
+        this.cameraUiInterface = cameraUiInterface;
     }
 
     private class SwipeTouchListener extends OnSwipeTouchListener

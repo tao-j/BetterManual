@@ -1,16 +1,13 @@
 package com.obsidium.bettermanual;
 
-import android.os.Handler;
-
-import com.github.killerink.CameraWrapper;
+import com.github.killerink.FragmentActivityInterface;
 import com.obsidium.bettermanual.views.ApertureView;
 import com.obsidium.bettermanual.views.DriveMode;
 import com.obsidium.bettermanual.views.ExposureModeView;
 import com.obsidium.bettermanual.views.IsoView;
 import com.obsidium.bettermanual.views.ShutterView;
-import com.sony.scalar.hardware.CameraEx;
 
-public interface ActivityInterface
+public interface CameraUiInterface
 {
     void showMessageDelayed(String msg);
     void showMessage(String msg);
@@ -19,17 +16,16 @@ public interface ActivityInterface
     void hideHintMessage();
     int getActiveViewsFlag();
     void setActiveViewFlag(int viewsToShow);
-    Preferences getPreferences();
-    CameraWrapper getCamera();
+
     ExposureModeView getExposureMode();
-    Handler getMainHandler();
-    Handler getBackHandler();
+
     void updateViewVisibility();
     void setLeftViewVisibility(boolean state);
     ShutterView getShutter();
     DriveMode getDriveMode();
     ApertureView getAperture();
     IsoView getIso();
-    void startActivity(Class<?> activity);
-    DialHandler getDialHandler();
+
+    FragmentActivityInterface getActivityInterface();
+
 }

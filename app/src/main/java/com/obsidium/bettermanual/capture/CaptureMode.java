@@ -1,7 +1,6 @@
 package com.obsidium.bettermanual.capture;
 
-import com.obsidium.bettermanual.ActivityInterface;
-import com.sony.scalar.hardware.CameraEx;
+import com.obsidium.bettermanual.CameraUiInterface;
 
 
 public abstract class CaptureMode implements CaptureModeInterface
@@ -9,13 +8,13 @@ public abstract class CaptureMode implements CaptureModeInterface
 
     public static final int COUNTDOWN_SECONDS = 5;
 
-    protected ActivityInterface activityInterface;
+    protected CameraUiInterface cameraUiInterface;
     protected boolean isActive = false;
     protected int             m_countdown;
 
-    public CaptureMode(ActivityInterface activityInterface)
+    public CaptureMode(CameraUiInterface cameraUiInterface)
     {
-        this.activityInterface = activityInterface;
+        this.cameraUiInterface = cameraUiInterface;
     }
 
     @Override
@@ -30,12 +29,12 @@ public abstract class CaptureMode implements CaptureModeInterface
         {
             if (--m_countdown > 0)
             {
-                activityInterface.showMessage(String.format("Starting in %d...", m_countdown));
-                activityInterface.getMainHandler().postDelayed(this, 1000);
+                cameraUiInterface.showMessage(String.format("Starting in %d...", m_countdown));
+                cameraUiInterface.getActivityInterface().getMainHandler().postDelayed(this, 1000);
             }
             else
             {
-                activityInterface.hideMessage();
+                cameraUiInterface.hideMessage();
                 startShooting();
             }
         }
@@ -44,19 +43,19 @@ public abstract class CaptureMode implements CaptureModeInterface
     @Override
     public void startCountDown() {
         isActive = true;
-        activityInterface.getCamera().stopPreview();
-        activityInterface.showHintMessage("\uE04C to abort");
+        cameraUiInterface.getActivityInterface().getCamera().stopPreview();
+        cameraUiInterface.showHintMessage("\uE04C to abort");
         // Stop preview (doesn't seem to preserve battery life?)
-        activityInterface.getCamera().stopDisplay();
+        cameraUiInterface.getActivityInterface().getCamera().stopDisplay();
 
         // Hide some bottom views
-        activityInterface.getPreferences().setViewFlags(activityInterface.getActiveViewsFlag());
-        activityInterface.setActiveViewFlag(0);
-        activityInterface.updateViewVisibility();
+        cameraUiInterface.getActivityInterface().getPreferences().setViewFlags(cameraUiInterface.getActiveViewsFlag());
+        cameraUiInterface.setActiveViewFlag(0);
+        cameraUiInterface.updateViewVisibility();
 
         // Start countdown
         m_countdown = COUNTDOWN_SECONDS;
-        activityInterface.showMessage(String.format("Starting in %d...", m_countdown));
-        activityInterface.getMainHandler().postDelayed(m_countDownRunnable, 1000);
+        cameraUiInterface.showMessage(String.format("Starting in %d...", m_countdown));
+        cameraUiInterface.getActivityInterface().getMainHandler().postDelayed(m_countDownRunnable, 1000);
     }
 }

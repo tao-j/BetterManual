@@ -3,6 +3,7 @@ package com.github.ma1co.pmcademo.app;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 
 import com.github.ma1co.openmemories.framework.DeviceInfo;
@@ -48,6 +49,13 @@ public class BaseActivity extends Activity implements DialPadKeysEvents {
             public void onDeviceStatusChanged(int event) {
                 if (event == DisplayManager.EVENT_SWITCH_DEVICE)
                     onDisplayChanged(displayManager.getActiveDevice());
+                if (event == DisplayManager.EVENT_DETACH_DEVICE)
+                    Log.d("BaseActivity", "Detach Device");
+                if (event == DisplayManager.EVENT_ATTACH_DEVICE)
+                    Log.d("BaseActivity", "Attach Device");
+                if (event == DisplayManager.EVENT_CHANGE_VIEW_PATTERN)
+                    Log.d("BaseActivity", "change view pattern");
+
             }
         });
     }

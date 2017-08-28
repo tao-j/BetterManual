@@ -1,6 +1,10 @@
 package com.github.killerink;
 
 import android.hardware.Camera;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.util.Pair;
 import android.view.SurfaceHolder;
@@ -14,13 +18,12 @@ import java.util.List;
  * Created by troop on 26.08.2017.
  */
 
-public class CameraWrapper implements SurfaceHolder.Callback
+public class CameraWrapper extends CameraWrapperEventProxy implements SurfaceHolder.Callback
 {
 
     public interface CameraEvents{
         void onCameraOpen(boolean isOpen);
     }
-
 
     private final String TAG = CameraWrapper.class.getSimpleName();
     private CameraEx m_camera;
@@ -31,10 +34,21 @@ public class CameraWrapper implements SurfaceHolder.Callback
     private CameraEvents cameraEventsListner;
     private boolean isSurfaceCreated = false;
     private SurfaceHolder surfaceHolder;
+    private BackGroundHandler bgHandler;
 
-    public CameraWrapper(ActivityInterface activityInterface)
+
+    private final int INCREASE_SHUTTER = 1;
+    private final int DECREASE_SHUTTER = 2;
+    private final int DECREASE_APERTURE = 3;
+    private final int INCREASE_APERTURE = 4;
+    private final int SET_ISO = 5;
+
+    public CameraWrapper(ActivityInterface activityInterface, HandlerThread hthread)
     {
+        super();
         this.activityInterface = activityInterface;
+        bgHandler = new BackGroundHandler(hthread.getLooper());
+
     }
 
     public void setCameraEventsListner(CameraEvents eventsListner)
@@ -75,6 +89,17 @@ public class CameraWrapper implements SurfaceHolder.Callback
                     Log.d(TAG,"Preview onStart");
                 }
             });
+
+            m_camera.setAutoPictureReviewControl(getAutoPictureReviewControls());
+            m_camera.setPreviewAnalizeListener(CameraWrapper.this);
+            m_camera.setAutoISOSensitivityListener(CameraWrapper.this);
+            m_camera.setShutterListener(CameraWrapper.this);
+            m_camera.setApertureChangeListener(CameraWrapper.this);
+            m_camera.setProgramLineRangeOverListener(CameraWrapper.this);
+            m_camera.setPreviewMagnificationListener(CameraWrapper.this);
+            m_camera.setFocusDriveListener(CameraWrapper.this);
+            m_camera.setShutterSpeedChangeListener(CameraWrapper.this);
+
             activityInterface.getMainHandler().post(new Runnable() {
                 @Override
                 public void run() {
@@ -82,6 +107,7 @@ public class CameraWrapper implements SurfaceHolder.Callback
                         cameraEventsListner.onCameraOpen(true);
                 }
             });
+
             if (surfaceHolder != null && isSurfaceCreated)
             {
                 setSurfaceHolder(surfaceHolder);
@@ -95,6 +121,19 @@ public class CameraWrapper implements SurfaceHolder.Callback
     public void closeCamera()
     {
         Log.d(TAG,"closeCamera");
+        m_camera.setAutoFocusStartListener(null);
+        m_camera.setAutoFocusDoneListener(null);
+        m_camera.setPreviewStartListener(null);
+        m_camera.setAutoPictureReviewControl(null);
+        m_camera.setPreviewAnalizeListener(null);
+        m_camera.setAutoISOSensitivityListener(null);
+        m_camera.setShutterListener(null);
+        m_camera.setApertureChangeListener(null);
+        m_camera.setProgramLineRangeOverListener(null);
+        m_camera.setPreviewMagnificationListener(null);
+        m_camera.setFocusDriveListener(null);
+        m_camera.setShutterSpeedChangeListener(null);
+
         m_camera.getNormalCamera().stopPreview();
         m_camera.release();
         m_camera = null;
@@ -262,6 +301,11 @@ public class CameraWrapper implements SurfaceHolder.Callback
         setParameters(parameters);
     }
 
+    public int getAutoShutterSpeedLowLimit()
+    {
+        return modifier.getAutoShutterSpeedLowLimit();
+    }
+
     public void setSelfTimer(int value)
     {
         modifier.setSelfTimer(value);
@@ -280,8 +324,7 @@ public class CameraWrapper implements SurfaceHolder.Callback
 
     public void setISOSensitivity(int value)
     {
-        modifier.setISOSensitivity(value);
-        setParameters(parameters);
+        sendMsg(SET_ISO,value);
     }
 
     public void setPreviewMagnification(int factor, Pair position)
@@ -289,10 +332,26 @@ public class CameraWrapper implements SurfaceHolder.Callback
         m_camera.setPreviewMagnification(factor,position);
     }
 
-    public void decrementShutterSpeed(){m_camera.decrementShutterSpeed();}
-    public void incrementShutterSpeed(){m_camera.incrementShutterSpeed();}
-    public void decrementAperture(){m_camera.decrementAperture();}
-    public void incrementAperture(){m_camera.incrementAperture();}
+    public void decrementShutterSpeed(){
+        sendMsg(DECREASE_SHUTTER);
+    }
+    public void incrementShutterSpeed()
+    {
+        sendMsg(INCREASE_SHUTTER);
+    }
+
+    public void decrementAperture(){
+        sendMsg(DECREASE_APERTURE);
+    }
+
+    public void incrementAperture(){
+       sendMsg(INCREASE_APERTURE);
+    }
+
+
+    public int getAperture() {
+        return modifier.getAperture();
+    }
 
     public Pair getShutterSpeed()
     {
@@ -324,5 +383,54 @@ public class CameraWrapper implements SurfaceHolder.Callback
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
         isSurfaceCreated = false;
         this.surfaceHolder = null;
+    }
+
+    private void sendMsg(int code)
+    {
+        Message msg = bgHandler.obtainMessage();
+        msg.what = code;
+        bgHandler.sendMessage(msg);
+    }
+
+    private void sendMsg(int code,int value)
+    {
+        Message msg = bgHandler.obtainMessage();
+        msg.what = code;
+        msg.what = value;
+        bgHandler.sendMessage(msg);
+    }
+
+    private class BackGroundHandler extends Handler
+    {
+
+        public BackGroundHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what)
+            {
+                case INCREASE_SHUTTER:
+                    m_camera.incrementShutterSpeed();
+                    break;
+                case DECREASE_SHUTTER:
+                    m_camera.decrementShutterSpeed();
+                    break;
+                case INCREASE_APERTURE:
+                    m_camera.incrementAperture();
+                    break;
+                case DECREASE_APERTURE:
+                    m_camera.decrementAperture();
+                    break;
+                case SET_ISO:
+                    modifier.setISOSensitivity(msg.arg1);
+                    setParameters(parameters);
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+
+        }
     }
 }

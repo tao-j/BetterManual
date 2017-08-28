@@ -13,21 +13,6 @@ public class ShutterView extends BaseTextView {
         onScrolled(value);
     }
 
-    private class ShutterSetRunner implements Runnable
-    {
-        private int direction;
-        public ShutterSetRunner(int direction)
-        {
-            this.direction = direction;
-        }
-        @Override
-        public void run() {
-            if (direction > 0)
-                cameraUiInterface.getActivityInterface().getCamera().decrementShutterSpeed();
-            else
-                cameraUiInterface.getActivityInterface().getCamera().incrementShutterSpeed();
-        }
-    }
 
     // Shutter speed
     private boolean         m_notifyOnNextShutterSpeedChange;
@@ -45,7 +30,11 @@ public class ShutterView extends BaseTextView {
 
     @Override
     public void onScrolled(int distance) {
-        cameraUiInterface.getActivityInterface().getBackHandler().post(new ShutterSetRunner(distance));
+        if (distance > 0)
+            cameraUiInterface.getActivityInterface().getCamera().decrementShutterSpeed();
+        else
+            cameraUiInterface.getActivityInterface().getCamera().incrementShutterSpeed();
+        //cameraUiInterface.getActivityInterface().getBackHandler().post(new ShutterSetRunner(distance));
     }
 
     @Override
@@ -63,18 +52,12 @@ public class ShutterView extends BaseTextView {
     public void updateShutterSpeed(int n, int d)
     {
         final String text = CameraUtil.formatShutterSpeed(n, d);
-        cameraUiInterface.getActivityInterface().getMainHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                setText(text);
-                if (m_notifyOnNextShutterSpeedChange)
-                {
-                    cameraUiInterface.showMessageDelayed(text);
-                    m_notifyOnNextShutterSpeedChange = false;
-                }
-            }
-        });
-
+        setText(text);
+        if (m_notifyOnNextShutterSpeedChange)
+        {
+            cameraUiInterface.showMessageDelayed(text);
+            m_notifyOnNextShutterSpeedChange = false;
+        }
     }
 
 }

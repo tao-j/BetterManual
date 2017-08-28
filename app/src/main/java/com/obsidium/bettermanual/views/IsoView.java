@@ -36,13 +36,7 @@ public class IsoView extends BaseTextView implements CameraEx.AutoISOSensitivity
         this.wrapper =wrapper;
         this.m_supportedIsos = wrapper.getSupportedISOSensitivities();
         m_curIso = wrapper.getISOSensitivity();
-        post(new Runnable() {
-            @Override
-            public void run() {
-                setText(String.format("\uE488 %d", m_curIso));
-            }
-        });
-
+        setText(String.format("\uE488 %d", m_curIso));
     }
 
     public int getCurrentIso()
@@ -113,13 +107,7 @@ public class IsoView extends BaseTextView implements CameraEx.AutoISOSensitivity
 
     @Override
     public void onChanged(final int i, CameraEx cameraEx) {
-        post(new Runnable() {
-            @Override
-            public void run() {
-                setText("\uE488 " + String.valueOf(i) + (m_curIso == 0 ? "(A)" : ""));
-            }
-        });
-
+        setText("\uE488 " + String.valueOf(i) + (m_curIso == 0 ? "(A)" : ""));
     }
 
     @Override

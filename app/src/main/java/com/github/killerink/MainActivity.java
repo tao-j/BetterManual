@@ -46,7 +46,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler))
             Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());
         m_handler = new Handler(Looper.getMainLooper());
-        setContentView(R.layout.fragment_activity);
+        setContentView(R.layout.main_activity);
 
         surfaceView = (SurfaceView)findViewById(R.id.surfaceView);
         //surfaceView.setOnTouchListener(new CameraUiFragment.SurfaceSwipeTouchListener(getContext()));
@@ -60,7 +60,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         Log.d(TAG,"onResume");
         super.onResume();
         startBackgroundThread();
-        wrapper = new CameraWrapper(this);
+        wrapper = new CameraWrapper(this,mHandlerThread);
         m_surfaceHolder.addCallback(wrapper);
         wrapper.setCameraEventsListner(this);
         wrapper.startCamera();
@@ -157,10 +157,12 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         {
             case FRAGMENT_CAMERA_UI:
                 CameraUiFragment ui = CameraUiFragment.getCameraUiFragment(this);
+                getDialHandler().setDialEventListner(ui);
                 replaceCameraFragment(ui, CameraUiFragment.class.getSimpleName());
                 break;
             case FRAGMENT_MIN_SHUTTER:
                 MinShutterActivity msa = MinShutterActivity.getMinShutterActivity(this);
+                getDialHandler().setDialEventListner(msa);
                 replaceCameraFragment(msa, MinShutterActivity.class.getSimpleName());
                 break;
 

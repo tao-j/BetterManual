@@ -26,10 +26,7 @@ public class ApertureView extends BaseTextView implements CameraEx.ApertureChang
         }
         @Override
         public void run() {
-            if (direction > 0)
-                cameraUiInterface.getActivityInterface().getCamera().decrementAperture();
-            else
-                cameraUiInterface.getActivityInterface().getCamera().incrementAperture();
+
         }
     }
 
@@ -52,7 +49,10 @@ public class ApertureView extends BaseTextView implements CameraEx.ApertureChang
     @Override
     public void onScrolled(int distance) {
         m_notifyOnNextApertureChange = true;
-        cameraUiInterface.getActivityInterface().getBackHandler().post(new ApertureSetRunner(distance));
+        if (distance > 0)
+            cameraUiInterface.getActivityInterface().getCamera().decrementAperture();
+        else
+            cameraUiInterface.getActivityInterface().getCamera().incrementAperture();
     }
 
 
@@ -77,17 +77,11 @@ public class ApertureView extends BaseTextView implements CameraEx.ApertureChang
                         apertureInfo.currentAperture, apertureInfo.currentAvailableMin, apertureInfo.currentAvailableMax));
                 */
         final String text = String.format("f%.1f", (float)apertureInfo.currentAperture / 100.0f);
-        cameraUiInterface.getActivityInterface().getMainHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                setText(text);
-                if (m_notifyOnNextApertureChange)
-                {
-                    m_notifyOnNextApertureChange = false;
-                    cameraUiInterface.showMessageDelayed(text);
-                }
-            }
-        });
-
+        setText(text);
+        if (m_notifyOnNextApertureChange)
+        {
+            m_notifyOnNextApertureChange = false;
+            cameraUiInterface.showMessageDelayed(text);
+        }
     }
 }

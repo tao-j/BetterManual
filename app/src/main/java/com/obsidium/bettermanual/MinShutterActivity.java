@@ -1,6 +1,5 @@
 package com.obsidium.bettermanual;
 
-import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -13,14 +12,13 @@ import android.widget.TextView;
 
 import com.github.killerink.ActivityInterface;
 import com.github.killerink.KeyEvents;
+import com.github.killerink.MainActivity;
 import com.sony.scalar.hardware.CameraEx;
 
 public class MinShutterActivity extends Fragment implements SeekBar.OnSeekBarChangeListener, KeyEvents
 {
     private SeekBar     m_sbShutter;
     private TextView    m_tvInfo;
-
-    private CameraEx m_camera;
 
     private ActivityInterface activityInterface;
 
@@ -39,7 +37,7 @@ public class MinShutterActivity extends Fragment implements SeekBar.OnSeekBarCha
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_min_shutter,container,false);
+        return inflater.inflate(R.layout.min_shutter_fragment,container,false);
     }
 
     @Override
@@ -57,7 +55,7 @@ public class MinShutterActivity extends Fragment implements SeekBar.OnSeekBarCha
             @Override
             public void onClick(View view)
             {
-
+                activityInterface.loadFragment(MainActivity.FRAGMENT_CAMERA_UI);
             }
         });
     }
@@ -66,20 +64,22 @@ public class MinShutterActivity extends Fragment implements SeekBar.OnSeekBarCha
     public void onResume()
     {
         super.onResume();
-        activityInterface.getDialHandler().setDialEventListner(this);
 
-        m_camera = CameraEx.open(0, null);
-
-        m_camera.setShutterSpeedChangeListener(new CameraEx.ShutterSpeedChangeListener()
+        activityInterface.getCamera().getCameraEx().setShutterSpeedChangeListener(new CameraEx.ShutterSpeedChangeListener()
         {
             @Override
-            public void onShutterSpeedChange(CameraEx.ShutterSpeedInfo shutterSpeedInfo, CameraEx cameraEx)
+            public void onShutterSpeedChange(final CameraEx.ShutterSpeedInfo shutterSpeedInfo, CameraEx cameraEx)
             {
-                int idx = CameraUtil.getShutterValueIndex(shutterSpeedInfo.currentAvailableMin_n, shutterSpeedInfo.currentAvailableMin_d);
+                final int idx = CameraUtil.getShutterValueIndex(shutterSpeedInfo.currentAvailableMin_n, shutterSpeedInfo.currentAvailableMin_d);
                 if (idx >= 0)
                 {
-                    m_sbShutter.setProgress(idx);
-                    m_tvInfo.setText(CameraUtil.formatShutterSpeed(shutterSpeedInfo.currentAvailableMin_n, shutterSpeedInfo.currentAvailableMin_d));
+                    activityInterface.getMainHandler().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            m_sbShutter.setProgress(idx);
+                            m_tvInfo.setText(CameraUtil.formatShutterSpeed(shutterSpeedInfo.currentAvailableMin_n, shutterSpeedInfo.currentAvailableMin_d));
+                        }
+                    });
                 }
             }
         });
@@ -90,12 +90,8 @@ public class MinShutterActivity extends Fragment implements SeekBar.OnSeekBarCha
     {
         super.onPause();
         // Save minimum shutter speed
-        Preferences prefs = activityInterface.getPreferences();
-        final CameraEx.ParametersModifier paramsModifier = m_camera.createParametersModifier(m_camera.getNormalCamera().getParameters());
-        prefs.setMinShutterSpeed(paramsModifier.getAutoShutterSpeedLowLimit());
 
-        m_camera.release();
-        m_camera = null;
+        activityInterface.getPreferences().setMinShutterSpeed(activityInterface.getCamera().getAutoShutterSpeedLowLimit());
     }
 
 
@@ -108,6 +104,7 @@ public class MinShutterActivity extends Fragment implements SeekBar.OnSeekBarCha
 
     @Override
     public boolean onEnterKeyUp() {
+        activityInterface.loadFragment(MainActivity.FRAGMENT_CAMERA_UI);
         return false;
     }
 
@@ -235,9 +232,7 @@ public class MinShutterActivity extends Fragment implements SeekBar.OnSeekBarCha
     public boolean onUpperDialChanged(int value)
     {
         m_sbShutter.incrementProgressBy(value);
-        final Camera.Parameters params = m_camera.createEmptyParameters();
-        m_camera.createParametersModifier(params).setAutoShutterSpeedLowLimit(CameraUtil.MIN_SHUTTER_VALUES[m_sbShutter.getProgress()]);
-        m_camera.getNormalCamera().setParameters(params);
+        activityInterface.getCamera().setAutoShutterSpeedLowLimit(CameraUtil.MIN_SHUTTER_VALUES[m_sbShutter.getProgress()]);
         return true;
     }
 
@@ -291,9 +286,7 @@ public class MinShutterActivity extends Fragment implements SeekBar.OnSeekBarCha
     {
         if (fromUser)
         {
-            final Camera.Parameters params = m_camera.createEmptyParameters();
-            m_camera.createParametersModifier(params).setAutoShutterSpeedLowLimit(CameraUtil.MIN_SHUTTER_VALUES[progress]);
-            m_camera.getNormalCamera().setParameters(params);
+            activityInterface.getCamera().setAutoShutterSpeedLowLimit(CameraUtil.MIN_SHUTTER_VALUES[progress]);
         }
     }
     public void onStartTrackingTouch(SeekBar var1)

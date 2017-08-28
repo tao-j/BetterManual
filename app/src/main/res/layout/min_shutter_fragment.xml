@@ -19,11 +19,13 @@
         />
 
     <SeekBar
+        android:id="@+id/sbShutter"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/sbShutter"
-        android:clickable="true"
-        android:layout_below="@+id/tvInfo"/>
+        android:layout_below="@+id/tvInfo"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:clickable="true" />
 
     <Button
         android:layout_width="wrap_content"

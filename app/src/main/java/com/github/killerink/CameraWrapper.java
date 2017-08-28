@@ -29,6 +29,8 @@ public class CameraWrapper implements SurfaceHolder.Callback
     private ActivityInterface activityInterface;
 
     private CameraEvents cameraEventsListner;
+    private boolean isSurfaceCreated = false;
+    private SurfaceHolder surfaceHolder;
 
     public CameraWrapper(ActivityInterface activityInterface)
     {
@@ -80,6 +82,12 @@ public class CameraWrapper implements SurfaceHolder.Callback
                         cameraEventsListner.onCameraOpen(true);
                 }
             });
+            if (surfaceHolder != null && isSurfaceCreated)
+            {
+                setSurfaceHolder(surfaceHolder);
+                startPreview();
+                startDisplay();
+            }
 
         }
     };
@@ -298,8 +306,13 @@ public class CameraWrapper implements SurfaceHolder.Callback
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
-        setSurfaceHolder(surfaceHolder);
-        startDisplay();
+        this.surfaceHolder = surfaceHolder;
+        if (m_camera != null)
+        {
+            setSurfaceHolder(surfaceHolder);
+            startDisplay();
+        }
+        isSurfaceCreated = true;
     }
 
     @Override
@@ -309,6 +322,7 @@ public class CameraWrapper implements SurfaceHolder.Callback
 
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-
+        isSurfaceCreated = false;
+        this.surfaceHolder = null;
     }
 }

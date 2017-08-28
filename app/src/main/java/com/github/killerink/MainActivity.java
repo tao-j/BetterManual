@@ -8,6 +8,8 @@ import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 
 import com.github.ma1co.pmcademo.app.BaseActivity;
 import com.obsidium.bettermanual.CameraUiFragment;
@@ -34,6 +36,9 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
 
     private Handler   m_handler;
 
+    private SurfaceHolder m_surfaceHolder;
+    SurfaceView surfaceView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG,"onCreate");
@@ -43,6 +48,10 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         m_handler = new Handler(Looper.getMainLooper());
         setContentView(R.layout.fragment_activity);
 
+        surfaceView = (SurfaceView)findViewById(R.id.surfaceView);
+        //surfaceView.setOnTouchListener(new CameraUiFragment.SurfaceSwipeTouchListener(getContext()));
+        m_surfaceHolder = surfaceView.getHolder();
+        m_surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         preferences = new Preferences(getApplicationContext());
     }
 
@@ -52,6 +61,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         super.onResume();
         startBackgroundThread();
         wrapper = new CameraWrapper(this);
+        m_surfaceHolder.addCallback(wrapper);
         wrapper.setCameraEventsListner(this);
         wrapper.startCamera();
 
@@ -63,6 +73,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         Log.d(TAG,"onPause");
         super.onPause();
         if (wrapper !=null) {
+            m_surfaceHolder.removeCallback(wrapper);
             wrapper.closeCamera();
             wrapper = null;
         }

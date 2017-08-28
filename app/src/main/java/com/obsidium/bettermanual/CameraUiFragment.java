@@ -41,14 +41,14 @@ import java.util.List;
 
 
 
-public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback, View.OnClickListener, CameraEx.ShutterListener, CameraUiInterface, KeyEvents
+public class CameraUiFragment extends Fragment implements View.OnClickListener, CameraEx.ShutterListener, CameraUiInterface, KeyEvents
 {
 
     private static final boolean LOGGING_ENABLED = false;
     private static final int MESSAGE_TIMEOUT = 1000;
     private final  String TAG  = CameraUiFragment.class.getSimpleName();
 
-    private SurfaceHolder   m_surfaceHolder;
+
     private CameraEx.AutoPictureReviewControl m_autoReviewControl;
     private int             m_pictureReviewTime;
 
@@ -144,12 +144,6 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
         super.onViewCreated(view, savedInstanceState);
         dialViews = new ArrayList<View>();
 
-        SurfaceView surfaceView = (SurfaceView)view.findViewById(R.id.surfaceView);
-        surfaceView.setOnTouchListener(new SurfaceSwipeTouchListener(getContext()));
-        m_surfaceHolder = surfaceView.getHolder();
-        m_surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-
-
         exposureMode = (ExposureModeView) view.findViewById(R.id.ivMode);
         exposureMode.setOnClickListener(this);
         exposureMode.setActivity(activityInterface);
@@ -237,7 +231,6 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
         Log.d(TAG,"onResume");
         super.onResume();
         activityInterface.getDialHandler().setDialEventListner(this);
-        m_surfaceHolder.addCallback(activityInterface.getCamera());
         startCamera();
     }
 
@@ -246,31 +239,12 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
     {
         Log.d(TAG,"onPause");
         saveDefaults();
-        m_surfaceHolder.removeCallback(activityInterface.getCamera());
         if (m_autoReviewControl != null)
             m_autoReviewControl.setPictureReviewTime(m_pictureReviewTime);
         activityInterface.getCamera().getCameraEx().setAutoPictureReviewControl(null);
         super.onPause();
     }
 
-    @Override
-    public void surfaceCreated(SurfaceHolder holder)
-    {
-        if(activityInterface.getCamera() !=null) {
-            activityInterface.getCamera().setSurfaceHolder(holder);
-
-            activityInterface.getCamera().startDisplay();
-        }
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
-    {
-        //log(String.format("surfaceChanged width %d height %d\n", width, height));
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {}
     private class SurfaceSwipeTouchListener extends OnSwipeTouchListener
     {
         public SurfaceSwipeTouchListener(Context context)
@@ -500,8 +474,7 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
 
 
     private void startCamera() {
-        activityInterface.getCamera().startPreview();
-        activityInterface.getCamera().startDisplay();
+
         m_autoReviewControl = new CameraEx.AutoPictureReviewControl();
         activityInterface.getCamera().getCameraEx().setAutoPictureReviewControl(m_autoReviewControl);
         // Disable picture review

@@ -1,20 +1,17 @@
 package com.obsidium.bettermanual;
 
-import android.content.Context;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.github.killerink.FragmentActivityInterface;
+import com.github.killerink.ActivityInterface;
 import com.github.killerink.KeyEvents;
 import com.sony.scalar.hardware.CameraEx;
 
@@ -25,9 +22,9 @@ public class MinShutterActivity extends Fragment implements SeekBar.OnSeekBarCha
 
     private CameraEx m_camera;
 
-    private FragmentActivityInterface activityInterface;
+    private ActivityInterface activityInterface;
 
-    public static MinShutterActivity getMinShutterActivity(FragmentActivityInterface activityInterface)
+    public static MinShutterActivity getMinShutterActivity(ActivityInterface activityInterface)
     {
         MinShutterActivity msa = new MinShutterActivity();
         msa.setActivityInterface(activityInterface);
@@ -35,8 +32,8 @@ public class MinShutterActivity extends Fragment implements SeekBar.OnSeekBarCha
     }
 
 
-    public void setActivityInterface(FragmentActivityInterface fragmentActivityInterface) {
-        this.activityInterface = fragmentActivityInterface;
+    public void setActivityInterface(ActivityInterface activityInterface) {
+        this.activityInterface = activityInterface;
     }
 
     @Nullable

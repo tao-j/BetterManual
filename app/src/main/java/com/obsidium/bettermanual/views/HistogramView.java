@@ -42,7 +42,13 @@ public class HistogramView extends View
     public void setHistogram(short[] histogram)
     {
         m_histogram = histogram;
-        invalidate();
+        this.post(new Runnable() {
+            @Override
+            public void run() {
+                invalidate();
+            }
+        });
+
     }
 
     private void drawHistogram(Canvas canvas, short[] histogram)

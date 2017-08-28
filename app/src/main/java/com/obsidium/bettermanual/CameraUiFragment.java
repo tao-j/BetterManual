@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -15,10 +14,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.github.killerink.FragmentActivityInterface;
+import com.github.killerink.ActivityInterface;
 import com.github.killerink.KeyEvents;
 
 import com.obsidium.bettermanual.capture.CaptureModeBracket;
@@ -119,18 +117,18 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
     private int             m_viewFlags;
     private boolean bulbcapture = false;
 
-    private FragmentActivityInterface fragmentActivityInterface;
+    private ActivityInterface activityInterface;
 
 
-    public static CameraUiFragment getCameraUiFragment(FragmentActivityInterface activityInterface)
+    public static CameraUiFragment getCameraUiFragment(ActivityInterface activityInterface)
     {
         CameraUiFragment cu = new CameraUiFragment();
         cu.setActivityInterface(activityInterface);
         return cu;
     }
 
-    public void setActivityInterface(FragmentActivityInterface fragmentActivityInterface) {
-        this.fragmentActivityInterface = fragmentActivityInterface;
+    public void setActivityInterface(ActivityInterface activityInterface) {
+        this.activityInterface = activityInterface;
     }
 
     @Nullable
@@ -154,12 +152,12 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
 
         exposureMode = (ExposureModeView) view.findViewById(R.id.ivMode);
         exposureMode.setOnClickListener(this);
-        exposureMode.setActivity(fragmentActivityInterface);
+        exposureMode.setActivity(activityInterface);
         dialViews.add(exposureMode);
 
         driveMode = (DriveMode) view.findViewById(R.id.ivDriveMode);
         driveMode.setOnClickListener(this);
-        driveMode.setActivity(fragmentActivityInterface);
+        driveMode.setActivity(activityInterface);
         dialViews.add(driveMode);
 
         m_ivTimelapse = (ImageView)view.findViewById(R.id.ivTimelapse);
@@ -238,8 +236,8 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
     {
         Log.d(TAG,"onResume");
         super.onResume();
-        fragmentActivityInterface.getDialHandler().setDialEventListner(this);
-        m_surfaceHolder.addCallback(fragmentActivityInterface.getCamera());
+        activityInterface.getDialHandler().setDialEventListner(this);
+        m_surfaceHolder.addCallback(activityInterface.getCamera());
         startCamera();
     }
 
@@ -248,20 +246,20 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
     {
         Log.d(TAG,"onPause");
         saveDefaults();
-        m_surfaceHolder.removeCallback(fragmentActivityInterface.getCamera());
+        m_surfaceHolder.removeCallback(activityInterface.getCamera());
         if (m_autoReviewControl != null)
             m_autoReviewControl.setPictureReviewTime(m_pictureReviewTime);
-        fragmentActivityInterface.getCamera().getCameraEx().setAutoPictureReviewControl(null);
+        activityInterface.getCamera().getCameraEx().setAutoPictureReviewControl(null);
         super.onPause();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder)
     {
-        if(fragmentActivityInterface.getCamera() !=null) {
-            fragmentActivityInterface.getCamera().setSurfaceHolder(holder);
+        if(activityInterface.getCamera() !=null) {
+            activityInterface.getCamera().setSurfaceHolder(holder);
 
-            fragmentActivityInterface.getCamera().startDisplay();
+            activityInterface.getCamera().startDisplay();
         }
     }
 
@@ -287,7 +285,7 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
             {
                 m_curPreviewMagnificationPos = new Pair<Integer, Integer>(Math.max(Math.min(m_curPreviewMagnificationMaxPos, m_curPreviewMagnificationPos.first + (int)distanceX), -m_curPreviewMagnificationMaxPos),
                         Math.max(Math.min(m_curPreviewMagnificationMaxPos, m_curPreviewMagnificationPos.second + (int)distanceY), -m_curPreviewMagnificationMaxPos));
-                fragmentActivityInterface.getCamera().getCameraEx().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+                activityInterface.getCamera().getCameraEx().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
                 return true;
             }
             return false;
@@ -297,30 +295,54 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
     public void showMessageDelayed(String msg)
     {
         showMessage(msg);
-        fragmentActivityInterface.getMainHandler().removeCallbacks(m_hideMessageRunnable);
-        fragmentActivityInterface.getMainHandler().postDelayed(m_hideMessageRunnable, MESSAGE_TIMEOUT);
+        activityInterface.getMainHandler().removeCallbacks(m_hideMessageRunnable);
+        activityInterface.getMainHandler().postDelayed(m_hideMessageRunnable, MESSAGE_TIMEOUT);
     }
 
-    public void showMessage(String msg)
+    public void showMessage(final String msg)
     {
-        m_tvMsg.setText(msg);
-        m_tvMsg.setVisibility(View.VISIBLE);
+        activityInterface.getMainHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                m_tvMsg.setText(msg);
+                m_tvMsg.setVisibility(View.VISIBLE);
+            }
+        });
+
     }
 
     public void hideMessage()
     {
-        m_tvMsg.setVisibility(View.GONE);
+        activityInterface.getMainHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                m_tvMsg.setVisibility(View.GONE);
+            }
+        });
+
     }
 
     @Override
-    public void showHintMessage(String msg) {
-        m_tvHint.setText(msg);
-        m_tvHint.setVisibility(View.VISIBLE);
+    public void showHintMessage(final String msg) {
+        activityInterface.getMainHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                m_tvHint.setText(msg);
+                m_tvHint.setVisibility(View.VISIBLE);
+            }
+        });
+
     }
 
     @Override
     public void hideHintMessage() {
-        m_tvHint.setVisibility(View.GONE);
+        activityInterface.getMainHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                m_tvHint.setVisibility(View.GONE);
+            }
+        });
+
     }
 
     @Override
@@ -346,8 +368,8 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
 
 
     @Override
-    public FragmentActivityInterface getActivityInterface() {
-        return fragmentActivityInterface;
+    public ActivityInterface getActivityInterface() {
+        return activityInterface;
     }
 
 
@@ -364,7 +386,7 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
     {
         if (!bulbcapture) {
 
-            fragmentActivityInterface.getCamera().cancelTakePicture();
+            activityInterface.getCamera().cancelTakePicture();
             if (timelapse.isActive())
                 timelapse.onShutter(i);
             else if (bracket.isActive())
@@ -375,8 +397,14 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
 
     public void updateViewVisibility()
     {
-        m_vHist.setVisibility((m_viewFlags & VIEW_FLAG_HISTOGRAM) != 0 ? View.VISIBLE : View.GONE);
-        m_vGrid.setVisibility((m_viewFlags & VIEW_FLAG_GRID) != 0 ? View.VISIBLE : View.GONE);
+        activityInterface.getMainHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                m_vHist.setVisibility((m_viewFlags & VIEW_FLAG_HISTOGRAM) != 0 ? View.VISIBLE : View.GONE);
+                m_vGrid.setVisibility((m_viewFlags & VIEW_FLAG_GRID) != 0 ? View.VISIBLE : View.GONE);
+            }
+        });
+
     }
 
     private void cycleVisibleViews()
@@ -403,12 +431,18 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
         log("\n");
     }
 
-    private void togglePreviewMagnificationViews(boolean magnificationActive)
+    private void togglePreviewMagnificationViews(final boolean magnificationActive)
     {
-        m_previewNavView.setVisibility(magnificationActive ? View.VISIBLE : View.GONE);
-        m_tvMagnification.setVisibility(magnificationActive ? View.VISIBLE : View.GONE);
-        m_vHist.setVisibility(magnificationActive ? View.GONE : View.VISIBLE);
-        setLeftViewVisibility(!magnificationActive);
+        activityInterface.getMainHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                m_previewNavView.setVisibility(magnificationActive ? View.VISIBLE : View.GONE);
+                m_tvMagnification.setVisibility(magnificationActive ? View.VISIBLE : View.GONE);
+                m_vHist.setVisibility(magnificationActive ? View.GONE : View.VISIBLE);
+                setLeftViewVisibility(!magnificationActive);
+            }
+        });
+
     }
 
 
@@ -416,12 +450,12 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
     private void saveDefaults()
     {
         // Scene mode
-        fragmentActivityInterface.getPreferences().setSceneMode(fragmentActivityInterface.getCamera().getSceneMode());
+        activityInterface.getPreferences().setSceneMode(activityInterface.getCamera().getSceneMode());
         // Drive mode and burst speed
-        fragmentActivityInterface.getPreferences().setDriveMode(fragmentActivityInterface.getCamera().getDriveMode());
-        fragmentActivityInterface.getPreferences().setBurstDriveSpeed(fragmentActivityInterface.getCamera().getBurstDriveSpeed());
+        activityInterface.getPreferences().setDriveMode(activityInterface.getCamera().getDriveMode());
+        activityInterface.getPreferences().setBurstDriveSpeed(activityInterface.getCamera().getBurstDriveSpeed());
         // View visibility
-        fragmentActivityInterface.getPreferences().setViewFlags(m_viewFlags);
+        activityInterface.getPreferences().setViewFlags(m_viewFlags);
 
         // TODO: Dial mode
     }
@@ -429,8 +463,8 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
     private void disableLENR()
     {
         // Disable long exposure noise reduction
-        if(fragmentActivityInterface.getCamera().isLongExposureNoiseReductionSupported())
-            fragmentActivityInterface.getCamera().setLongExposureNoiseReduction(false);
+        if(activityInterface.getCamera().isLongExposureNoiseReductionSupported())
+            activityInterface.getCamera().setLongExposureNoiseReduction(false);
     }
 
     private void loadDefaults()
@@ -438,26 +472,26 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
 
         //Log.d(TAG,"Parameters: " + params.flatten());
         // Focus mode
-        fragmentActivityInterface.getCamera().setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
+        activityInterface.getCamera().setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
         // Scene mode
-        final String sceneMode = fragmentActivityInterface.getPreferences().getSceneMode();
-        fragmentActivityInterface.getCamera().setSceneMode(sceneMode);
+        final String sceneMode = activityInterface.getPreferences().getSceneMode();
+        activityInterface.getCamera().setSceneMode(sceneMode);
         // Drive mode and burst speed
-        fragmentActivityInterface.getCamera().setDriveMode(fragmentActivityInterface.getPreferences().getDriveMode());
-        fragmentActivityInterface.getCamera().setBurstDriveSpeed(fragmentActivityInterface.getPreferences().getBurstDriveSpeed());
+        activityInterface.getCamera().setDriveMode(activityInterface.getPreferences().getDriveMode());
+        activityInterface.getCamera().setBurstDriveSpeed(activityInterface.getPreferences().getBurstDriveSpeed());
         // Minimum shutter speed
-        if(fragmentActivityInterface.getCamera().isAutoShutterSpeedLowLimitSupported()) {
+        if(activityInterface.getCamera().isAutoShutterSpeedLowLimitSupported()) {
             if (sceneMode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
-                fragmentActivityInterface.getCamera().setAutoShutterSpeedLowLimit(-1);
+                activityInterface.getCamera().setAutoShutterSpeedLowLimit(-1);
             else
-                fragmentActivityInterface.getCamera().setAutoShutterSpeedLowLimit(fragmentActivityInterface.getPreferences().getMinShutterSpeed());
+                activityInterface.getCamera().setAutoShutterSpeedLowLimit(activityInterface.getPreferences().getMinShutterSpeed());
         }
         // Disable self timer
-        fragmentActivityInterface.getCamera().setSelfTimer(0);
+        activityInterface.getCamera().setSelfTimer(0);
         // Force aspect ratio to 3:2
-        fragmentActivityInterface.getCamera().setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
+        activityInterface.getCamera().setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
         // View visibility
-        m_viewFlags = fragmentActivityInterface.getPreferences().getViewFlags(VIEW_FLAG_GRID | VIEW_FLAG_HISTOGRAM);
+        m_viewFlags = activityInterface.getPreferences().getViewFlags(VIEW_FLAG_GRID | VIEW_FLAG_HISTOGRAM);
         // TODO: Dial mode?
         setDialMode(0);
 
@@ -466,21 +500,21 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
 
 
     private void startCamera() {
-        fragmentActivityInterface.getCamera().startPreview();
-        fragmentActivityInterface.getCamera().startDisplay();
+        activityInterface.getCamera().startPreview();
+        activityInterface.getCamera().startDisplay();
         m_autoReviewControl = new CameraEx.AutoPictureReviewControl();
-        fragmentActivityInterface.getCamera().getCameraEx().setAutoPictureReviewControl(m_autoReviewControl);
+        activityInterface.getCamera().getCameraEx().setAutoPictureReviewControl(m_autoReviewControl);
         // Disable picture review
         m_pictureReviewTime = m_autoReviewControl.getPictureReviewTime();
         m_autoReviewControl.setPictureReviewTime(0);
 
-        m_vGrid.setVideoRect(fragmentActivityInterface.getDisplayManager().getDisplayedVideoRect());
+        m_vGrid.setVideoRect(activityInterface.getDisplayManager().getDisplayedVideoRect());
 
         // Exposure compensation
-        evCompensation.init(fragmentActivityInterface.getCamera());
+        evCompensation.init(activityInterface.getCamera());
 
         // Preview/Histogram
-        fragmentActivityInterface.getCamera().getCameraEx().setPreviewAnalizeListener(new CameraEx.PreviewAnalizeListener()
+        activityInterface.getCamera().getCameraEx().setPreviewAnalizeListener(new CameraEx.PreviewAnalizeListener()
         {
             @Override
             public void onAnalizedData(CameraEx.AnalizedData analizedData, CameraEx cameraEx)
@@ -492,21 +526,21 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
 
 
         // ISO
-        fragmentActivityInterface.getCamera().getCameraEx().setAutoISOSensitivityListener(iso);
+        activityInterface.getCamera().getCameraEx().setAutoISOSensitivityListener(iso);
 
         // Shutter
-        fragmentActivityInterface.getCamera().getCameraEx().setShutterSpeedChangeListener(bracket);
+        activityInterface.getCamera().getCameraEx().setShutterSpeedChangeListener(bracket);
         //returns when a capture is done, seems to replace the default android camera1 api CaptureCallback that get called with Camera.takePicture(shutter,raw, jpeg)
         //also it seems Camera.takePicture is nonfunctional/crash on a6000
-        fragmentActivityInterface.getCamera().getCameraEx().setShutterListener(this);
+        activityInterface.getCamera().getCameraEx().setShutterListener(this);
 
         //m_camera.setJpegListener(); maybe is used to get jpeg/raw data returned
 
         // Aperture
-        fragmentActivityInterface.getCamera().getCameraEx().setApertureChangeListener(aperture);
+        activityInterface.getCamera().getCameraEx().setApertureChangeListener(aperture);
 
         // Exposure metering
-        fragmentActivityInterface.getCamera().getCameraEx().setProgramLineRangeOverListener(new CameraEx.ProgramLineRangeOverListener()
+        activityInterface.getCamera().getCameraEx().setProgramLineRangeOverListener(new CameraEx.ProgramLineRangeOverListener()
         {
             @Override
             public void onAERange(boolean b, boolean b1, boolean b2, CameraEx cameraEx)
@@ -524,7 +558,13 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
                     text = String.format("+%.1f", (float)ev / 3.0f);
                 else
                     text = String.format("%.1f", (float)ev / 3.0f);
-                m_tvExposure.setText(text);
+                activityInterface.getMainHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        m_tvExposure.setText(text);
+                    }
+                });
+
                 //log(String.format("onEVRange i %d %f\n", ev, (float)ev / 3.0f));
             }
 
@@ -535,15 +575,15 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
             }
         });
 
-        iso.init(fragmentActivityInterface.getCamera());
+        iso.init(activityInterface.getCamera());
 
-        aperture.setText(String.format("f%.1f", (float)fragmentActivityInterface.getCamera().getParametersModifier().getAperture() / 100.0f));
+        aperture.setText(String.format("f%.1f", (float) activityInterface.getCamera().getParametersModifier().getAperture() / 100.0f));
 
-        Pair<Integer, Integer> sp = fragmentActivityInterface.getCamera().getParametersModifier().getShutterSpeed();
+        Pair<Integer, Integer> sp = activityInterface.getCamera().getParametersModifier().getShutterSpeed();
         m_tvShutter.updateShutterSpeed(sp.first, sp.second);
 
-        m_supportedPreviewMagnifications = (List<Integer>)fragmentActivityInterface.getCamera().getParametersModifier().getSupportedPreviewMagnification();
-        fragmentActivityInterface.getCamera().getCameraEx().setPreviewMagnificationListener(new CameraEx.PreviewMagnificationListener()
+        m_supportedPreviewMagnifications = (List<Integer>) activityInterface.getCamera().getParametersModifier().getSupportedPreviewMagnification();
+        activityInterface.getCamera().getCameraEx().setPreviewMagnificationListener(new CameraEx.PreviewMagnificationListener()
         {
             @Override
             public void onChanged(boolean enabled, int magFactor, int magLevel, Pair coords, CameraEx cameraEx)
@@ -584,19 +624,25 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
             }
         });
 
-        fragmentActivityInterface.getCamera().getCameraEx().setFocusDriveListener(new CameraEx.FocusDriveListener()
+        activityInterface.getCamera().getCameraEx().setFocusDriveListener(new CameraEx.FocusDriveListener()
         {
             @Override
-            public void onChanged(CameraEx.FocusPosition focusPosition, CameraEx cameraEx)
+            public void onChanged(final CameraEx.FocusPosition focusPosition, CameraEx cameraEx)
             {
-                if (m_curPreviewMagnification == 0)
-                {
-                    m_lFocusScale.setVisibility(View.VISIBLE);
-                    m_focusScaleView.setMaxPosition(focusPosition.maxPosition);
-                    m_focusScaleView.setCurPosition(focusPosition.currentPosition);
-                    fragmentActivityInterface.getMainHandler().removeCallbacks(m_hideFocusScaleRunnable);
-                    fragmentActivityInterface.getMainHandler().postDelayed(m_hideFocusScaleRunnable, 2000);
-                }
+                activityInterface.getMainHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (m_curPreviewMagnification == 0)
+                        {
+                            m_lFocusScale.setVisibility(View.VISIBLE);
+                            m_focusScaleView.setMaxPosition(focusPosition.maxPosition);
+                            m_focusScaleView.setCurPosition(focusPosition.currentPosition);
+                            activityInterface.getMainHandler().removeCallbacks(m_hideFocusScaleRunnable);
+                            activityInterface.getMainHandler().postDelayed(m_hideFocusScaleRunnable, 2000);
+                        }
+                    }
+                });
+
             }
         });
 
@@ -712,7 +758,7 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
         else if (newY < -m_curPreviewMagnificationMaxPos)
             newY = -m_curPreviewMagnificationMaxPos;
         m_curPreviewMagnificationPos = new Pair<Integer, Integer>(m_curPreviewMagnificationPos.first, newY);
-        fragmentActivityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+        activityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
     }
 
     private void movePreviewHorizontal(int delta)
@@ -723,7 +769,7 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
         else if (newX < -m_curPreviewMagnificationMaxPos)
             newX = -m_curPreviewMagnificationMaxPos;
         m_curPreviewMagnificationPos = new Pair<Integer, Integer>(newX, m_curPreviewMagnificationPos.second);
-        fragmentActivityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+        activityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
     }
 
     @Override
@@ -790,7 +836,7 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
         else if (m_curPreviewMagnification != 0)
         {
             m_curPreviewMagnificationPos = new Pair<Integer, Integer>(0, 0);
-            fragmentActivityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+            activityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
             return true;
         }
         else if (view instanceof ShutterView || bulbcapture)
@@ -812,14 +858,14 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
         }
         else if (view == m_ivTimelapse)
         {
-            fragmentActivityInterface.getDialHandler().setDialEventListner(timelapse);
+            activityInterface.getDialHandler().setDialEventListner(timelapse);
             timelapse.onEnterKeyDown();
 
             return false;
         }
         else if (view == m_ivBracket)
         {
-            fragmentActivityInterface.getDialHandler().setDialEventListner(bracket);
+            activityInterface.getDialHandler().setDialEventListner(bracket);
             bracket.onEnterKeyDown();
             //setDialMode(DialMode.bracketSetPicCount);
 
@@ -845,7 +891,7 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
     private void stopBulbCapture() {
         Log.d(TAG, "Stop BULB");
         bulbcapture = false;
-        fragmentActivityInterface.getCamera().cancelTakePicture();
+        activityInterface.getCamera().cancelTakePicture();
     }
 
     private void startBulbCapture()
@@ -853,7 +899,7 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
         m_tvHint.setVisibility(View.GONE);
         m_tvMsg.setVisibility(View.GONE);
         bulbcapture = true;
-        fragmentActivityInterface.getCamera().takePicture();
+        activityInterface.getCamera().takePicture();
     }
 
     @Override
@@ -1019,7 +1065,7 @@ public class CameraUiFragment extends Fragment implements SurfaceHolder.Callback
     public boolean onDeleteKeyUp()
     {
         // Exiting, make sure the app isn't restarted
-        fragmentActivityInterface.closeApp();
+        activityInterface.closeApp();
         return true;
     }
 

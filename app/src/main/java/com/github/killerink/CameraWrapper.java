@@ -4,7 +4,6 @@ import android.hardware.Camera;
 import android.util.Log;
 import android.util.Pair;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 
 import com.sony.scalar.hardware.CameraEx;
 
@@ -17,19 +16,73 @@ import java.util.List;
 
 public class CameraWrapper implements SurfaceHolder.Callback
 {
+
+    public interface CameraEvents{
+        void onCameraOpen(boolean isOpen);
+    }
+
+
     private final String TAG = CameraWrapper.class.getSimpleName();
     private CameraEx m_camera;
     private Camera.Parameters parameters;
     private CameraEx.ParametersModifier modifier;
+    private ActivityInterface activityInterface;
 
-    public CameraWrapper()
+    private CameraEvents cameraEventsListner;
+
+    public CameraWrapper(ActivityInterface activityInterface)
     {
-        Log.d(TAG,"Open Cam");
-        m_camera = CameraEx.open(0, null);
-        Log.d(TAG,"Cam open");
-        parameters = m_camera.getNormalCamera().getParameters();
-        modifier = m_camera.createParametersModifier(parameters);
+        this.activityInterface = activityInterface;
     }
+
+    public void setCameraEventsListner(CameraEvents eventsListner)
+    {
+        this.cameraEventsListner =eventsListner;
+    }
+
+    public void startCamera()
+    {
+        activityInterface.getBackHandler().post(cameraOpenRunner);
+    }
+
+    private Runnable cameraOpenRunner = new Runnable() {
+        @Override
+        public void run() {
+            CameraEx.OpenOptions options = new CameraEx.OpenOptions();
+            Log.d(TAG,"Open Cam");
+            options.setPreview(true);
+            m_camera = CameraEx.open(0, options);
+            Log.d(TAG,"Cam open");
+            parameters = m_camera.getNormalCamera().getParameters();
+            modifier = m_camera.createParametersModifier(parameters);
+            m_camera.setAutoFocusStartListener(new CameraEx.AutoFocusStartListener() {
+                @Override
+                public void onStart(CameraEx cameraEx) {
+                    Log.d(TAG,"AutoFocus onStart");
+                }
+            });
+            m_camera.setAutoFocusDoneListener(new CameraEx.AutoFocusDoneListener() {
+                @Override
+                public void onDone(int i, int[] ints, CameraEx cameraEx) {
+                    Log.d(TAG,"AutoFocus onDone");
+                }
+            });
+            m_camera.setPreviewStartListener(new CameraEx.PreviewStartListener() {
+                @Override
+                public void onStart(CameraEx cameraEx) {
+                    Log.d(TAG,"Preview onStart");
+                }
+            });
+            activityInterface.getMainHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    if (cameraEventsListner != null)
+                        cameraEventsListner.onCameraOpen(true);
+                }
+            });
+
+        }
+    };
 
     public void closeCamera()
     {

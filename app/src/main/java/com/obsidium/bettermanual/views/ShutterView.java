@@ -63,12 +63,18 @@ public class ShutterView extends BaseTextView {
     public void updateShutterSpeed(int n, int d)
     {
         final String text = CameraUtil.formatShutterSpeed(n, d);
-        setText(text);
-        if (m_notifyOnNextShutterSpeedChange)
-        {
-            cameraUiInterface.showMessageDelayed(text);
-            m_notifyOnNextShutterSpeedChange = false;
-        }
+        cameraUiInterface.getActivityInterface().getMainHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                setText(text);
+                if (m_notifyOnNextShutterSpeedChange)
+                {
+                    cameraUiInterface.showMessageDelayed(text);
+                    m_notifyOnNextShutterSpeedChange = false;
+                }
+            }
+        });
+
     }
 
 }

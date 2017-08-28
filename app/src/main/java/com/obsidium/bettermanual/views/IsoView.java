@@ -36,7 +36,13 @@ public class IsoView extends BaseTextView implements CameraEx.AutoISOSensitivity
         this.wrapper =wrapper;
         this.m_supportedIsos = wrapper.getSupportedISOSensitivities();
         m_curIso = wrapper.getISOSensitivity();
-        setText(String.format("\uE488 %d", m_curIso));
+        post(new Runnable() {
+            @Override
+            public void run() {
+                setText(String.format("\uE488 %d", m_curIso));
+            }
+        });
+
     }
 
     public int getCurrentIso()
@@ -62,10 +68,16 @@ public class IsoView extends BaseTextView implements CameraEx.AutoISOSensitivity
         return false;
     }
 
-    private void setIso(int iso) {
+    private void setIso(final int iso) {
         //log("setIso: " + String.valueOf(iso) + "\n");
         m_curIso = iso;
-        setText(String.format("\uE488 %s", (iso == 0 ? "AUTO" : String.valueOf(iso))));
+        post(new Runnable() {
+            @Override
+            public void run() {
+                setText(String.format("\uE488 %s", (iso == 0 ? "AUTO" : String.valueOf(iso))));
+            }
+        });
+
         wrapper.setISOSensitivity(iso);
     }
 
@@ -100,8 +112,14 @@ public class IsoView extends BaseTextView implements CameraEx.AutoISOSensitivity
     }
 
     @Override
-    public void onChanged(int i, CameraEx cameraEx) {
-        setText("\uE488 " + String.valueOf(i) + (m_curIso == 0 ? "(A)" : ""));
+    public void onChanged(final int i, CameraEx cameraEx) {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                setText("\uE488 " + String.valueOf(i) + (m_curIso == 0 ? "(A)" : ""));
+            }
+        });
+
     }
 
     @Override

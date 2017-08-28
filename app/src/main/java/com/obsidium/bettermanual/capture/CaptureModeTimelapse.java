@@ -1,11 +1,15 @@
 package com.obsidium.bettermanual.capture;
 
+import android.util.Log;
+
 import com.github.killerink.KeyEvents;
 import com.obsidium.bettermanual.CameraUiInterface;
 import com.sony.scalar.sysutil.didep.Settings;
 
 public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
 {
+
+    private final String TAG = CaptureModeTimelapse.class.getSimpleName();
 
     private int             m_timelapseInterval;    // ms
     private int             m_timelapsePicCount;
@@ -80,13 +84,19 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
         cameraUiInterface.getActivityInterface().getCamera().startDisplay();
 
             // Update controls
-        cameraUiInterface.hideHintMessage();
-        cameraUiInterface.setLeftViewVisibility(true);
-        cameraUiInterface.getExposureMode().updateImage();
-        cameraUiInterface.getDriveMode().updateImage();
+        cameraUiInterface.getActivityInterface().getMainHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                cameraUiInterface.hideHintMessage();
+                cameraUiInterface.setLeftViewVisibility(true);
+                cameraUiInterface.getExposureMode().updateImage();
+                cameraUiInterface.getDriveMode().updateImage();
 
-        cameraUiInterface.setActiveViewFlag(cameraUiInterface.getActivityInterface().getPreferences().getViewFlags(cameraUiInterface.getActiveViewsFlag()));
-        cameraUiInterface.updateViewVisibility();
+                cameraUiInterface.setActiveViewFlag(cameraUiInterface.getActivityInterface().getPreferences().getViewFlags(cameraUiInterface.getActiveViewsFlag()));
+                cameraUiInterface.updateViewVisibility();
+            }
+        });
+
 
             try
             {
@@ -261,6 +271,7 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
 
     @Override
     public boolean onEnterKeyDown() {
+        Log.d(TAG,"onEnterKeyDown" + currentdial);
         if (currentdial == TLS_SET_NONE) {
             prepare();
             updateTimelapseInterval();
@@ -272,7 +283,9 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
         }
         else if (currentdial == TLS_SET_PICCOUNT)
         {
-            cameraUiInterface.getActivityInterface().getDialHandler().setDefaultListner();
+            Log.d(TAG, "onEnterKeyDown setDefaultDialListner");
+            cameraUiInterface.getActivityInterface().getDialHandler().setDialEventListner((KeyEvents)cameraUiInterface);
+            Log.d(TAG, "onEnterKeyDown startCountDown");
             startCountDown();
             currentdial = TLS_SET_NONE;
         }

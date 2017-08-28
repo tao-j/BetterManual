@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -19,7 +20,7 @@ import com.obsidium.bettermanual.R;
  * Created by troop on 27.08.2017.
  */
 
-public class MainActivity extends BaseActivity implements FragmentActivityInterface {
+public class MainActivity extends BaseActivity implements ActivityInterface, CameraWrapper.CameraEvents {
 
     private final String TAG = MainActivity.class.getSimpleName();
     private Preferences preferences;
@@ -31,7 +32,7 @@ public class MainActivity extends BaseActivity implements FragmentActivityInterf
     public final static int FRAGMENT_CAMERA_UI = 0;
     public final static int FRAGMENT_MIN_SHUTTER = 1;
 
-    private final Handler   m_handler = new Handler();
+    private Handler   m_handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +40,7 @@ public class MainActivity extends BaseActivity implements FragmentActivityInterf
         super.onCreate(savedInstanceState);
         if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler))
             Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());
+        m_handler = new Handler(Looper.getMainLooper());
         setContentView(R.layout.fragment_activity);
 
         preferences = new Preferences(getApplicationContext());
@@ -49,8 +51,10 @@ public class MainActivity extends BaseActivity implements FragmentActivityInterf
         Log.d(TAG,"onResume");
         super.onResume();
         startBackgroundThread();
-        wrapper = new CameraWrapper();
-        loadFragment(FRAGMENT_CAMERA_UI);
+        wrapper = new CameraWrapper(this);
+        wrapper.setCameraEventsListner(this);
+        wrapper.startCamera();
+
 
     }
 
@@ -159,4 +163,14 @@ public class MainActivity extends BaseActivity implements FragmentActivityInterf
         transaction.commit();
     }
 
+    @Override
+    public void onCameraOpen(boolean isOpen) {
+        Log.d(TAG, "onCameraOpen");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                loadFragment(FRAGMENT_CAMERA_UI);
+            }
+        });
+    }
 }

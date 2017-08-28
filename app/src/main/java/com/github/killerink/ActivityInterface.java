@@ -9,7 +9,7 @@ import com.sony.scalar.hardware.avio.DisplayManager;
  * Created by troop on 27.08.2017.
  */
 
-public interface FragmentActivityInterface {
+public interface ActivityInterface {
     boolean hasTouchScreen();
     Preferences getPreferences();
     KeyEventHandler getDialHandler();

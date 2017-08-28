@@ -54,6 +54,13 @@ public class BaseActivity extends FragmentActivity implements KeyEvents {
             public void onDeviceStatusChanged(int event) {
                 if (event == DisplayManager.EVENT_SWITCH_DEVICE)
                     onDisplayChanged(displayManager.getActiveDevice());
+                if (event == DisplayManager.EVENT_DETACH_DEVICE)
+                    Log.d("BaseActivity", "Detach Device");
+                if (event == DisplayManager.EVENT_ATTACH_DEVICE)
+                    Log.d("BaseActivity", "Attach Device");
+                if (event == DisplayManager.EVENT_CHANGE_VIEW_PATTERN)
+                    Log.d("BaseActivity", "change view pattern");
+
             }
         });
     }

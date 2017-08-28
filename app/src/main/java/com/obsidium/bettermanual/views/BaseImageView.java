@@ -5,12 +5,12 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
-import com.github.killerink.FragmentActivityInterface;
+import com.github.killerink.ActivityInterface;
 
 public abstract class BaseImageView extends ImageView implements DialValueSet
 {
 
-    protected FragmentActivityInterface activity;
+    protected ActivityInterface activity;
 
     public BaseImageView(Context context) {
         super(context);
@@ -24,7 +24,7 @@ public abstract class BaseImageView extends ImageView implements DialValueSet
         super(context, attrs, defStyle);
     }
 
-    public void setActivity(FragmentActivityInterface activity)
+    public void setActivity(ActivityInterface activity)
     {
         this.activity = activity;
     }

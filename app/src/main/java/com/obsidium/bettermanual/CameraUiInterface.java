@@ -1,6 +1,6 @@
 package com.obsidium.bettermanual;
 
-import com.github.killerink.FragmentActivityInterface;
+import com.github.killerink.ActivityInterface;
 import com.obsidium.bettermanual.views.ApertureView;
 import com.obsidium.bettermanual.views.DriveMode;
 import com.obsidium.bettermanual.views.ExposureModeView;
@@ -26,6 +26,6 @@ public interface CameraUiInterface
     ApertureView getAperture();
     IsoView getIso();
 
-    FragmentActivityInterface getActivityInterface();
+    ActivityInterface getActivityInterface();
 
 }

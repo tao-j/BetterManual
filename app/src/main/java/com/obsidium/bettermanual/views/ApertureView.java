@@ -77,11 +77,17 @@ public class ApertureView extends BaseTextView implements CameraEx.ApertureChang
                         apertureInfo.currentAperture, apertureInfo.currentAvailableMin, apertureInfo.currentAvailableMax));
                 */
         final String text = String.format("f%.1f", (float)apertureInfo.currentAperture / 100.0f);
-        setText(text);
-        if (m_notifyOnNextApertureChange)
-        {
-            m_notifyOnNextApertureChange = false;
-            cameraUiInterface.showMessageDelayed(text);
-        }
+        cameraUiInterface.getActivityInterface().getMainHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                setText(text);
+                if (m_notifyOnNextApertureChange)
+                {
+                    m_notifyOnNextApertureChange = false;
+                    cameraUiInterface.showMessageDelayed(text);
+                }
+            }
+        });
+
     }
 }

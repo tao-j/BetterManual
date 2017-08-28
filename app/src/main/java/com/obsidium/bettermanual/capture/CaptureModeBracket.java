@@ -289,7 +289,7 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
         }
         else
         {
-            cameraUiInterface.getActivityInterface().getDialHandler().setDefaultListner();
+            cameraUiInterface.getActivityInterface().getDialHandler().setDialEventListner((KeyEvents)cameraUiInterface);
             startCountDown();
             currentDialMode = BRACKET_NON;
         }

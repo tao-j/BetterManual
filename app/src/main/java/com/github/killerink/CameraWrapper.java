@@ -42,6 +42,8 @@ public class CameraWrapper extends CameraWrapperEventProxy implements SurfaceHol
     private final int DECREASE_APERTURE = 3;
     private final int INCREASE_APERTURE = 4;
     private final int SET_ISO = 5;
+    private final int SET_EV =6;
+    private final int SET_AUTO_SHUTTER_SPEED_LOW_LIMIT = 7;
 
     public CameraWrapper(ActivityInterface activityInterface, HandlerThread hthread)
     {
@@ -217,9 +219,7 @@ public class CameraWrapper extends CameraWrapperEventProxy implements SurfaceHol
     }
 
     public void setExposureCompensation(int value) {
-        Camera.Parameters parameters = getParameters();
-        parameters.setExposureCompensation(value);
-        setParameters(parameters);
+        sendMsg(SET_EV,value);
     }
 
     public int getMaxExposureCompensation() {
@@ -297,8 +297,7 @@ public class CameraWrapper extends CameraWrapperEventProxy implements SurfaceHol
 
     public void setAutoShutterSpeedLowLimit(int value)
     {
-        modifier.setAutoShutterSpeedLowLimit(value);
-        setParameters(parameters);
+        sendMsg(SET_AUTO_SHUTTER_SPEED_LOW_LIMIT,value);
     }
 
     public int getAutoShutterSpeedLowLimit()
@@ -425,6 +424,14 @@ public class CameraWrapper extends CameraWrapperEventProxy implements SurfaceHol
                     break;
                 case SET_ISO:
                     modifier.setISOSensitivity(msg.arg1);
+                    setParameters(parameters);
+                    break;
+                case SET_EV:
+                    parameters.setExposureCompensation(msg.arg1);
+                    setParameters(parameters);
+                    break;
+                case SET_AUTO_SHUTTER_SPEED_LOW_LIMIT:
+                    modifier.setAutoShutterSpeedLowLimit(msg.arg1);
                     setParameters(parameters);
                     break;
                 default:

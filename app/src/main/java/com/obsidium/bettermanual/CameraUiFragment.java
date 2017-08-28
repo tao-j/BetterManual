@@ -237,7 +237,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         saveDefaults();
         if (activityInterface.getCamera().getAutoPictureReviewControls() != null)
             activityInterface.getCamera().getAutoPictureReviewControls().setPictureReviewTime(m_pictureReviewTime);
-        activityInterface.getCamera().getCameraEx().setAutoPictureReviewControl(null);
+        //activityInterface.getCamera().setAutoPictureReviewControl(null);
         super.onPause();
     }
 

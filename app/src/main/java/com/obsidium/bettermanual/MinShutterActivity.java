@@ -65,7 +65,7 @@ public class MinShutterActivity extends Fragment implements SeekBar.OnSeekBarCha
     {
         super.onResume();
 
-        activityInterface.getCamera().getCameraEx().setShutterSpeedChangeListener(new CameraEx.ShutterSpeedChangeListener()
+        activityInterface.getCamera().setShutterSpeedChangeListener(new CameraEx.ShutterSpeedChangeListener()
         {
             @Override
             public void onShutterSpeedChange(final CameraEx.ShutterSpeedInfo shutterSpeedInfo, CameraEx cameraEx)
@@ -73,13 +73,9 @@ public class MinShutterActivity extends Fragment implements SeekBar.OnSeekBarCha
                 final int idx = CameraUtil.getShutterValueIndex(shutterSpeedInfo.currentAvailableMin_n, shutterSpeedInfo.currentAvailableMin_d);
                 if (idx >= 0)
                 {
-                    activityInterface.getMainHandler().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            m_sbShutter.setProgress(idx);
-                            m_tvInfo.setText(CameraUtil.formatShutterSpeed(shutterSpeedInfo.currentAvailableMin_n, shutterSpeedInfo.currentAvailableMin_d));
-                        }
-                    });
+                    m_sbShutter.setProgress(idx);
+                    m_tvInfo.setText(CameraUtil.formatShutterSpeed(shutterSpeedInfo.currentAvailableMin_n, shutterSpeedInfo.currentAvailableMin_d));
+
                 }
             }
         });

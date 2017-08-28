@@ -16,22 +16,6 @@ public class EvView extends BaseTextView {
         onScrolled(value);
     }
 
-    private class EvSetRunner implements Runnable
-    {
-        private int direction;
-        public EvSetRunner(int direction)
-        {
-            this.direction = direction;
-        }
-        @Override
-        public void run() {
-            if (direction > 0)
-                decrementExposureCompensation(true);
-            else
-                incrementExposureCompensation(true);
-        }
-    }
-
     private int             m_maxExposureCompensation;
     private int             m_minExposureCompensation;
     private int             m_curExposureCompensation;
@@ -52,7 +36,10 @@ public class EvView extends BaseTextView {
 
     @Override
     public void onScrolled(int distance) {
-        cameraUiInterface.getActivityInterface().getBackHandler().post(new EvSetRunner(distance));
+        if (distance > 0)
+            decrementExposureCompensation(true);
+        else
+            incrementExposureCompensation(true);
     }
 
     @Override
@@ -101,21 +88,15 @@ public class EvView extends BaseTextView {
 
     private void updateExposureCompensation(final boolean notify)
     {
-        cameraUiInterface.getActivityInterface().getMainHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                final String text;
-                if (m_curExposureCompensation == 0)
-                    text = "\uEB18\u00B10.0";
-                else if (m_curExposureCompensation > 0)
-                    text = String.format("\uEB18+%.1f", m_curExposureCompensation * m_exposureCompensationStep);
-                else
-                    text = String.format("\uEB18%.1f", m_curExposureCompensation * m_exposureCompensationStep);
-                setText(text);
-                if (notify)
-                    cameraUiInterface.showMessageDelayed(text);
-            }
-        });
-
+        final String text;
+        if (m_curExposureCompensation == 0)
+            text = "\uEB18\u00B10.0";
+        else if (m_curExposureCompensation > 0)
+            text = String.format("\uEB18+%.1f", m_curExposureCompensation * m_exposureCompensationStep);
+        else
+            text = String.format("\uEB18%.1f", m_curExposureCompensation * m_exposureCompensationStep);
+        setText(text);
+        if (notify)
+            cameraUiInterface.showMessageDelayed(text);
     }
 }

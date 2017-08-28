@@ -1,6 +1,7 @@
 package com.github.killerink;
 
 import android.hardware.Camera;
+import android.util.Log;
 import android.util.Pair;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -16,15 +17,36 @@ import java.util.List;
 
 public class CameraWrapper
 {
+    private final String TAG = CameraWrapper.class.getSimpleName();
     private CameraEx m_camera;
     private Camera.Parameters parameters;
     private CameraEx.ParametersModifier modifier;
 
     public CameraWrapper()
     {
-        m_camera = CameraEx.open(0, null);
+        CameraEx.OpenOptions options = new CameraEx.OpenOptions();
+        options.setPreview(true);
+        m_camera = CameraEx.open(0, options);
         parameters = m_camera.getNormalCamera().getParameters();
         modifier = m_camera.createParametersModifier(parameters);
+        m_camera.setAutoFocusStartListener(new CameraEx.AutoFocusStartListener() {
+            @Override
+            public void onStart(CameraEx cameraEx) {
+                Log.d(TAG,"AutoFocus onStart");
+            }
+        });
+        m_camera.setAutoFocusDoneListener(new CameraEx.AutoFocusDoneListener() {
+            @Override
+            public void onDone(int i, int[] ints, CameraEx cameraEx) {
+                Log.d(TAG,"AutoFocus onDone");
+            }
+        });
+        m_camera.setPreviewStartListener(new CameraEx.PreviewStartListener() {
+            @Override
+            public void onStart(CameraEx cameraEx) {
+                Log.d(TAG,"Preview onStart");
+            }
+        });
     }
 
     public void closeCamera()

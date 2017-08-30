@@ -255,7 +255,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
             {
                 m_curPreviewMagnificationPos = new Pair<Integer, Integer>(Math.max(Math.min(m_curPreviewMagnificationMaxPos, m_curPreviewMagnificationPos.first + (int)distanceX), -m_curPreviewMagnificationMaxPos),
                         Math.max(Math.min(m_curPreviewMagnificationMaxPos, m_curPreviewMagnificationPos.second + (int)distanceY), -m_curPreviewMagnificationMaxPos));
-                activityInterface.getCamera().getCameraEx().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+                activityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
                 return true;
             }
             return false;
@@ -545,7 +545,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         Pair<Integer, Integer> sp = activityInterface.getCamera().getShutterSpeed();
         m_tvShutter.updateShutterSpeed(sp.first, sp.second);
 
-        m_supportedPreviewMagnifications = (List<Integer>) activityInterface.getCamera().getParametersModifier().getSupportedPreviewMagnification();
+        m_supportedPreviewMagnifications = (List<Integer>) activityInterface.getCamera().getSupportedPreviewMagnification();
         activityInterface.getCamera().setPreviewMagnificationListener(new CameraEx.PreviewMagnificationListener()
         {
             @Override

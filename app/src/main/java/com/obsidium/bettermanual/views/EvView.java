@@ -3,7 +3,7 @@ package com.obsidium.bettermanual.views;
 import android.content.Context;
 import android.util.AttributeSet;
 
-import com.github.killerink.CameraWrapper;
+import com.github.killerink.camera.CameraInstance;
 
 /**
  * Created by KillerInk on 22.08.2017.
@@ -20,7 +20,7 @@ public class EvView extends BaseTextView {
     private int             m_minExposureCompensation;
     private int             m_curExposureCompensation;
     private float           m_exposureCompensationStep;
-    private CameraWrapper wrapper;
+    private CameraInstance wrapper;
 
     public EvView(Context context) {
         super(context);
@@ -49,7 +49,7 @@ public class EvView extends BaseTextView {
         return true;
     }
 
-    public void init(CameraWrapper wrapper)
+    public void init(CameraInstance wrapper)
     {
         this.wrapper = wrapper;
         m_maxExposureCompensation = wrapper.getMaxExposureCompensation();

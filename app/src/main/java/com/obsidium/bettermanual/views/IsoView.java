@@ -3,7 +3,7 @@ package com.obsidium.bettermanual.views;
 import android.content.Context;
 import android.util.AttributeSet;
 
-import com.github.killerink.CameraWrapper;
+import com.github.killerink.camera.CameraInstance;
 import com.sony.scalar.hardware.CameraEx;
 
 import java.util.List;
@@ -17,7 +17,7 @@ public class IsoView extends BaseTextView implements CameraEx.AutoISOSensitivity
     // ISO
     private int m_curIso;
     private List<Integer> m_supportedIsos;
-    private CameraWrapper wrapper;
+    private CameraInstance wrapper;
 
     public IsoView(Context context) {
         super(context);
@@ -31,7 +31,7 @@ public class IsoView extends BaseTextView implements CameraEx.AutoISOSensitivity
         super(context, attrs, defStyle);
     }
 
-    public void init(CameraWrapper wrapper)
+    public void init(CameraInstance wrapper)
     {
         this.wrapper =wrapper;
         this.m_supportedIsos = wrapper.getSupportedISOSensitivities();

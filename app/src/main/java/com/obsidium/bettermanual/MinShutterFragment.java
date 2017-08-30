@@ -3,7 +3,6 @@ package com.obsidium.bettermanual;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,16 +15,16 @@ import com.github.killerink.KeyEvents;
 import com.github.killerink.MainActivity;
 import com.sony.scalar.hardware.CameraEx;
 
-public class MinShutterActivity extends Fragment implements SeekBar.OnSeekBarChangeListener, KeyEvents
+public class MinShutterFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, KeyEvents
 {
     private SeekBar     m_sbShutter;
     private TextView    m_tvInfo;
 
     private ActivityInterface activityInterface;
 
-    public static MinShutterActivity getMinShutterActivity(ActivityInterface activityInterface)
+    public static MinShutterFragment getMinShutterActivity(ActivityInterface activityInterface)
     {
-        MinShutterActivity msa = new MinShutterActivity();
+        MinShutterFragment msa = new MinShutterFragment();
         msa.setActivityInterface(activityInterface);
         return msa;
     }

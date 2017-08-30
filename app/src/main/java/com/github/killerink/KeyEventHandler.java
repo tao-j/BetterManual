@@ -3,7 +3,6 @@ package com.github.killerink;
 import android.util.Log;
 import android.view.KeyEvent;
 
-import com.sony.scalar.provider.AvindexStore;
 import com.sony.scalar.sysutil.ScalarInput;
 
 /**

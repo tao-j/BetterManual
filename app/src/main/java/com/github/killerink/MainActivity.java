@@ -11,25 +11,26 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.github.killerink.camera.CameraInstance;
 import com.github.ma1co.pmcademo.app.BaseActivity;
 import com.obsidium.bettermanual.CameraUiFragment;
 import com.obsidium.bettermanual.CustomExceptionHandler;
-import com.obsidium.bettermanual.MinShutterActivity;
+import com.obsidium.bettermanual.MinShutterFragment;
 import com.obsidium.bettermanual.Preferences;
 import com.obsidium.bettermanual.R;
 
 /**
- * Created by troop on 27.08.2017.
+ * Created by KillerInk on 27.08.2017.
  */
 
-public class MainActivity extends BaseActivity implements ActivityInterface, CameraWrapper.CameraEvents {
+public class MainActivity extends BaseActivity implements ActivityInterface, CameraInstance.CameraEvents {
 
     private final String TAG = MainActivity.class.getSimpleName();
     private Preferences preferences;
     private HandlerThread mHandlerThread;
     private Handler mbgHandler;
 
-    private CameraWrapper wrapper;
+    private CameraInstance wrapper;
 
     public final static int FRAGMENT_CAMERA_UI = 0;
     public final static int FRAGMENT_MIN_SHUTTER = 1;
@@ -60,7 +61,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         Log.d(TAG,"onResume");
         super.onResume();
         startBackgroundThread();
-        wrapper = new CameraWrapper(mHandlerThread);
+        wrapper = new CameraInstance(mHandlerThread);
         m_surfaceHolder.addCallback(wrapper);
         wrapper.setCameraEventsListner(this);
         wrapper.startCamera();
@@ -120,7 +121,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     }
 
     @Override
-    public CameraWrapper getCamera() {
+    public CameraInstance getCamera() {
         return wrapper;
     }
 
@@ -161,9 +162,9 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
                 replaceCameraFragment(ui, CameraUiFragment.class.getSimpleName());
                 break;
             case FRAGMENT_MIN_SHUTTER:
-                MinShutterActivity msa = MinShutterActivity.getMinShutterActivity(this);
+                MinShutterFragment msa = MinShutterFragment.getMinShutterActivity(this);
                 getDialHandler().setDialEventListner(msa);
-                replaceCameraFragment(msa, MinShutterActivity.class.getSimpleName());
+                replaceCameraFragment(msa, MinShutterFragment.class.getSimpleName());
                 break;
 
         }

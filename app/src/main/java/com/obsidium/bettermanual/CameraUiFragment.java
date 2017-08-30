@@ -58,7 +58,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
     private TextView        m_tvMsg;
     private HistogramView m_vHist;
     private DriveMode driveMode;
-    protected ExposureModeView exposureMode;
+    private ExposureModeView exposureMode;
     private ImageView       m_ivTimelapse;
     private ImageView       m_ivBracket;
     private GridView m_vGrid;
@@ -123,7 +123,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         return cu;
     }
 
-    public void setActivityInterface(ActivityInterface activityInterface) {
+    private void setActivityInterface(ActivityInterface activityInterface) {
         this.activityInterface = activityInterface;
     }
 
@@ -672,7 +672,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         return true;
     }
 
-    public void setDialMode(int mode)
+    private void setDialMode(int mode)
     {
         View lastView = dialViews.get(lastDialView);
         if (lastView instanceof BaseTextView)

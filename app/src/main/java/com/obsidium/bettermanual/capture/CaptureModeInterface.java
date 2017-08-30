@@ -1,6 +1,6 @@
 package com.obsidium.bettermanual.capture;
 
-public interface CaptureModeInterface {
+interface CaptureModeInterface {
     void reset();
     void startCountDown();
     void prepare();

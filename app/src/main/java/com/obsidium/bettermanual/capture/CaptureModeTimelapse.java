@@ -162,7 +162,7 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
         updateTimelapseInterval();
     }
 
-    protected void updateTimelapseInterval()
+    private void updateTimelapseInterval()
     {
         if (m_timelapseInterval == 0)
             cameraUiInterface.showMessage("No delay");
@@ -174,7 +174,7 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
             cameraUiInterface.showMessage(String.format("%d seconds", m_timelapseInterval / 1000));
     }
 
-    public void updateTimelapsePictureCount()
+    private void updateTimelapsePictureCount()
     {
         if (m_timelapsePicCount == 0)
             cameraUiInterface.showMessage("No picture limit");
@@ -195,7 +195,7 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
         updateTimelapsePictureCount();
     }
 
-    protected final Runnable  m_timelapseRunnable = new Runnable()
+    private final Runnable  m_timelapseRunnable = new Runnable()
     {
         @Override
         public void run()

@@ -3,6 +3,7 @@ package com.obsidium.bettermanual;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,21 +65,27 @@ public class MinShutterActivity extends Fragment implements SeekBar.OnSeekBarCha
     public void onResume()
     {
         super.onResume();
-
+        CameraEx.ShutterSpeedInfo info = activityInterface.getCamera().getShutterSpeedInfo();
+        setShutterSpeedToUi(info,true);
         activityInterface.getCamera().setShutterSpeedChangeListener(new CameraEx.ShutterSpeedChangeListener()
         {
             @Override
             public void onShutterSpeedChange(final CameraEx.ShutterSpeedInfo shutterSpeedInfo, CameraEx cameraEx)
             {
-                final int idx = CameraUtil.getShutterValueIndex(shutterSpeedInfo.currentAvailableMin_n, shutterSpeedInfo.currentAvailableMin_d);
-                if (idx >= 0)
-                {
-                    m_sbShutter.setProgress(idx);
-                    m_tvInfo.setText(CameraUtil.formatShutterSpeed(shutterSpeedInfo.currentAvailableMin_n, shutterSpeedInfo.currentAvailableMin_d));
-
-                }
+                setShutterSpeedToUi(shutterSpeedInfo,false);
             }
         });
+    }
+
+    private void setShutterSpeedToUi(CameraEx.ShutterSpeedInfo shutterSpeedInfo, boolean updateSeekbarProgress) {
+        final int idx = CameraUtil.getShutterValueIndex(shutterSpeedInfo.currentAvailableMin_n, shutterSpeedInfo.currentAvailableMin_d);
+        if (idx >= 0)
+        {
+            if (updateSeekbarProgress)
+                m_sbShutter.setProgress(idx);
+            m_tvInfo.setText(CameraUtil.formatShutterSpeed(shutterSpeedInfo.currentAvailableMin_n, shutterSpeedInfo.currentAvailableMin_d));
+
+        }
     }
 
     @Override

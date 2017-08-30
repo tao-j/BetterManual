@@ -21,17 +21,14 @@ import java.util.List;
 public class CameraWrapper extends CameraWrapperEventProxy implements SurfaceHolder.Callback
 {
 
-    public interface CameraEvents{
-        void onCameraOpen(boolean isOpen);
-    }
+
 
     private final String TAG = CameraWrapper.class.getSimpleName();
     private CameraEx m_camera;
     private Camera.Parameters parameters;
     private CameraEx.ParametersModifier modifier;
-    private ActivityInterface activityInterface;
 
-    private CameraEvents cameraEventsListner;
+
     private boolean isSurfaceCreated = false;
     private SurfaceHolder surfaceHolder;
     private BackGroundHandler bgHandler;
@@ -45,22 +42,17 @@ public class CameraWrapper extends CameraWrapperEventProxy implements SurfaceHol
     private final int SET_EV =6;
     private final int SET_AUTO_SHUTTER_SPEED_LOW_LIMIT = 7;
 
-    public CameraWrapper(ActivityInterface activityInterface, HandlerThread hthread)
+    public CameraWrapper(HandlerThread hthread)
     {
         super();
-        this.activityInterface = activityInterface;
         bgHandler = new BackGroundHandler(hthread.getLooper());
 
     }
 
-    public void setCameraEventsListner(CameraEvents eventsListner)
-    {
-        this.cameraEventsListner =eventsListner;
-    }
 
     public void startCamera()
     {
-        activityInterface.getBackHandler().post(cameraOpenRunner);
+        bgHandler.post(cameraOpenRunner);
     }
 
     private Runnable cameraOpenRunner = new Runnable() {
@@ -73,18 +65,8 @@ public class CameraWrapper extends CameraWrapperEventProxy implements SurfaceHol
             Log.d(TAG,"Cam open");
             parameters = m_camera.getNormalCamera().getParameters();
             modifier = m_camera.createParametersModifier(parameters);
-            m_camera.setAutoFocusStartListener(new CameraEx.AutoFocusStartListener() {
-                @Override
-                public void onStart(CameraEx cameraEx) {
-                    Log.d(TAG,"AutoFocus onStart");
-                }
-            });
-            m_camera.setAutoFocusDoneListener(new CameraEx.AutoFocusDoneListener() {
-                @Override
-                public void onDone(int i, int[] ints, CameraEx cameraEx) {
-                    Log.d(TAG,"AutoFocus onDone");
-                }
-            });
+            m_camera.setAutoFocusStartListener(CameraWrapper.this);
+            m_camera.setAutoFocusDoneListener(CameraWrapper.this);
             m_camera.setPreviewStartListener(new CameraEx.PreviewStartListener() {
                 @Override
                 public void onStart(CameraEx cameraEx) {
@@ -102,13 +84,7 @@ public class CameraWrapper extends CameraWrapperEventProxy implements SurfaceHol
             m_camera.setFocusDriveListener(CameraWrapper.this);
             m_camera.setShutterSpeedChangeListener(CameraWrapper.this);
 
-            activityInterface.getMainHandler().post(new Runnable() {
-                @Override
-                public void run() {
-                    if (cameraEventsListner != null)
-                        cameraEventsListner.onCameraOpen(true);
-                }
-            });
+            fireOnCameraOpen(true);
 
             if (surfaceHolder != null && isSurfaceCreated)
             {
@@ -395,7 +371,7 @@ public class CameraWrapper extends CameraWrapperEventProxy implements SurfaceHol
     {
         Message msg = bgHandler.obtainMessage();
         msg.what = code;
-        msg.what = value;
+        msg.arg1 = value;
         bgHandler.sendMessage(msg);
     }
 

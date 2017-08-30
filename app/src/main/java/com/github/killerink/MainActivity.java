@@ -60,7 +60,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         Log.d(TAG,"onResume");
         super.onResume();
         startBackgroundThread();
-        wrapper = new CameraWrapper(this,mHandlerThread);
+        wrapper = new CameraWrapper(mHandlerThread);
         m_surfaceHolder.addCallback(wrapper);
         wrapper.setCameraEventsListner(this);
         wrapper.startCamera();

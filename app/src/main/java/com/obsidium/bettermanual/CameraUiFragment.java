@@ -494,9 +494,11 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
         // ISO
         activityInterface.getCamera().setAutoISOSensitivityListener(iso);
+        iso.init(activityInterface.getCamera());
 
         // Shutter
         activityInterface.getCamera().setShutterSpeedChangeListener(bracket);
+
         //returns when a capture is done, seems to replace the default android camera1 api CaptureCallback that get called with Camera.takePicture(shutter,raw, jpeg)
         //also it seems Camera.takePicture is nonfunctional/crash on a6000
         activityInterface.getCamera().setShutterListener(this);
@@ -537,8 +539,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
                 //log(String.format("onMeteringRange b %b\n", Boolean.valueOf(b)));
             }
         });
-
-        iso.init(activityInterface.getCamera());
 
         aperture.setText(String.format("f%.1f", (float) activityInterface.getCamera().getAperture() / 100.0f));
 
@@ -581,8 +581,8 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
             {
                 // Useless?
                 //*
-                log("onInfoUpdated b:" + String.valueOf(b) +
-                               " x:" + coords.first + " y:" + coords.second + "\n");
+                /*log("onInfoUpdated b:" + String.valueOf(b) +
+                               " x:" + coords.first + " y:" + coords.second + "\n");*/
                 //*
             }
         });

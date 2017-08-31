@@ -33,70 +33,6 @@
         android:layout_centerVertical="false"
         android:orientation="vertical">
 
-        <view
-            android:id="@+id/ivMode"
-            class="com.obsidium.bettermanual.views.ExposureModeView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/surfaceView"
-            android:layout_alignTop="@+id/surfaceView"
-            android:layout_marginTop="2dp"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:minWidth="40dp"
-            android:paddingBottom="6dp"
-            android:paddingLeft="2dp"
-            android:paddingRight="6dp"
-            android:paddingTop="6dp"
-            android:scaleType="center" />
-
-        <view
-            android:id="@+id/ivDriveMode"
-            class="com.obsidium.bettermanual.views.DriveMode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/ivMode"
-            android:layout_below="@+id/ivMode"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:minWidth="40dp"
-            android:paddingBottom="6dp"
-            android:paddingLeft="2dp"
-            android:paddingRight="6dp"
-            android:paddingTop="6dp"
-            android:scaleType="center" />
-
-        <ImageView
-            android:id="@+id/ivTimelapse"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/ivDriveMode"
-            android:layout_below="@+id/ivDriveMode"
-            android:layout_marginTop="12dp"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:minWidth="40dp"
-            android:paddingBottom="6dp"
-            android:paddingLeft="2dp"
-            android:paddingRight="6dp"
-            android:paddingTop="6dp"
-            android:scaleType="center" />
-
-        <ImageView
-            android:id="@+id/ivBracket"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/ivTimelapse"
-            android:layout_below="@+id/ivTimelapse"
-            android:layout_marginTop="2dp"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:minWidth="40dp"
-            android:paddingBottom="6dp"
-            android:paddingLeft="2dp"
-            android:paddingRight="6dp"
-            android:paddingTop="6dp"
-            android:scaleType="center" />
     </LinearLayout>
 
 
@@ -125,15 +61,15 @@
         android:layout_marginLeft="4dp" />
 
     <TextView
+        android:id="@+id/tvMsg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        tools:text="Msg"
-        android:id="@+id/tvMsg"
-        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:textSize="38dp"
-        android:textColor="@android:color/white"/>
+        android:layout_centerVertical="true"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/Msg_textsize"
+        tools:text="Msg" />
 
     <com.obsidium.bettermanual.views.HistogramView
         android:id="@+id/vHist"
@@ -183,79 +119,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:addStatesFromChildren="false"
         android:clickable="false"
         android:orientation="horizontal">
 
-        <com.obsidium.bettermanual.views.ShutterView
-            android:id="@+id/tvShutter"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:gravity="bottom|center"
-            android:paddingTop="12dp"
-            android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white"
-            android:textSize="22dp"
-            tools:background="#f86d6d"
-            tools:text="Shutter" />
-
-        <com.obsidium.bettermanual.views.ApertureView
-            android:id="@+id/tvAperture"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="bottom"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:gravity="bottom|center"
-            android:paddingTop="12dp"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white"
-            android:textSize="22dp"
-            tools:background="#87f083"
-            tools:text="Aperture" />
-
-        <com.obsidium.bettermanual.views.IsoView
-            android:id="@+id/tvISO"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:gravity="bottom|center"
-            android:paddingTop="12dp"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white"
-            android:textSize="22dp"
-            tools:background="#90a0fa"
-            tools:text="ISO" />
-
-        <com.obsidium.bettermanual.views.EvView
-            android:id="@+id/tvExposureCompensation"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:gravity="bottom|center"
-            android:paddingTop="12dp"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white"
-            android:textSize="22dp"
-            tools:background="#502080"
-            tools:text="EV" />
-
-        <TextView
-            android:id="@+id/tvExposure"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:gravity="bottom|center"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white"
-            android:textSize="22dp"
-            tools:background="#502080"
-            tools:text="EV" />
     </LinearLayout>
 
     <TextView

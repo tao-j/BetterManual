@@ -72,4 +72,7 @@ interface CameraParameterInterface
     void decrementAperture();
     void incrementAperture();
     int getAperture();
+    String getImageStabilisationMode();
+    void setImageStabilisation(String mode);
+    List<String> getSupportedImageStabModes();
 }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="textSize">18dp</dimen>
+    <dimen name="bottomHolderChildMarginRight">5dp</dimen>
+    <dimen name="Msg_textsize">38dp</dimen>
+</resources>

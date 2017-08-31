@@ -3,6 +3,7 @@ package com.github.killerink.camera;
 import android.hardware.Camera;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.util.Pair;
 
 import com.sony.scalar.hardware.CameraEx;
@@ -13,7 +14,7 @@ import java.util.List;
  * Created by KillerInk on 30.08.2017.
  */
 
-public abstract class BaseCamera implements CameraEventListnerInterface, CameraParameterInterface {
+public class BaseCamera implements CameraEventListnerInterface, CameraParameterInterface {
 
 
 
@@ -385,6 +386,24 @@ public abstract class BaseCamera implements CameraEventListnerInterface, CameraP
 
     public int getAperture() {
         return modifier.getAperture();
+    }
+
+    @Override
+    public String getImageStabilisationMode() {
+        return modifier.getAntiHandBlurMode();
+    }
+
+    @Override
+    public void setImageStabilisation(String enable) {
+        modifier.setAntiHandBlurMode(enable);
+
+        setParameters(parameters);
+    }
+
+    @Override
+    public List<String> getSupportedImageStabModes() {
+
+        return modifier.getSupportedAntiHandBlurModes();
     }
 
     public Pair getShutterSpeed()

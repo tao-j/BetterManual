@@ -29,6 +29,7 @@ import com.obsidium.bettermanual.views.ExposureModeView;
 import com.obsidium.bettermanual.views.FocusScaleView;
 import com.obsidium.bettermanual.views.GridView;
 import com.obsidium.bettermanual.views.HistogramView;
+import com.obsidium.bettermanual.views.ImageStabView;
 import com.obsidium.bettermanual.views.IsoView;
 import com.obsidium.bettermanual.views.PreviewNavView;
 import com.obsidium.bettermanual.views.ShutterView;
@@ -68,6 +69,8 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
     private LinearLayout bottomHolder;
     private LinearLayout leftHolder;
+
+    private ImageStabView imageStabView;
 
     private List<View> dialViews;
     private int lastDialView;
@@ -139,55 +142,82 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         Log.d(TAG,"onViewCreated");
         super.onViewCreated(view, savedInstanceState);
         dialViews = new ArrayList<View>();
+        bottomHolder = (LinearLayout)view.findViewById(R.id.bottom_holder);
+        leftHolder = (LinearLayout) view.findViewById(R.id.left_holder);
 
-        exposureMode = (ExposureModeView) view.findViewById(R.id.ivMode);
+
+        exposureMode = new ExposureModeView(getContext());
         exposureMode.setOnClickListener(this);
         exposureMode.setActivity(activityInterface);
         dialViews.add(exposureMode);
+        leftHolder.addView(exposureMode);
 
-        driveMode = (DriveMode) view.findViewById(R.id.ivDriveMode);
+        driveMode = new DriveMode(getContext());
         driveMode.setOnClickListener(this);
         driveMode.setActivity(activityInterface);
         dialViews.add(driveMode);
+        leftHolder.addView(driveMode);
 
-        m_ivTimelapse = (ImageView)view.findViewById(R.id.ivTimelapse);
+        m_ivTimelapse = new ImageView(getContext());
         //noinspection ResourceType
         m_ivTimelapse.setImageResource(SonyDrawables.p_16_dd_parts_43_shoot_icon_setting_drivemode_invalid);
         m_ivTimelapse.setOnClickListener(this);
         dialViews.add(m_ivTimelapse);
+        leftHolder.addView(m_ivTimelapse);
 
-        m_ivBracket = (ImageView)view.findViewById(R.id.ivBracket);
+        m_ivBracket = new ImageView(getContext());
         //noinspection ResourceType
         m_ivBracket.setImageResource(SonyDrawables.p_16_dd_parts_contshot);
         m_ivBracket.setOnClickListener(this);
         dialViews.add(m_ivBracket);
+        leftHolder.addView(m_ivBracket);
 
-        m_tvShutter = (ShutterView)view.findViewById(R.id.tvShutter);
+        imageStabView = new ImageStabView(getContext());
+        imageStabView.setActivity(activityInterface);
+        dialViews.add(imageStabView);
+        leftHolder.addView(imageStabView);
+
+        final int margineright = (int)getResources().getDimension(R.dimen.bottomHolderChildMarginRight);
+        m_tvShutter = new ShutterView(getContext());
+        m_tvShutter.setTextSize((int)getResources().getDimension(R.dimen.textSize));
+        LinearLayout.LayoutParams params= new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(0, 0, margineright, 0);
+        m_tvShutter.setLayoutParams(params);
         m_tvShutter.setOnTouchListener(m_tvShutter.getSwipeTouchListner());
         m_tvShutter.setCameraUiInterface(this);
         dialViews.add(m_tvShutter);
+        bottomHolder.addView(m_tvShutter);
 
-        aperture = (ApertureView) view.findViewById(R.id.tvAperture);
+        aperture = new ApertureView(getContext());
+        aperture.setTextSize((int)getResources().getDimension(R.dimen.textSize));
         aperture.setOnTouchListener(aperture.getSwipeTouchListner());
         aperture.setCameraUiInterface(this);
+        aperture.setLayoutParams(params);
         dialViews.add(aperture);
+        bottomHolder.addView(aperture);
 
-        iso = (IsoView) view.findViewById(R.id.tvISO);
+        iso = new IsoView(getContext());
+        iso.setTextSize((int)getResources().getDimension(R.dimen.textSize));
         iso.setOnTouchListener(iso.getSwipeTouchListner());
         iso.setCameraUiInterface(this);
+        iso.setLayoutParams(params);
         dialViews.add(iso);
+        bottomHolder.addView(iso);
 
-        evCompensation = (EvView) view.findViewById(R.id.tvExposureCompensation);
+        evCompensation = new EvView(getContext());
+        evCompensation.setTextSize((int)getResources().getDimension(R.dimen.textSize));
         evCompensation.setOnTouchListener(evCompensation.getSwipeTouchListner());
         evCompensation.setCameraUiInterface(this);
+        evCompensation.setLayoutParams(params);
         dialViews.add(evCompensation);
+        bottomHolder.addView(evCompensation);
 
-        bottomHolder = (LinearLayout)view.findViewById(R.id.bottom_holder);
-        leftHolder = (LinearLayout) view.findViewById(R.id.left_holder);
-
-        m_tvExposure = (TextView)view.findViewById(R.id.tvExposure);
+        m_tvExposure = new TextView(getContext());
+        m_tvExposure.setTextSize((int)getResources().getDimension(R.dimen.textSize));
+        m_tvExposure.setLayoutParams(params);
         //noinspection ResourceType
         m_tvExposure.setCompoundDrawablesWithIntrinsicBounds(SonyDrawables.p_meteredmanualicon, 0, 0, 0);
+        bottomHolder.addView(m_tvExposure);
 
         m_tvLog = (TextView)view.findViewById(R.id.tvLog);
         m_tvLog.setVisibility(LOGGING_ENABLED ? View.VISIBLE : View.GONE);
@@ -606,27 +636,20 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         loadDefaults();
         driveMode.updateImage();
         exposureMode.updateImage();
+        imageStabView.updateImage();
         updateViewVisibility();
     }
 
     // OnClickListener
     public void onClick(View view)
     {
-        switch (view.getId())
-        {
-            case R.id.ivDriveMode:
-                driveMode.toggle();
-                break;
-            case R.id.ivMode:
-                exposureMode.toggle();
-                break;
-            case R.id.ivTimelapse:
+        if(view instanceof BaseImageView)
+            ((BaseImageView) view).toggle();
+        else
+            if (view.equals(timelapse))
                 timelapse.prepare();
-                break;
-            case R.id.ivBracket:
+            else if (view.equals(bracket))
                 bracket.prepare();
-                break;
-        }
     }
 
     @Override
@@ -789,6 +812,10 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         {
             driveMode.toggle();
             return false;
+        }
+        else if (view == imageStabView)
+        {
+            imageStabView.toggle();
         }
         else if (view == iso) {
             iso.onClick();

@@ -1,5 +1,6 @@
 package com.github.killerink.camera;
 
+import android.hardware.Camera;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -11,6 +12,8 @@ import android.view.SurfaceHolder;
 import com.sony.scalar.hardware.CameraEx;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.StringTokenizer;
 
 
 public class CameraInstance extends CameraInternalEventImpl implements SurfaceHolder.Callback {
@@ -40,6 +43,8 @@ public class CameraInstance extends CameraInternalEventImpl implements SurfaceHo
             Log.d(TAG, "Cam open");
             parameters = m_camera.getNormalCamera().getParameters();
             modifier = m_camera.createParametersModifier(parameters);
+            dumpParameter();
+
             m_camera.setAutoFocusStartListener(CameraInstance.this);
             m_camera.setAutoFocusDoneListener(CameraInstance.this);
             m_camera.setPreviewStartListener(new CameraEx.PreviewStartListener() {
@@ -69,6 +74,21 @@ public class CameraInstance extends CameraInternalEventImpl implements SurfaceHo
 
         }
     };
+
+    private void dumpParameter() {
+        StringTokenizer localStringTokenizer = new StringTokenizer(((Camera.Parameters)parameters).flatten(), ";");
+        while (localStringTokenizer.hasMoreElements())
+            Log.d(TAG, localStringTokenizer.nextToken());
+
+        List<String> tmp = getSupportedImageStabModes();
+        logList(tmp);
+    }
+
+    private void logList(List<String> list)
+    {
+        for (String s : list)
+            Log.d(TAG,s);
+    }
 
     public void closeCamera() {
         Log.d(TAG, "closeCamera");

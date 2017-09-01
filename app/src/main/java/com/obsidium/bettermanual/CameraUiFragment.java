@@ -428,22 +428,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         updateViewVisibility();
     }
 
-    private void dumpList(List list, String name)
-    {
-        log(name);
-        log(": ");
-        if (list != null)
-        {
-            for (Object o : list)
-            {
-                log(o.toString());
-                log(" ");
-            }
-        }
-        else
-            log("null");
-        log("\n");
-    }
 
     private void togglePreviewMagnificationViews(final boolean magnificationActive)
     {
@@ -474,12 +458,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         // TODO: Dial mode
     }
 
-    private void disableLENR()
-    {
-        // Disable long exposure noise reduction
-        if(activityInterface.getCamera().isLongExposureNoiseReductionSupported())
-            activityInterface.getCamera().setLongExposureNoiseReduction(false);
-    }
 
     private void loadDefaults()
     {
@@ -509,7 +487,8 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         // TODO: Dial mode?
         setDialMode(0);
 
-        disableLENR();
+        if (activityInterface.getCamera().isSupportedLongExposureNR())
+            activityInterface.getCamera().setLongExposureNR(false);
     }
 
 

@@ -82,4 +82,7 @@ interface CameraParameterInterface
     void setLiveSlowShutter(String liveSlowShutter);
     String getLiveSlowShutter();
     String[] getSupportedLiveSlowShutterModes();
+
+    boolean isSupportedLongExposureNR();
+    void setLongExposureNR(boolean enable);
 }

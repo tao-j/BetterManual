@@ -81,5 +81,5 @@ interface CameraParameterInterface
     boolean isLiveSlowShutterSupported();
     void setLiveSlowShutter(String liveSlowShutter);
     String getLiveSlowShutter();
-    List<String> getSupportedLiveSlowShutterModes();
+    String[] getSupportedLiveSlowShutterModes();
 }

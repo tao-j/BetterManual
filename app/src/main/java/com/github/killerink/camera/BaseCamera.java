@@ -442,8 +442,8 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     }
 
     @Override
-    public List<String> getSupportedLiveSlowShutterModes() {
-        return getSupportedLiveSlowShutterModes();
+    public String[] getSupportedLiveSlowShutterModes() {
+        return new String[] { modifier.SLOW_SHUTTER_LIVEVIEW_MODE_OFF,modifier.SLOW_SHUTTER_LIVEVIEW_MODE_ON};
     }
 
     public Pair getShutterSpeed()

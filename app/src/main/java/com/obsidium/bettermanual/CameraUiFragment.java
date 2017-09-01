@@ -146,6 +146,39 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         leftHolder = (LinearLayout) view.findViewById(R.id.left_holder);
 
 
+        m_tvLog = (TextView)view.findViewById(R.id.tvLog);
+        m_tvLog.setVisibility(LOGGING_ENABLED ? View.VISIBLE : View.GONE);
+
+        m_vHist = (HistogramView)view.findViewById(R.id.vHist);
+
+        m_tvMagnification = (TextView)view.findViewById(R.id.tvMagnification);
+
+        m_previewNavView = (PreviewNavView)view.findViewById(R.id.vPreviewNav);
+        m_previewNavView.setVisibility(View.GONE);
+
+        m_tvMsg = (TextView)view.findViewById(R.id.tvMsg);
+
+        m_vGrid = (GridView)view.findViewById(R.id.vGrid);
+
+        m_tvHint = (TextView)view.findViewById(R.id.tvHint);
+        m_tvHint.setVisibility(View.GONE);
+
+        m_focusScaleView = (FocusScaleView)view.findViewById(R.id.vFocusScale);
+        m_lFocusScale = view.findViewById(R.id.lFocusScale);
+        m_lFocusScale.setVisibility(View.GONE);
+
+        //noinspection ResourceType
+        ((ImageView)view.findViewById(R.id.ivFocusRight)).setImageResource(SonyDrawables.p_16_dd_parts_rec_focuscontrol_far);
+        //noinspection ResourceType
+        ((ImageView)view.findViewById(R.id.ivFocusLeft)).setImageResource(SonyDrawables.p_16_dd_parts_rec_focuscontrol_near);
+
+
+
+        timelapse = new CaptureModeTimelapse(this);
+        bracket = new CaptureModeBracket(this);
+    }
+
+    private void loadUiItems() {
         exposureMode = new ExposureModeView(getContext());
         exposureMode.setOnClickListener(this);
         exposureMode.setActivity(activityInterface);
@@ -172,10 +205,12 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         dialViews.add(m_ivBracket);
         leftHolder.addView(m_ivBracket);
 
-        imageStabView = new ImageStabView(getContext());
-        imageStabView.setActivity(activityInterface);
-        dialViews.add(imageStabView);
-        leftHolder.addView(imageStabView);
+        if (activityInterface.getCamera().isImageStabSupported()) {
+            imageStabView = new ImageStabView(getContext());
+            imageStabView.setActivity(activityInterface);
+            dialViews.add(imageStabView);
+            leftHolder.addView(imageStabView);
+        }
 
         final int margineright = (int)getResources().getDimension(R.dimen.bottomHolderChildMarginRight);
         m_tvShutter = new ShutterView(getContext());
@@ -218,37 +253,14 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         //noinspection ResourceType
         m_tvExposure.setCompoundDrawablesWithIntrinsicBounds(SonyDrawables.p_meteredmanualicon, 0, 0, 0);
         bottomHolder.addView(m_tvExposure);
-
-        m_tvLog = (TextView)view.findViewById(R.id.tvLog);
-        m_tvLog.setVisibility(LOGGING_ENABLED ? View.VISIBLE : View.GONE);
-
-        m_vHist = (HistogramView)view.findViewById(R.id.vHist);
-
-        m_tvMagnification = (TextView)view.findViewById(R.id.tvMagnification);
-
-        m_previewNavView = (PreviewNavView)view.findViewById(R.id.vPreviewNav);
-        m_previewNavView.setVisibility(View.GONE);
-
-        m_tvMsg = (TextView)view.findViewById(R.id.tvMsg);
-
-        m_vGrid = (GridView)view.findViewById(R.id.vGrid);
-
-        m_tvHint = (TextView)view.findViewById(R.id.tvHint);
-        m_tvHint.setVisibility(View.GONE);
-
-        m_focusScaleView = (FocusScaleView)view.findViewById(R.id.vFocusScale);
-        m_lFocusScale = view.findViewById(R.id.lFocusScale);
-        m_lFocusScale.setVisibility(View.GONE);
-
-        //noinspection ResourceType
-        ((ImageView)view.findViewById(R.id.ivFocusRight)).setImageResource(SonyDrawables.p_16_dd_parts_rec_focuscontrol_far);
-        //noinspection ResourceType
-        ((ImageView)view.findViewById(R.id.ivFocusLeft)).setImageResource(SonyDrawables.p_16_dd_parts_rec_focuscontrol_near);
-
         setDialMode(0);
+    }
 
-        timelapse = new CaptureModeTimelapse(this);
-        bracket = new CaptureModeBracket(this);
+    private void clearUiItems()
+    {
+        dialViews.clear();
+        leftHolder.removeAllViews();
+        bottomHolder.removeAllViews();
     }
 
     @Override
@@ -257,6 +269,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         Log.d(TAG,"onResume");
         super.onResume();
         activityInterface.getDialHandler().setDialEventListner(this);
+        loadUiItems();
         initUi();
     }
 
@@ -265,6 +278,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
     {
         Log.d(TAG,"onPause");
         saveDefaults();
+        clearUiItems();
         if (activityInterface.getCamera().getAutoPictureReviewControls() != null)
             activityInterface.getCamera().getAutoPictureReviewControls().setPictureReviewTime(m_pictureReviewTime);
         //activityInterface.getCamera().setAutoPictureReviewControl(null);

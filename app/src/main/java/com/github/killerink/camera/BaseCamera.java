@@ -389,6 +389,19 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     }
 
     @Override
+    public boolean isImageStabSupported() {
+        try {
+            modifier.getSupportedAntiHandBlurModes();
+
+            return true;
+        }
+        catch (NoSuchMethodError ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
     public String getImageStabilisationMode() {
         return modifier.getAntiHandBlurMode();
     }
@@ -404,6 +417,33 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     public List<String> getSupportedImageStabModes() {
 
         return modifier.getSupportedAntiHandBlurModes();
+    }
+
+    @Override
+    public boolean isLiveSlowShutterSupported() {
+        try {
+            return modifier.isSupportedSlowShutterLiveviewMode();
+        }
+        catch (NoSuchMethodError ex)
+        {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    public void setLiveSlowShutter(String liveSlowShutter)
+    {
+        modifier.setSlowShutterLiveviewMode(liveSlowShutter);
+    }
+
+    @Override
+    public String getLiveSlowShutter() {
+        return modifier.getSlowShutterLiveviewMode();
+    }
+
+    @Override
+    public List<String> getSupportedLiveSlowShutterModes() {
+        return getSupportedLiveSlowShutterModes();
     }
 
     public Pair getShutterSpeed()

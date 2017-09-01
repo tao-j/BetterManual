@@ -72,7 +72,14 @@ interface CameraParameterInterface
     void decrementAperture();
     void incrementAperture();
     int getAperture();
+
+    boolean isImageStabSupported();
     String getImageStabilisationMode();
     void setImageStabilisation(String mode);
     List<String> getSupportedImageStabModes();
+
+    boolean isLiveSlowShutterSupported();
+    void setLiveSlowShutter(String liveSlowShutter);
+    String getLiveSlowShutter();
+    List<String> getSupportedLiveSlowShutterModes();
 }

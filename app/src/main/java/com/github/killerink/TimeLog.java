@@ -1,8 +1,6 @@
 package com.github.killerink;
 
-import android.provider.Settings;
 import android.util.Log;
-
 
 public class TimeLog {
     private final String TAG = TimeLog.class.getSimpleName();

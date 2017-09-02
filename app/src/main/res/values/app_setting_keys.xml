@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ask_sceneMode" translatable="false">sceneMode</string>
+    <string name="ask_driveMode" translatable="false">driveMode</string>
+    <string name="ask_burstDriveSpeed" translatable="false">burstDriveSpeed</string>
+    <string name="ask_minShutterSpeed" translatable="false">minShutterSpeed</string>
+    <string name="ask_viewFlags" translatable="false">viewFlags</string>
+    <string name="ask_dialMode" translatable="false">dialMode</string>
+    <integer name="bla">1</integer>
+</resources>

@@ -2,9 +2,8 @@ package com.obsidium.bettermanual.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 
-import com.obsidium.bettermanual.SonyDrawables;
+import com.obsidium.bettermanual.R;
 
 /**
  * Created by KillerInk on 31.08.2017.
@@ -35,9 +34,9 @@ public class ImageStabView extends BaseImageView {
     public void updateImage() {
         final String stabilisationMode= activity.getCamera().getImageStabilisationMode();
         if (stabilisationMode.equals("onetime"))
-            setImageResource(SonyDrawables.p_16_dd_parts_fn_1_5_layer_sel_steadyshot_on);
+            setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_fn_1_5_layer_sel_steadyshot_on));
         else
-            setImageResource(SonyDrawables.p_16_dd_parts_fn_1_5_layer_sel_steadyshot_off);
+            setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_fn_1_5_layer_sel_steadyshot_off));
     }
 
     @Override

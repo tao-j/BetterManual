@@ -1,6 +1,7 @@
 package com.github.killerink;
 
 import android.os.Handler;
+import android.view.View;
 
 import com.github.killerink.camera.CameraInstance;
 import com.obsidium.bettermanual.Preferences;
@@ -21,4 +22,5 @@ public interface ActivityInterface {
     void closeApp();
     void setColorDepth(boolean highQuality);
     void loadFragment(int fragment);
+    void setSurfaceViewOnTouchListner(View.OnTouchListener onTouchListner);
 }

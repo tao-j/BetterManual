@@ -3,7 +3,7 @@ package com.obsidium.bettermanual.views;
 import android.content.Context;
 import android.util.AttributeSet;
 
-import com.obsidium.bettermanual.SonyDrawables;
+import com.obsidium.bettermanual.R;
 import com.sony.scalar.hardware.CameraEx;
 
 public class DriveMode extends BaseImageView
@@ -26,7 +26,7 @@ public class DriveMode extends BaseImageView
         if (driveMode.equals(CameraEx.ParametersModifier.DRIVE_MODE_SINGLE))
         {
             //noinspection ResourceType
-            setImageResource(SonyDrawables.p_drivemode_n_001);
+            setImageResource(getResources().getInteger(R.integer.p_drivemode_n_001));
         }
         else if (driveMode.equals(CameraEx.ParametersModifier.DRIVE_MODE_BURST))
         {
@@ -34,19 +34,19 @@ public class DriveMode extends BaseImageView
             if (burstDriveSpeed.equals(CameraEx.ParametersModifier.BURST_DRIVE_SPEED_LOW))
             {
                 //noinspection ResourceType
-                setImageResource(SonyDrawables.p_drivemode_n_003);
+                setImageResource(getResources().getInteger(R.integer.p_drivemode_n_003));
             }
             else if (burstDriveSpeed.equals(CameraEx.ParametersModifier.BURST_DRIVE_SPEED_HIGH))
             {
                 //noinspection ResourceType
-                setImageResource(SonyDrawables.p_drivemode_n_002);
+                setImageResource(getResources().getInteger(R.integer.p_drivemode_n_002));
             }
         }
         else //if (driveMode.equals("bracket"))
         {
             // Don't really care about this here
             //noinspection ResourceType
-            setImageResource(SonyDrawables.p_dialogwarning);
+            setImageResource(getResources().getInteger(R.integer.p_dialogwarning));
         }
     }
 

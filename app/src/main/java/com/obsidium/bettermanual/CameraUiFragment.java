@@ -47,6 +47,27 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         CameraEx.PreviewMagnificationListener,CameraEx.FocusDriveListener
 {
 
+    private class SurfaceSwipeTouchListener extends OnSwipeTouchListener
+    {
+        public SurfaceSwipeTouchListener(Context context)
+        {
+            super(context);
+        }
+
+        @Override
+        public boolean onScrolled(float distanceX, float distanceY)
+        {
+            if (m_curPreviewMagnification != 0)
+            {
+                m_curPreviewMagnificationPos = new Pair<Integer, Integer>(Math.max(Math.min(m_curPreviewMagnificationMaxPos, m_curPreviewMagnificationPos.first + (int)distanceX), -m_curPreviewMagnificationMaxPos),
+                        Math.max(Math.min(m_curPreviewMagnificationMaxPos, m_curPreviewMagnificationPos.second + (int)distanceY), -m_curPreviewMagnificationMaxPos));
+                activityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+                return true;
+            }
+            return false;
+        }
+    }
+
     private static final boolean LOGGING_ENABLED = false;
     private static final int MESSAGE_TIMEOUT = 1000;
     private final  String TAG  = CameraUiFragment.class.getSimpleName();
@@ -150,7 +171,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         bottomHolder = (LinearLayout)view.findViewById(R.id.bottom_holder);
         leftHolder = (LinearLayout) view.findViewById(R.id.left_holder);
 
-
         m_tvLog = (TextView)view.findViewById(R.id.tvLog);
         m_tvLog.setVisibility(LOGGING_ENABLED ? View.VISIBLE : View.GONE);
 
@@ -173,15 +193,40 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         m_lFocusScale.setVisibility(View.GONE);
 
         //noinspection ResourceType
-        ((ImageView)view.findViewById(R.id.ivFocusRight)).setImageResource(SonyDrawables.p_16_dd_parts_rec_focuscontrol_far);
+        ((ImageView)view.findViewById(R.id.ivFocusRight)).setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_rec_focuscontrol_far));
         //noinspection ResourceType
-        ((ImageView)view.findViewById(R.id.ivFocusLeft)).setImageResource(SonyDrawables.p_16_dd_parts_rec_focuscontrol_near);
-
-
+        ((ImageView)view.findViewById(R.id.ivFocusLeft)).setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_rec_focuscontrol_near));
 
         timelapse = new CaptureModeTimelapse(this);
         bracket = new CaptureModeBracket(this);
         timeLog.logTime();
+    }
+
+    @Override
+    public void onResume()
+    {
+        Log.d(TAG,"onResume");
+        final TimeLog timeLog = new TimeLog("onResume");
+        super.onResume();
+        activityInterface.getDialHandler().setDialEventListner(this);
+        loadUiItems();
+        initUi();
+        timeLog.logTime();
+    }
+
+    @Override
+    public void onPause()
+    {
+        Log.d(TAG,"onPause");
+        //save View visibility
+        activityInterface.getPreferences().setViewFlags(m_viewFlags);
+        activityInterface.getPreferences().setDialMode(lastDialView);
+
+        clearUiItems();
+        if (activityInterface.getCamera().getAutoPictureReviewControls() != null)
+            activityInterface.getCamera().getAutoPictureReviewControls().setPictureReviewTime(m_pictureReviewTime);
+        //activityInterface.getCamera().setAutoPictureReviewControl(null);
+        super.onPause();
     }
 
     private void loadUiItems() {
@@ -200,14 +245,14 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
         m_ivTimelapse = new ImageView(getContext());
         //noinspection ResourceType
-        m_ivTimelapse.setImageResource(SonyDrawables.p_16_dd_parts_43_shoot_icon_setting_drivemode_invalid);
+        m_ivTimelapse.setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_43_shoot_icon_setting_drivemode_invalid));
         m_ivTimelapse.setOnClickListener(this);
         dialViews.add(m_ivTimelapse);
         leftHolder.addView(m_ivTimelapse);
 
         m_ivBracket = new ImageView(getContext());
         //noinspection ResourceType
-        m_ivBracket.setImageResource(SonyDrawables.p_16_dd_parts_contshot);
+        m_ivBracket.setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_contshot));
         m_ivBracket.setOnClickListener(this);
         dialViews.add(m_ivBracket);
         leftHolder.addView(m_ivBracket);
@@ -258,9 +303,68 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         m_tvExposure.setTextSize((int)getResources().getDimension(R.dimen.textSize));
         m_tvExposure.setLayoutParams(params);
         //noinspection ResourceType
-        m_tvExposure.setCompoundDrawablesWithIntrinsicBounds(SonyDrawables.p_meteredmanualicon, 0, 0, 0);
+        m_tvExposure.setCompoundDrawablesWithIntrinsicBounds(getResources().getInteger(R.integer.p_meteredmanualicon), 0, 0, 0);
         bottomHolder.addView(m_tvExposure);
         setDialMode(0);
+        activityInterface.setSurfaceViewOnTouchListner(new SurfaceSwipeTouchListener(getContext()));
+        timeLog.logTime();
+    }
+
+    private void initUi() {
+
+        Log.d(TAG,"initUi");
+        final TimeLog timeLog = new TimeLog("initUi");
+        // Disable picture review
+        m_pictureReviewTime = activityInterface.getCamera().getAutoPictureReviewControls().getPictureReviewTime();
+        activityInterface.getCamera().getAutoPictureReviewControls().setPictureReviewTime(0);
+
+        m_vGrid.setVideoRect(activityInterface.getDisplayManager().getDisplayedVideoRect());
+
+        // Exposure compensation
+        evCompensation.init(activityInterface.getCamera());
+
+        // Preview/Histogram
+        activityInterface.getCamera().setPreviewAnalizeListener(this);
+
+
+        // ISO
+        activityInterface.getCamera().setAutoISOSensitivityListener(iso);
+        iso.init(activityInterface.getCamera());
+
+        // Shutter
+        activityInterface.getCamera().setShutterSpeedChangeListener(bracket);
+
+        //returns when a capture is done, seems to replace the default android camera1 api CaptureCallback that get called with Camera.takePicture(shutter,raw, jpeg)
+        //also it seems Camera.takePicture is nonfunctional/crash on a6000
+        activityInterface.getCamera().setShutterListener(this);
+
+        //m_camera.setJpegListener(); maybe is used to get jpeg/raw data returned
+
+        // Aperture
+        activityInterface.getCamera().setApertureChangeListener(aperture);
+
+        // Exposure metering
+        activityInterface.getCamera().setProgramLineRangeOverListener(this);
+
+        aperture.setText(String.format("f%.1f", (float) activityInterface.getCamera().getAperture() / 100.0f));
+
+        Pair<Integer, Integer> sp = activityInterface.getCamera().getShutterSpeed();
+        m_tvShutter.updateShutterSpeed(sp.first, sp.second);
+
+        m_supportedPreviewMagnifications = (List<Integer>) activityInterface.getCamera().getSupportedPreviewMagnification();
+        activityInterface.getCamera().setPreviewMagnificationListener(this);
+
+        activityInterface.getCamera().setFocusDriveListener(this);
+
+        m_viewFlags = activityInterface.getPreferences().getViewFlags(VIEW_FLAG_GRID | VIEW_FLAG_HISTOGRAM);
+        setDialMode(activityInterface.getPreferences().getDialMode(0));
+
+        driveMode.updateImage();
+        exposureMode.updateImage();
+        imageStabView.updateImage();
+        updateViewVisibility();
+
+        Log.d(TAG,"initUiEnd");
         timeLog.logTime();
     }
 
@@ -271,54 +375,13 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         bottomHolder.removeAllViews();
     }
 
-    @Override
-    public void onResume()
-    {
-        Log.d(TAG,"onResume");
-        final TimeLog timeLog = new TimeLog("onResume");
-        super.onResume();
-        activityInterface.getDialHandler().setDialEventListner(this);
-        loadUiItems();
-        initUi();
-        timeLog.logTime();
-    }
+
+
+    /* ##############################################################################
+       ###### CameraUiInterface impl ###
+       #################################  */
 
     @Override
-    public void onPause()
-    {
-        Log.d(TAG,"onPause");
-        saveDefaults();
-        clearUiItems();
-        if (activityInterface.getCamera().getAutoPictureReviewControls() != null)
-            activityInterface.getCamera().getAutoPictureReviewControls().setPictureReviewTime(m_pictureReviewTime);
-        //activityInterface.getCamera().setAutoPictureReviewControl(null);
-        super.onPause();
-    }
-
-
-
-
-    private class SurfaceSwipeTouchListener extends OnSwipeTouchListener
-    {
-        public SurfaceSwipeTouchListener(Context context)
-        {
-            super(context);
-        }
-
-        @Override
-        public boolean onScrolled(float distanceX, float distanceY)
-        {
-            if (m_curPreviewMagnification != 0)
-            {
-                m_curPreviewMagnificationPos = new Pair<Integer, Integer>(Math.max(Math.min(m_curPreviewMagnificationMaxPos, m_curPreviewMagnificationPos.first + (int)distanceX), -m_curPreviewMagnificationMaxPos),
-                        Math.max(Math.min(m_curPreviewMagnificationMaxPos, m_curPreviewMagnificationPos.second + (int)distanceY), -m_curPreviewMagnificationMaxPos));
-                activityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
-                return true;
-            }
-            return false;
-        }
-    }
-
     public void showMessageDelayed(String msg)
     {
         showMessage(msg);
@@ -326,6 +389,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         activityInterface.getMainHandler().postDelayed(m_hideMessageRunnable, MESSAGE_TIMEOUT);
     }
 
+    @Override
     public void showMessage(final String msg)
     {
         activityInterface.getMainHandler().post(new Runnable() {
@@ -338,6 +402,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
     }
 
+    @Override
     public void hideMessage()
     {
         activityInterface.getMainHandler().post(new Runnable() {
@@ -392,110 +457,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         return activityInterface;
     }
 
-
-
-    //################# CameraEx.ShutterListener #############
-    /**
-     * Returned from camera when a capture is done
-     * STATUS_CANCELED = 1;
-     * STATUS_ERROR = 2;
-     * STATUS_OK = 0;
-     * @param i code
-     * @param cameraEx did capture Image
-     */
     @Override
-    public void onShutter(int i, CameraEx cameraEx)
-    {
-        if (!bulbcapture) {
-
-            activityInterface.getCamera().cancelTakePicture();
-            if (timelapse.isActive())
-                timelapse.onShutter(i);
-            else if (bracket.isActive())
-                bracket.onShutter(i);
-        }
-    }
-    //################# CameraEx.ShutterListener END#############
-
-    //###################### CameraEx.PreviewAnalizeListener #################
-    @Override
-    public void onAnalizedData(CameraEx.AnalizedData analizedData, CameraEx cameraEx) {
-        if (analizedData != null && analizedData.hist != null && analizedData.hist.Y != null && m_vHist.getVisibility() == View.VISIBLE)
-            m_vHist.setHistogram(analizedData.hist.Y);
-    }
-    //############### CameraEx.PreviewAnalizeListener END###############
-
-
-    //###############CameraEx.ProgramLineRangeOverListener##############
-    @Override
-    public void onAERange(boolean b, boolean b1, boolean b2, CameraEx cameraEx) {
-
-    }
-
-    @Override
-    public void onEVRange(int ev, CameraEx cameraEx) {
-        final String text;
-        if (ev == 0)
-            text = "\u00B10.0";
-        else if (ev > 0)
-            text = String.format("+%.1f", (float)ev / 3.0f);
-        else
-            text = String.format("%.1f", (float)ev / 3.0f);
-        m_tvExposure.setText(text);
-    }
-
-    @Override
-    public void onMeteringRange(boolean b, CameraEx cameraEx) {
-
-    }
-
-    //############CameraEx.ProgramLineRangeOverListener END ###########
-
-    //##############CameraEx.PreviewMagnificationListener###############
-    @Override
-    public void onChanged(boolean enabled, int magFactor, int magLevel, Pair coords, CameraEx cameraEx) {
-        m_tvLog.setText("onChanged enabled:" + String.valueOf(enabled) + " magFactor:" + String.valueOf(magFactor) + " magLevel:" +
-                String.valueOf(magLevel) + " x:" + coords.first + " y:" + coords.second + "\n");
-        //*
-        if (enabled)
-        {
-            //log("m_curPreviewMagnificationMaxPos: " + String.valueOf(m_curPreviewMagnificationMaxPos) + "\n");
-            m_curPreviewMagnification = magLevel;
-            m_curPreviewMagnificationFactor = ((float)magFactor / 100.0f);
-            m_curPreviewMagnificationMaxPos = 1000 - (int)(1000.0f / m_curPreviewMagnificationFactor);
-            m_tvMagnification.setText(String.format("\uE012 %.2fx", (float)magFactor / 100.0f));
-            m_previewNavView.update(coords, m_curPreviewMagnificationFactor);
-        }
-        else
-        {
-            m_previewNavView.update(null, 0);
-            m_curPreviewMagnification = 0;
-            m_curPreviewMagnificationMaxPos = 0;
-            m_curPreviewMagnificationFactor = 0;
-        }
-        togglePreviewMagnificationViews(enabled);
-    }
-
-    @Override
-    public void onInfoUpdated(boolean b, Pair pair, CameraEx cameraEx) {
-
-    }
-    //###########CameraEx.PreviewMagnificationListener END###############
-
-    //##########CameraEx.FocusDriveListner################
-    @Override
-    public void onChanged(CameraEx.FocusPosition focusPosition, CameraEx cameraEx) {
-        if (m_curPreviewMagnification == 0)
-        {
-            m_lFocusScale.setVisibility(View.VISIBLE);
-            m_focusScaleView.setMaxPosition(focusPosition.maxPosition);
-            m_focusScaleView.setCurPosition(focusPosition.currentPosition);
-            activityInterface.getMainHandler().removeCallbacks(m_hideFocusScaleRunnable);
-            activityInterface.getMainHandler().postDelayed(m_hideFocusScaleRunnable, 2000);
-        }
-    }
-    //##########CameraEx.FocusDriveListner ENDs################
-
     public void updateViewVisibility()
     {
         activityInterface.getMainHandler().post(new Runnable() {
@@ -506,6 +468,33 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
             }
         });
 
+    }
+
+    @Override
+    public IsoView getIso() {
+        return iso;
+    }
+
+    @Override
+    public ShutterView getShutter() {
+        return m_tvShutter;
+    }
+
+    @Override
+    public DriveMode getDriveMode() {
+        return driveMode;
+    }
+
+    @Override
+    public ApertureView getAperture() {
+        return aperture;
+    }
+
+    @Override
+    public void setLeftViewVisibility(boolean visible)
+    {
+        final int visibility = visible ? View.VISIBLE : View.GONE;
+        leftHolder.setVisibility(visibility);
     }
 
     private void cycleVisibleViews()
@@ -530,171 +519,16 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
     }
 
-
-
-    private void saveDefaults()
-    {
-        // Scene mode
-        activityInterface.getPreferences().setSceneMode(activityInterface.getCamera().getSceneMode());
-        // Drive mode and burst speed
-        activityInterface.getPreferences().setDriveMode(activityInterface.getCamera().getDriveMode());
-        activityInterface.getPreferences().setBurstDriveSpeed(activityInterface.getCamera().getBurstDriveSpeed());
-        // View visibility
-        activityInterface.getPreferences().setViewFlags(m_viewFlags);
-
-        // TODO: Dial mode
-    }
-
-
-    private void loadDefaults()
-    {
-        activityInterface.getBackHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                final TimeLog timeLog = new TimeLog("loadDefaults");
-                //Log.d(TAG,"Parameters: " + params.flatten());
-                // Focus mode
-                activityInterface.getCamera().setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
-                // Scene mode
-                final String sceneMode = activityInterface.getPreferences().getSceneMode();
-                activityInterface.getCamera().setSceneMode(sceneMode);
-                // Drive mode and burst speed
-                activityInterface.getCamera().setDriveMode(activityInterface.getPreferences().getDriveMode());
-                activityInterface.getCamera().setBurstDriveSpeed(activityInterface.getPreferences().getBurstDriveSpeed());
-                // Minimum shutter speed
-                if(activityInterface.getCamera().isAutoShutterSpeedLowLimitSupported()) {
-                    if (sceneMode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
-                        activityInterface.getCamera().setAutoShutterSpeedLowLimit(-1);
-                    else
-                        activityInterface.getCamera().setAutoShutterSpeedLowLimit(activityInterface.getPreferences().getMinShutterSpeed());
-                }
-                // Disable self timer
-                activityInterface.getCamera().setSelfTimer(0);
-                // Force aspect ratio to 3:2
-                activityInterface.getCamera().setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
-                // View visibility
-
-                if (activityInterface.getCamera().isSupportedLongExposureNR())
-                    activityInterface.getCamera().setLongExposureNR(false);
-                timeLog.logTime();
-            }
-        });
-
-    }
-
-
-    private void initUi() {
-
-        Log.d(TAG,"initUi");
-        final TimeLog timeLog = new TimeLog("initUi");
-        // Disable picture review
-        m_pictureReviewTime = activityInterface.getCamera().getAutoPictureReviewControls().getPictureReviewTime();
-        activityInterface.getCamera().getAutoPictureReviewControls().setPictureReviewTime(0);
-
-        m_vGrid.setVideoRect(activityInterface.getDisplayManager().getDisplayedVideoRect());
-
-        // Exposure compensation
-        evCompensation.init(activityInterface.getCamera());
-
-        // Preview/Histogram
-        activityInterface.getCamera().setPreviewAnalizeListener(this);
-
-
-        // ISO
-        activityInterface.getCamera().setAutoISOSensitivityListener(iso);
-        iso.init(activityInterface.getCamera());
-
-        // Shutter
-        activityInterface.getCamera().setShutterSpeedChangeListener(bracket);
-
-        //returns when a capture is done, seems to replace the default android camera1 api CaptureCallback that get called with Camera.takePicture(shutter,raw, jpeg)
-        //also it seems Camera.takePicture is nonfunctional/crash on a6000
-        activityInterface.getCamera().setShutterListener(this);
-
-        //m_camera.setJpegListener(); maybe is used to get jpeg/raw data returned
-
-        // Aperture
-        activityInterface.getCamera().setApertureChangeListener(aperture);
-
-        // Exposure metering
-        activityInterface.getCamera().setProgramLineRangeOverListener(this);
-
-        aperture.setText(String.format("f%.1f", (float) activityInterface.getCamera().getAperture() / 100.0f));
-
-        Pair<Integer, Integer> sp = activityInterface.getCamera().getShutterSpeed();
-        m_tvShutter.updateShutterSpeed(sp.first, sp.second);
-
-        m_supportedPreviewMagnifications = (List<Integer>) activityInterface.getCamera().getSupportedPreviewMagnification();
-        activityInterface.getCamera().setPreviewMagnificationListener(this);
-
-        activityInterface.getCamera().setFocusDriveListener(this);
-        m_viewFlags = activityInterface.getPreferences().getViewFlags(VIEW_FLAG_GRID | VIEW_FLAG_HISTOGRAM);
-        // TODO: Dial mode?
-        setDialMode(0);
-
-        loadDefaults();
-        driveMode.updateImage();
-        exposureMode.updateImage();
-        imageStabView.updateImage();
-        updateViewVisibility();
-
-        Log.d(TAG,"initUiEnd");
-        timeLog.logTime();
-    }
-
     // OnClickListener
     public void onClick(View view)
     {
         if(view instanceof BaseImageView)
             ((BaseImageView) view).toggle();
         else
-            if (view.equals(timelapse))
-                timelapse.prepare();
-            else if (view.equals(bracket))
-                bracket.prepare();
-    }
-
-    @Override
-    public IsoView getIso() {
-        return iso;
-    }
-
-    @Override
-    public ShutterView getShutter() {
-        return m_tvShutter;
-    }
-
-    @Override
-    public DriveMode getDriveMode() {
-        return driveMode;
-    }
-
-    @Override
-    public ApertureView getAperture() {
-        return aperture;
-    }
-
-
-    public void setLeftViewVisibility(boolean visible)
-    {
-        final int visibility = visible ? View.VISIBLE : View.GONE;
-        leftHolder.setVisibility(visibility);
-    }
-
-    @Override
-    public boolean onUpperDialChanged(int value)
-    {
-        DialValueSet view = (DialValueSet) dialViews.get(lastDialView);
-        view.setIn_DecrementValue(value);
-        return true;
-    }
-
-    @Override
-    public boolean onLowerDialChanged(int value) {
-
-        setDialMode(value);
-
-        return true;
+        if (view.equals(timelapse))
+            timelapse.prepare();
+        else if (view.equals(bracket))
+            bracket.prepare();
     }
 
     private void setDialMode(int mode)
@@ -750,6 +584,42 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
             newX = -m_curPreviewMagnificationMaxPos;
         m_curPreviewMagnificationPos = new Pair<Integer, Integer>(newX, m_curPreviewMagnificationPos.second);
         activityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+    }
+
+
+    private void stopBulbCapture() {
+        Log.d(TAG, "Stop BULB");
+        bulbcapture = false;
+        activityInterface.getCamera().cancelTakePicture();
+    }
+
+    private void startBulbCapture()
+    {
+        m_tvHint.setVisibility(View.GONE);
+        m_tvMsg.setVisibility(View.GONE);
+        bulbcapture = true;
+        activityInterface.getCamera().takePicture();
+    }
+
+
+    /*  ##################################################################
+        ## Key events impl ##
+        ##################### */
+
+    @Override
+    public boolean onUpperDialChanged(int value)
+    {
+        DialValueSet view = (DialValueSet) dialViews.get(lastDialView);
+        view.setIn_DecrementValue(value);
+        return true;
+    }
+
+    @Override
+    public boolean onLowerDialChanged(int value) {
+
+        setDialMode(value);
+
+        return true;
     }
 
     @Override
@@ -873,20 +743,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         return false;
     }
 
-    private void stopBulbCapture() {
-        Log.d(TAG, "Stop BULB");
-        bulbcapture = false;
-        activityInterface.getCamera().cancelTakePicture();
-    }
-
-    private void startBulbCapture()
-    {
-        m_tvHint.setVisibility(View.GONE);
-        m_tvMsg.setVisibility(View.GONE);
-        bulbcapture = true;
-        activityInterface.getCamera().takePicture();
-    }
-
     @Override
     public boolean onUpKeyDown()
     {
@@ -954,8 +810,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         }
         return false;
     }
-
-
 
     @Override
     public boolean onShutterKeyUp()
@@ -1101,5 +955,112 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
         return super.onKeyDown(keyCode, event);
     }*/
+
+
+    /*  ##################################################################
+        ## CameraEx Events impl ##
+        ########################## */
+
+    //################# CameraEx.ShutterListener #############
+    /**
+     * Returned from camera when a capture is done
+     * STATUS_CANCELED = 1;
+     * STATUS_ERROR = 2;
+     * STATUS_OK = 0;
+     * @param i code
+     * @param cameraEx did capture Image
+     */
+    @Override
+    public void onShutter(int i, CameraEx cameraEx)
+    {
+        if (!bulbcapture) {
+
+            activityInterface.getCamera().cancelTakePicture();
+            if (timelapse.isActive())
+                timelapse.onShutter(i);
+            else if (bracket.isActive())
+                bracket.onShutter(i);
+        }
+    }
+    //################# CameraEx.ShutterListener END#############
+
+    //###################### CameraEx.PreviewAnalizeListener #################
+    @Override
+    public void onAnalizedData(CameraEx.AnalizedData analizedData, CameraEx cameraEx) {
+        if (analizedData != null && analizedData.hist != null && analizedData.hist.Y != null && m_vHist.getVisibility() == View.VISIBLE)
+            m_vHist.setHistogram(analizedData.hist.Y);
+    }
+    //############### CameraEx.PreviewAnalizeListener END###############
+
+
+    //###############CameraEx.ProgramLineRangeOverListener##############
+    @Override
+    public void onAERange(boolean b, boolean b1, boolean b2, CameraEx cameraEx) {
+
+    }
+
+    @Override
+    public void onEVRange(int ev, CameraEx cameraEx) {
+        final String text;
+        if (ev == 0)
+            text = "\u00B10.0";
+        else if (ev > 0)
+            text = String.format("+%.1f", (float)ev / 3.0f);
+        else
+            text = String.format("%.1f", (float)ev / 3.0f);
+        m_tvExposure.setText(text);
+    }
+
+    @Override
+    public void onMeteringRange(boolean b, CameraEx cameraEx) {
+
+    }
+
+    //############CameraEx.ProgramLineRangeOverListener END ###########
+
+    //##############CameraEx.PreviewMagnificationListener###############
+    @Override
+    public void onChanged(boolean enabled, int magFactor, int magLevel, Pair coords, CameraEx cameraEx) {
+        m_tvLog.setText("onChanged enabled:" + String.valueOf(enabled) + " magFactor:" + String.valueOf(magFactor) + " magLevel:" +
+                String.valueOf(magLevel) + " x:" + coords.first + " y:" + coords.second + "\n");
+        //*
+        if (enabled)
+        {
+            //log("m_curPreviewMagnificationMaxPos: " + String.valueOf(m_curPreviewMagnificationMaxPos) + "\n");
+            m_curPreviewMagnification = magLevel;
+            m_curPreviewMagnificationFactor = ((float)magFactor / 100.0f);
+            m_curPreviewMagnificationMaxPos = 1000 - (int)(1000.0f / m_curPreviewMagnificationFactor);
+            m_tvMagnification.setText(String.format("\uE012 %.2fx", (float)magFactor / 100.0f));
+            m_previewNavView.update(coords, m_curPreviewMagnificationFactor);
+        }
+        else
+        {
+            m_previewNavView.update(null, 0);
+            m_curPreviewMagnification = 0;
+            m_curPreviewMagnificationMaxPos = 0;
+            m_curPreviewMagnificationFactor = 0;
+        }
+        togglePreviewMagnificationViews(enabled);
+    }
+
+    @Override
+    public void onInfoUpdated(boolean b, Pair pair, CameraEx cameraEx) {
+
+    }
+    //###########CameraEx.PreviewMagnificationListener END###############
+
+    //##########CameraEx.FocusDriveListner################
+    @Override
+    public void onChanged(CameraEx.FocusPosition focusPosition, CameraEx cameraEx) {
+        if (m_curPreviewMagnification == 0)
+        {
+            m_lFocusScale.setVisibility(View.VISIBLE);
+            m_focusScaleView.setMaxPosition(focusPosition.maxPosition);
+            m_focusScaleView.setCurPosition(focusPosition.currentPosition);
+            activityInterface.getMainHandler().removeCallbacks(m_hideFocusScaleRunnable);
+            activityInterface.getMainHandler().postDelayed(m_hideFocusScaleRunnable, 2000);
+        }
+    }
+    //##########CameraEx.FocusDriveListner ENDs################
 
 }

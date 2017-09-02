@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 
-import com.obsidium.bettermanual.SonyDrawables;
+import com.obsidium.bettermanual.R;
 import com.sony.scalar.hardware.CameraEx;
 
 
@@ -48,25 +48,25 @@ public class ExposureModeView extends BaseImageView {
         if (mode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
         {
             //noinspection ResourceType
-            setImageResource(SonyDrawables.s_16_dd_parts_osd_icon_mode_m);
+            setImageResource(getResources().getInteger(R.integer.s_16_dd_parts_osd_icon_mode_m));
             m_exposureModes = ExposureModes.manual;
         }
         else if (mode.equals(CameraEx.ParametersModifier.SCENE_MODE_APERTURE_PRIORITY))
         {
             //noinspection ResourceType
-            setImageResource(SonyDrawables.s_16_dd_parts_osd_icon_mode_a);
+            setImageResource(getResources().getInteger(R.integer.s_16_dd_parts_osd_icon_mode_a));
             m_exposureModes = ExposureModes.aperture;
         }
         else if (mode.equals(CameraEx.ParametersModifier.SCENE_MODE_SHUTTER_PRIORITY))
         {
             //noinspection ResourceType
-            setImageResource(SonyDrawables.s_16_dd_parts_osd_icon_mode_s);
+            setImageResource(getResources().getInteger(R.integer.s_16_dd_parts_osd_icon_mode_s));
             m_exposureModes = ExposureModes.shutter;
         }
         else
         {
             //noinspection ResourceType
-            setImageResource(SonyDrawables.p_dialogwarning);
+            setImageResource(getResources().getInteger(R.integer.p_dialogwarning));
             m_exposureModes = ExposureModes.other;
         }
     }

@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 import com.github.killerink.camera.CameraInstance;
 import com.github.ma1co.pmcademo.app.BaseActivity;
@@ -18,6 +19,7 @@ import com.obsidium.bettermanual.CustomExceptionHandler;
 import com.obsidium.bettermanual.MinShutterFragment;
 import com.obsidium.bettermanual.Preferences;
 import com.obsidium.bettermanual.R;
+import com.sony.scalar.hardware.CameraEx;
 
 /**
  * Created by KillerInk on 27.08.2017.
@@ -74,12 +76,22 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         Log.d(TAG,"onPause");
         super.onPause();
         if (wrapper !=null) {
+            saveDefaults();
             m_surfaceHolder.removeCallback(wrapper);
             wrapper.closeCamera();
             wrapper = null;
         }
         stopBackgroundThread();
 
+    }
+
+    private void saveDefaults()
+    {
+        // Scene mode
+        getPreferences().setSceneMode(getCamera().getSceneMode());
+        // Drive mode and burst speed
+        getPreferences().setDriveMode(getCamera().getDriveMode());
+        getPreferences().setBurstDriveSpeed(getCamera().getBurstDriveSpeed());
     }
 
 
@@ -170,6 +182,12 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         }
     }
 
+    @Override
+    public void setSurfaceViewOnTouchListner(View.OnTouchListener onTouchListner) {
+        if (surfaceView != null)
+            surfaceView.setOnTouchListener(onTouchListner);
+    }
+
     private void replaceCameraFragment(Fragment fragment, String id)
     {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -186,5 +204,42 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
                 loadFragment(FRAGMENT_CAMERA_UI);
             }
         });
+        loadDefaults();
+    }
+
+    private void loadDefaults()
+    {
+        getBackHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                final TimeLog timeLog = new TimeLog("loadDefaults");
+                //Log.d(TAG,"Parameters: " + params.flatten());
+                // Focus mode
+                getCamera().setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
+                // Scene mode
+                final String sceneMode = getPreferences().getSceneMode();
+                getCamera().setSceneMode(sceneMode);
+                // Drive mode and burst speed
+                getCamera().setDriveMode(getPreferences().getDriveMode());
+                getCamera().setBurstDriveSpeed(getPreferences().getBurstDriveSpeed());
+                // Minimum shutter speed
+                if(getCamera().isAutoShutterSpeedLowLimitSupported()) {
+                    if (sceneMode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
+                        getCamera().setAutoShutterSpeedLowLimit(-1);
+                    else
+                        getCamera().setAutoShutterSpeedLowLimit(getPreferences().getMinShutterSpeed());
+                }
+                // Disable self timer
+                getCamera().setSelfTimer(0);
+                // Force aspect ratio to 3:2
+                getCamera().setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
+                // View visibility
+
+                if (getCamera().isSupportedLongExposureNR())
+                    getCamera().setLongExposureNR(false);
+                timeLog.logTime();
+            }
+        });
+
     }
 }

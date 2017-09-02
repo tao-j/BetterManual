@@ -277,10 +277,12 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         }
 
         final int margineright = (int)getResources().getDimension(R.dimen.bottomHolderChildMarginRight);
-        m_tvShutter = new ShutterView(getContext());
-        m_tvShutter.setTextSize((int)getResources().getDimension(R.dimen.textSize));
         LinearLayout.LayoutParams params= new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(0, 0, margineright, 0);
+        params.weight = 1;
+
+        m_tvShutter = new ShutterView(getContext());
+        m_tvShutter.setTextSize((int)getResources().getDimension(R.dimen.textSize));
         m_tvShutter.setLayoutParams(params);
         m_tvShutter.setOnTouchListener(m_tvShutter.getSwipeTouchListner());
         m_tvShutter.setCameraUiInterface(this);

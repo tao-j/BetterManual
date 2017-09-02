@@ -65,6 +65,7 @@ interface CameraParameterInterface
     void setISOSensitivity(int value);
 
     void setPreviewMagnification(int factor, Pair position);
+    void stopPreviewMagnification();
 
     void decrementShutterSpeed();
     void incrementShutterSpeed();

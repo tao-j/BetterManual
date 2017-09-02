@@ -368,6 +368,11 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
         cameraHandler.sendMessage(msg);
     }
 
+    @Override
+    public void stopPreviewMagnification() {
+        m_camera.stopPreviewMagnification();
+    }
+
     public List<Integer> getSupportedPreviewMagnification() {
         return modifier.getSupportedPreviewMagnification();
     }

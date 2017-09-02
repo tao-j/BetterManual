@@ -12,19 +12,7 @@
         android:id="@+id/vGrid"
         />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        tools:text="Magnification"
-        android:id="@+id/tvMagnification"
-        android:layout_alignTop="@+id/surfaceView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignLeft="@+id/surfaceView"
-        android:textColor="@android:color/white"
-        android:singleLine="true"
-        android:layout_margin="2dp"
-        android:textSize="18dp"
-        android:layout_marginTop="2dp"/>
+
 
     <LinearLayout
         android:id="@+id/left_holder"
@@ -40,8 +28,6 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/tvLog"
-        android:layout_above="@+id/lInfoBottom"
-        android:layout_alignTop="@+id/surfaceView"
         android:textSize="10dp"
         tools:text="Log"
         android:textColor="@android:color/white"
@@ -51,14 +37,7 @@
         android:gravity="bottom"
         android:layout_marginBottom="4dp"/>
 
-    <com.obsidium.bettermanual.views.PreviewNavView
-        android:id="@+id/vPreviewNav"
-        android:layout_width="75dp"
-        android:layout_height="50dp"
-        android:layout_above="@+id/bottom_holder"
-        android:layout_alignParentBottom="false"
-        android:layout_marginBottom="4dp"
-        android:layout_marginLeft="4dp" />
+
 
     <TextView
         android:id="@+id/tvMsg"

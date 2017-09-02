@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.github.killerink.ActivityInterface;
 import com.github.killerink.KeyEvents;
 
+import com.github.killerink.MainActivity;
 import com.github.killerink.TimeLog;
 import com.obsidium.bettermanual.capture.CaptureModeBracket;
 import com.obsidium.bettermanual.capture.CaptureModeTimelapse;
@@ -45,29 +46,10 @@ import java.util.List;
 
 public class CameraUiFragment extends Fragment implements View.OnClickListener, CameraEx.ShutterListener,
         CameraUiInterface, KeyEvents, CameraEx.PreviewAnalizeListener,CameraEx.ProgramLineRangeOverListener,
-        CameraEx.PreviewMagnificationListener,CameraEx.FocusDriveListener
+        CameraEx.FocusDriveListener
 {
 
-    private class SurfaceSwipeTouchListener extends OnSwipeTouchListener
-    {
-        public SurfaceSwipeTouchListener(Context context)
-        {
-            super(context);
-        }
 
-        @Override
-        public boolean onScrolled(float distanceX, float distanceY)
-        {
-            if (m_curPreviewMagnification != 0)
-            {
-                m_curPreviewMagnificationPos = new Pair<Integer, Integer>(Math.max(Math.min(m_curPreviewMagnificationMaxPos, m_curPreviewMagnificationPos.first + (int)distanceX), -m_curPreviewMagnificationMaxPos),
-                        Math.max(Math.min(m_curPreviewMagnificationMaxPos, m_curPreviewMagnificationPos.second + (int)distanceY), -m_curPreviewMagnificationMaxPos));
-                activityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
-                return true;
-            }
-            return false;
-        }
-    }
 
     private static final boolean LOGGING_ENABLED = false;
     private static final int MESSAGE_TIMEOUT = 1000;
@@ -117,14 +99,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         }
     };
 
-    // Preview magnification
-    private List<Integer>   m_supportedPreviewMagnifications;
-    private boolean         m_zoomLeverPressed;
-    private int             m_curPreviewMagnification;
-    private float           m_curPreviewMagnificationFactor;
-    private Pair<Integer, Integer>  m_curPreviewMagnificationPos = new Pair<Integer, Integer>(0, 0);
-    private int             m_curPreviewMagnificationMaxPos;
-    private PreviewNavView m_previewNavView;
+
 
 
     private final Runnable  m_hideMessageRunnable = new Runnable()
@@ -180,8 +155,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
         m_tvMagnification = (TextView)view.findViewById(R.id.tvMagnification);
 
-        m_previewNavView = (PreviewNavView)view.findViewById(R.id.vPreviewNav);
-        m_previewNavView.setVisibility(View.GONE);
 
         m_tvMsg = (TextView)view.findViewById(R.id.tvMsg);
 
@@ -320,7 +293,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         m_tvExposure.setCompoundDrawablesWithIntrinsicBounds(getResources().getInteger(R.integer.p_meteredmanualicon), 0, 0, 0);
         bottomHolder.addView(m_tvExposure);
         setDialMode(0);
-        activityInterface.setSurfaceViewOnTouchListner(new SurfaceSwipeTouchListener(getContext()));
+
         timeLog.logTime();
     }
 
@@ -364,9 +337,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
         Pair<Integer, Integer> sp = activityInterface.getCamera().getShutterSpeed();
         m_tvShutter.updateShutterSpeed(sp.first, sp.second);
-
-        m_supportedPreviewMagnifications = (List<Integer>) activityInterface.getCamera().getSupportedPreviewMagnification();
-        activityInterface.getCamera().setPreviewMagnificationListener(this);
 
         activityInterface.getCamera().setFocusDriveListener(this);
 
@@ -522,19 +492,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
     }
 
 
-    private void togglePreviewMagnificationViews(final boolean magnificationActive)
-    {
-        activityInterface.getMainHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                m_previewNavView.setVisibility(magnificationActive ? View.VISIBLE : View.GONE);
-                m_tvMagnification.setVisibility(magnificationActive ? View.VISIBLE : View.GONE);
-                m_vHist.setVisibility(magnificationActive ? View.GONE : View.VISIBLE);
-                setLeftViewVisibility(!magnificationActive);
-            }
-        });
-
-    }
 
     // OnClickListener
     public void onClick(View view)
@@ -579,30 +536,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         else if (lastView instanceof ImageView)
             ((ImageView)lastView).setColorFilter(Color.GREEN);
     }
-
-
-    private void movePreviewVertical(int delta)
-    {
-        int newY = m_curPreviewMagnificationPos.second + delta;
-        if (newY > m_curPreviewMagnificationMaxPos)
-            newY = m_curPreviewMagnificationMaxPos;
-        else if (newY < -m_curPreviewMagnificationMaxPos)
-            newY = -m_curPreviewMagnificationMaxPos;
-        m_curPreviewMagnificationPos = new Pair<Integer, Integer>(m_curPreviewMagnificationPos.first, newY);
-        activityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
-    }
-
-    private void movePreviewHorizontal(int delta)
-    {
-        int newX = m_curPreviewMagnificationPos.first + delta;
-        if (newX > m_curPreviewMagnificationMaxPos)
-            newX = m_curPreviewMagnificationMaxPos;
-        else if (newX < -m_curPreviewMagnificationMaxPos)
-            newX = -m_curPreviewMagnificationMaxPos;
-        m_curPreviewMagnificationPos = new Pair<Integer, Integer>(newX, m_curPreviewMagnificationPos.second);
-        activityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
-    }
-
 
     private void stopBulbCapture() {
         Log.d(TAG, "Stop BULB");
@@ -653,12 +586,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         {
             bracket.abort();
             return false;
-        }
-        else if (m_curPreviewMagnification != 0)
-        {
-            m_curPreviewMagnificationPos = new Pair<Integer, Integer>(0, 0);
-            activityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
-            return true;
         }
         else if (view instanceof ShutterView || bulbcapture)
         {
@@ -722,6 +649,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public boolean onFnKeyUp() {
+        activityInterface.loadFragment(MainActivity.FRAGMENT_PREVIEWMAGNIFICATION);
         return false;
     }
 
@@ -771,17 +699,9 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
     @Override
     public boolean onUpKeyUp()
     {
-        if (m_curPreviewMagnification != 0)
-        {
-            movePreviewVertical((int)(-500.0f / m_curPreviewMagnificationFactor));
-            return true;
-        }
-        else
-        {
             // Toggle visibility of some views
             cycleVisibleViews();
             return true;
-        }
     }
 
     @Override
@@ -805,11 +725,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
     @Override
     public boolean onLeftKeyUp()
     {
-        if (m_curPreviewMagnification != 0)
-        {
-            movePreviewHorizontal((int)(-500.0f / m_curPreviewMagnificationFactor));
-            return true;
-        }
         return false;
     }
 
@@ -822,11 +737,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
     @Override
     public boolean onRightKeyUp()
     {
-        if (m_curPreviewMagnification != 0)
-        {
-            movePreviewHorizontal((int)(500.0f / m_curPreviewMagnificationFactor));
-            return true;
-        }
         return false;
     }
 
@@ -1037,48 +947,19 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
     //############CameraEx.ProgramLineRangeOverListener END ###########
 
-    //##############CameraEx.PreviewMagnificationListener###############
-    @Override
-    public void onChanged(boolean enabled, int magFactor, int magLevel, Pair coords, CameraEx cameraEx) {
-        m_tvLog.setText("onChanged enabled:" + String.valueOf(enabled) + " magFactor:" + String.valueOf(magFactor) + " magLevel:" +
-                String.valueOf(magLevel) + " x:" + coords.first + " y:" + coords.second + "\n");
-        //*
-        if (enabled)
-        {
-            //log("m_curPreviewMagnificationMaxPos: " + String.valueOf(m_curPreviewMagnificationMaxPos) + "\n");
-            m_curPreviewMagnification = magLevel;
-            m_curPreviewMagnificationFactor = ((float)magFactor / 100.0f);
-            m_curPreviewMagnificationMaxPos = 1000 - (int)(1000.0f / m_curPreviewMagnificationFactor);
-            m_tvMagnification.setText(String.format("\uE012 %.2fx", (float)magFactor / 100.0f));
-            m_previewNavView.update(coords, m_curPreviewMagnificationFactor);
-        }
-        else
-        {
-            m_previewNavView.update(null, 0);
-            m_curPreviewMagnification = 0;
-            m_curPreviewMagnificationMaxPos = 0;
-            m_curPreviewMagnificationFactor = 0;
-        }
-        togglePreviewMagnificationViews(enabled);
-    }
 
-    @Override
-    public void onInfoUpdated(boolean b, Pair pair, CameraEx cameraEx) {
-
-    }
     //###########CameraEx.PreviewMagnificationListener END###############
 
     //##########CameraEx.FocusDriveListner################
     @Override
     public void onChanged(CameraEx.FocusPosition focusPosition, CameraEx cameraEx) {
-        if (m_curPreviewMagnification == 0)
-        {
+
             m_lFocusScale.setVisibility(View.VISIBLE);
             m_focusScaleView.setMaxPosition(focusPosition.maxPosition);
             m_focusScaleView.setCurPosition(focusPosition.currentPosition);
             activityInterface.getMainHandler().removeCallbacks(m_hideFocusScaleRunnable);
             activityInterface.getMainHandler().postDelayed(m_hideFocusScaleRunnable, 2000);
-        }
+
     }
     //##########CameraEx.FocusDriveListner ENDs################
 

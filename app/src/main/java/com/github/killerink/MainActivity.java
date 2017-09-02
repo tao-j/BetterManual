@@ -18,6 +18,7 @@ import com.obsidium.bettermanual.CameraUiFragment;
 import com.obsidium.bettermanual.CustomExceptionHandler;
 import com.obsidium.bettermanual.MinShutterFragment;
 import com.obsidium.bettermanual.Preferences;
+import com.obsidium.bettermanual.PreviewMagnificationFragment;
 import com.obsidium.bettermanual.R;
 import com.sony.scalar.hardware.CameraEx;
 
@@ -36,6 +37,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
 
     public final static int FRAGMENT_CAMERA_UI = 0;
     public final static int FRAGMENT_MIN_SHUTTER = 1;
+    public final static int FRAGMENT_PREVIEWMAGNIFICATION = 2;
 
     private Handler   m_handler;
 
@@ -168,15 +170,21 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     public void loadFragment(int fragment) {
         switch (fragment)
         {
-            case FRAGMENT_CAMERA_UI:
-                CameraUiFragment ui = CameraUiFragment.getCameraUiFragment(this);
-                getDialHandler().setDialEventListner(ui);
-                replaceCameraFragment(ui, CameraUiFragment.class.getSimpleName());
-                break;
             case FRAGMENT_MIN_SHUTTER:
                 MinShutterFragment msa = MinShutterFragment.getMinShutterActivity(this);
                 getDialHandler().setDialEventListner(msa);
                 replaceCameraFragment(msa, MinShutterFragment.class.getSimpleName());
+                break;
+            case FRAGMENT_PREVIEWMAGNIFICATION:
+                PreviewMagnificationFragment pmf = PreviewMagnificationFragment.getFragment(this);
+                getDialHandler().setDialEventListner(pmf);
+                replaceCameraFragment(pmf, PreviewMagnificationFragment.class.getSimpleName());
+                break;
+            case FRAGMENT_CAMERA_UI:
+            default:
+                CameraUiFragment ui = CameraUiFragment.getCameraUiFragment(this);
+                getDialHandler().setDialEventListner(ui);
+                replaceCameraFragment(ui, CameraUiFragment.class.getSimpleName());
                 break;
 
         }

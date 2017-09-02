@@ -84,17 +84,22 @@ public class CameraInstance extends CameraInternalEventImpl implements SurfaceHo
         if (isImageStabSupported())
         {
             Log.d(TAG,"getSupportedImageStabModes");
-            tmp = getSupportedImageStabModes();
-            logList(tmp);
+            logList(getSupportedImageStabModes());
         }
         if (isLiveSlowShutterSupported()) {
             Log.d(TAG, "getSupportedLiveSlowShutterModes");
-            tmp = getSupportedLiveSlowShutterModes();
-            logList(tmp);
+            logArray(getSupportedLiveSlowShutterModes());
         }
     }
 
     private void logList(List<String> list)
+    {
+        String st = new String();
+        for (String s : list)
+            st += s+",";
+        Log.d(TAG,st);
+    }
+    private void logArray(String[] list)
     {
         String st = new String();
         for (String s : list)

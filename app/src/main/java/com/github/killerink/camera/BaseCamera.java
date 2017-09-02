@@ -274,6 +274,11 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
         setParameters(parameters);
     }
 
+    @Override
+    public boolean getLongeExposureNR() {
+        return modifier.getLongExposureNR();
+    }
+
     public void setFocusMode(String value)
     {
         parameters.setFocusMode(value);
@@ -446,23 +451,7 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
         return new String[] { modifier.SLOW_SHUTTER_LIVEVIEW_MODE_OFF,modifier.SLOW_SHUTTER_LIVEVIEW_MODE_ON};
     }
 
-    @Override
-    public boolean isSupportedLongExposureNR() {
-        try {
-            return modifier.isSupportedLongExposureNR();
-        }
-        catch (NoSuchMethodError ex)
-        {
-            ex.printStackTrace();
-            return false;
-        }
-    }
 
-    @Override
-    public void setLongExposureNR(boolean enable) {
-        modifier.setLongExposureNR(enable);
-        setParameters(parameters);
-    }
 
     public Pair getShutterSpeed()
     {

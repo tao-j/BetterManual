@@ -38,6 +38,7 @@ interface CameraParameterInterface
     //long expo noise reduction
     boolean isLongExposureNoiseReductionSupported();
     void setLongExposureNoiseReduction(boolean enable);
+    boolean getLongeExposureNR();
     
     void setFocusMode(String value);
     
@@ -83,6 +84,5 @@ interface CameraParameterInterface
     String getLiveSlowShutter();
     String[] getSupportedLiveSlowShutterModes();
 
-    boolean isSupportedLongExposureNR();
-    void setLongExposureNR(boolean enable);
+
 }

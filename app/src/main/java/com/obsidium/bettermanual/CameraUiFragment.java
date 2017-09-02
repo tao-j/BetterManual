@@ -32,6 +32,7 @@ import com.obsidium.bettermanual.views.GridView;
 import com.obsidium.bettermanual.views.HistogramView;
 import com.obsidium.bettermanual.views.ImageStabView;
 import com.obsidium.bettermanual.views.IsoView;
+import com.obsidium.bettermanual.views.LongExpoNR;
 import com.obsidium.bettermanual.views.PreviewNavView;
 import com.obsidium.bettermanual.views.ShutterView;
 import com.sony.scalar.hardware.CameraEx;
@@ -91,6 +92,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
     private TextView        m_tvHint;
     private FocusScaleView m_focusScaleView;
     private View            m_lFocusScale;
+    private LongExpoNR longExpoNR;
 
     private LinearLayout bottomHolder;
     private LinearLayout leftHolder;
@@ -260,8 +262,18 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         if (activityInterface.getCamera().isImageStabSupported()) {
             imageStabView = new ImageStabView(getContext());
             imageStabView.setActivity(activityInterface);
+            imageStabView.setOnClickListener(this);
             dialViews.add(imageStabView);
             leftHolder.addView(imageStabView);
+        }
+
+        if (activityInterface.getCamera().isLongExposureNoiseReductionSupported())
+        {
+            longExpoNR = new LongExpoNR(getContext());
+            longExpoNR.setActivity(activityInterface);
+            longExpoNR.setOnClickListener(this);
+            dialViews.add(longExpoNR);
+            leftHolder.addView(longExpoNR);
         }
 
         final int margineright = (int)getResources().getDimension(R.dimen.bottomHolderChildMarginRight);
@@ -361,7 +373,10 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
         driveMode.updateImage();
         exposureMode.updateImage();
-        imageStabView.updateImage();
+        if (imageStabView != null)
+            imageStabView.updateImage();
+        if (longExpoNR != null)
+            longExpoNR.updateImage();
         updateViewVisibility();
 
         Log.d(TAG,"initUiEnd");
@@ -689,6 +704,8 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         {
             imageStabView.toggle();
         }
+        else if (view == longExpoNR)
+            longExpoNR.toggle();
         else if (view == iso) {
             iso.onClick();
             return false;

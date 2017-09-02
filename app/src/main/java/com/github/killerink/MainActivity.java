@@ -235,8 +235,8 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
                 getCamera().setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
                 // View visibility
 
-                if (getCamera().isSupportedLongExposureNR())
-                    getCamera().setLongExposureNR(false);
+                /*if (getCamera().isLongExposureNoiseReductionSupported())
+                    getCamera().setLongExposureNoiseReduction(getP);*/
                 timeLog.logTime();
             }
         });

@@ -38,6 +38,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     public final static int FRAGMENT_CAMERA_UI = 0;
     public final static int FRAGMENT_MIN_SHUTTER = 1;
     public final static int FRAGMENT_PREVIEWMAGNIFICATION = 2;
+    public final static int FRAGMENT_IMAGEVIEW = 3;
 
     private Handler   m_handler;
 
@@ -179,6 +180,11 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
                 PreviewMagnificationFragment pmf = PreviewMagnificationFragment.getFragment(this);
                 getDialHandler().setDialEventListner(pmf);
                 replaceCameraFragment(pmf, PreviewMagnificationFragment.class.getSimpleName());
+                break;
+            case FRAGMENT_IMAGEVIEW:
+                ImageFragment imageFragment = ImageFragment.getFragment(this);
+                getDialHandler().setDialEventListner(imageFragment);
+                replaceCameraFragment(imageFragment, ImageFragment.class.getSimpleName());
                 break;
             case FRAGMENT_CAMERA_UI:
             default:

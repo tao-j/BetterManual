@@ -754,6 +754,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public boolean onPlayKeyUp() {
+        activityInterface.loadFragment(MainActivity.FRAGMENT_IMAGEVIEW);
         return false;
     }
 
@@ -826,64 +827,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         activityInterface.closeApp();
         return true;
     }
-
-    /*@Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)
-    {
-        Log.d(TAG, "onkeydown:"+event.getScanCode()+ " event:" + event.getAction());
-        final int scanCode = event.getScanCode();
-        if (timelapse.isActive() && scanCode != ScalarInput.ISV_KEY_ENTER)
-            return true;
-        // TODO: Use m_supportedPreviewMagnifications
-        *//*if (m_dialMode != DialMode.timelapseSetInterval && m_dialMode != DialMode.timelapseSetPicCount)
-        {
-            if (scanCode == ScalarInput.ISV_KEY_ZOOM_TELE && !m_zoomLeverPressed)
-            {
-                // zoom lever tele
-                m_zoomLeverPressed = true;
-                if (m_curPreviewMagnification == 0)
-                {
-                    m_curPreviewMagnification = 100;
-                    m_lFocusScale.setVisibility(View.GONE);
-                }
-                else
-                    m_curPreviewMagnification = 200;
-                m_camera.setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
-                return true;
-            }
-            else if (scanCode == ScalarInput.ISV_KEY_ZOOM_WIDE && !m_zoomLeverPressed)
-            {
-                // zoom lever wide
-                m_zoomLeverPressed = true;
-                if (m_curPreviewMagnification == 200)
-                {
-                    m_curPreviewMagnification = 100;
-                    m_camera.setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
-                }
-                else
-                {
-                    m_curPreviewMagnification = 0;
-                    m_camera.stopPreviewMagnification();
-                }
-                return true;
-            }
-            else if (scanCode == ScalarInput.ISV_KEY_ZOOM_OFF)
-            {
-                // zoom lever returned to neutral position
-                m_zoomLeverPressed = false;
-                return true;
-            }
-        }*//*
-
-        if (scanCode == ScalarInput.ISV_KEY_S2) {
-            Log.d(TAG, "S2");
-            return true;
-        }
-        if (scanCode == ScalarInput.ISV_KEY_S1_1)
-            Log.d(TAG, "S1_1");
-
-        return super.onKeyDown(keyCode, event);
-    }*/
 
 
     /*  ##################################################################

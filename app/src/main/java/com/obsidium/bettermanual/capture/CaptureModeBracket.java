@@ -274,6 +274,13 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
 
     @Override
     public boolean onEnterKeyDown() {
+
+
+        return false;
+    }
+
+    @Override
+    public boolean onEnterKeyUp() {
         if (currentDialMode == BRACKET_NON)
         {
             prepare();
@@ -293,12 +300,6 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
             startCountDown();
             currentDialMode = BRACKET_NON;
         }
-
-        return false;
-    }
-
-    @Override
-    public boolean onEnterKeyUp() {
         return false;
     }
 

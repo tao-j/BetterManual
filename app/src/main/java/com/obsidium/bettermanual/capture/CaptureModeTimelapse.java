@@ -271,6 +271,12 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
 
     @Override
     public boolean onEnterKeyDown() {
+
+        return false;
+    }
+
+    @Override
+    public boolean onEnterKeyUp() {
         Log.d(TAG,"onEnterKeyDown" + currentdial);
         if (currentdial == TLS_SET_NONE) {
             prepare();
@@ -289,11 +295,6 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
             startCountDown();
             currentdial = TLS_SET_NONE;
         }
-        return false;
-    }
-
-    @Override
-    public boolean onEnterKeyUp() {
         return false;
     }
 

@@ -11,8 +11,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.obsidium.bettermanual.R;
 import com.sony.scalar.graphics.JpegExporter;
@@ -49,6 +51,7 @@ public class ImageFragment extends Fragment implements KeyEvents {
     private ActivityInterface activityInterface;
     private Cursor mediaCursor;
     OptimizedImage image;
+    AvindexContentInfo info;
 
     final String[] GROUP_QUERY_PROJECTION = new String[] { "_id", "_count", "count_of_one_before", "dcf_folder_number" };
     final String[] QUERY_PROJECTION = new String[] { "_id", "_data", "_display_name", "datetaken" };
@@ -100,8 +103,8 @@ public class ImageFragment extends Fragment implements KeyEvents {
     @Override
     public void onResume() {
         super.onResume();
-        activityInterface.getCamera().stopPreview();
-        activityInterface.getCamera().stopDisplay();
+        /*activityInterface.getCamera().stopPreview();
+        activityInterface.getCamera().stopDisplay();*/
         activityInterface.getCamera().closeCamera();
 
         AvindexStore.loadMedia(AvindexStore.getExternalMediaIds()[0], AvindexStore.CONTENT_TYPE_LOAD_STILL);
@@ -119,9 +122,11 @@ public class ImageFragment extends Fragment implements KeyEvents {
         super.onPause();
         if (mediaCursor != null && !mediaCursor.isClosed())
             mediaCursor.close();
+        closeImageInfo();
+        closeOptimizedImage();
         activityInterface.getCamera().startCamera();
-        activityInterface.getCamera().startPreview();
-        activityInterface.getCamera().startDisplay();
+        /*activityInterface.getCamera().startPreview();
+        activityInterface.getCamera().startDisplay();*/
     }
 
     private void loadOptimizedImg()
@@ -159,24 +164,39 @@ public class ImageFragment extends Fragment implements KeyEvents {
         if (mediaCursor != null)
             mediaCursor.close();*/
 
-        AvindexContentInfo info = AvindexStore.Images.Media.getImageInfo(id);
+
+        closeImageInfo();
+
+        info = AvindexStore.Images.Media.getImageInfo(id);
 
         OptimizedImageFactory.Options options = new OptimizedImageFactory.Options();
-        options.bBasicInfo = true;
-        options.bCamInfo = true;
-        options.bGpsInfo = true;
-        options.bExtCamInfo = true;
+        options.bBasicInfo = false;
+        options.bCamInfo = false;
+        options.bGpsInfo = false;
+        options.bExtCamInfo = false;
         options.imageType = info.getAttributeInt(AvindexContentInfo.TAG_CONTENT_TYPE,2);
         options.colorType = info.getAttributeInt(AvindexContentInfo.TAG_COLOR_TYPE,1);
         options.outContentInfo = info;
 
+        closeOptimizedImage();
+        image = OptimizedImageFactory.decodeImage(data,options);
+
+        imageView.setOptimizedImage(image);
+    }
+
+    private void closeOptimizedImage() {
         if (image != null) {
             image.release();
             image = null;
         }
-        image = OptimizedImageFactory.decodeImage(data,options);
+    }
 
-        imageView.setOptimizedImage(image);
+    private void closeImageInfo() {
+        if (info != null && !info.isRecycled())
+        {
+            info.recycle();
+            info = null;
+        }
     }
 
     private String getStringFromCollumn(String column, Cursor cursor)
@@ -352,7 +372,7 @@ public class ImageFragment extends Fragment implements KeyEvents {
 
     @Override
     public boolean onPlayKeyUp() {
-        activityInterface.loadFragment(MainActivity.FRAGMENT_CAMERA_UI);
+        activityInterface.loadFragment(MainActivity.FRAGMENT_WAITFORCAMERARDY);
         return false;
     }
 

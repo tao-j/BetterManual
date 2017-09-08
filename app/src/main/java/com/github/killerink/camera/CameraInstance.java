@@ -196,67 +196,74 @@ public class CameraInstance extends CameraInternalEventImpl implements SurfaceHo
 
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case INCREASE_SHUTTER:
-                    m_camera.incrementShutterSpeed();
-                    break;
-                case DECREASE_SHUTTER:
-                    m_camera.decrementShutterSpeed();
-                    break;
-                case INCREASE_APERTURE:
-                    m_camera.incrementAperture();
-                    break;
-                case DECREASE_APERTURE:
-                    m_camera.decrementAperture();
-                    break;
-                case SET_ISO:
-                    modifier.setISOSensitivity(msg.arg1);
-                    setParameters(parameters);
-                    break;
-                case SET_EV:
-                    parameters.setExposureCompensation(msg.arg1);
-                    setParameters(parameters);
-                    break;
-                case SET_AUTO_SHUTTER_SPEED_LOW_LIMIT:
-                    modifier.setAutoShutterSpeedLowLimit(msg.arg1);
-                    setParameters(parameters);
-                    break;
-                case SET_SELF_TIMER:
-                    modifier.setSelfTimer(msg.arg1);
-                    setParameters(parameters);
-                    break;
-                case SET_PREVIEWMAGNIFICATION:
-                    m_camera.setPreviewMagnification(msg.arg1,(Pair)msg.obj);
-                    break;
-                case SET_ADJUST_SHUTTER_SPEED:
-                    m_camera.adjustShutterSpeed(msg.arg1);
-                    break;
-                case START_DISPLAY:
-                    m_camera.getNormalCamera().startPreview();
-                    break;
-                case STOP_DISPLAY:
-                    m_camera.getNormalCamera().stopPreview();
-                    break;
-                case CAPTURE_IMAGE:
-                    m_camera.stopDirectShutter(new CameraEx.DirectShutterStoppedCallback() {
-                        @Override
-                        public void onShutterStopped(CameraEx cameraEx) {
-                            m_camera.burstableTakePicture();
-                        }
-                    });
-                    break;
-                case CANCEL_CAPTURE:
-                    m_camera.cancelTakePicture();
-                    m_camera.startDirectShutter();
-                    break;
-                case START_PREVIEW:
-                    m_camera.startDirectShutter();
-                    break;
-                case STOP_PREVIEW:
-                    m_camera.stopDirectShutter(null);
-                    break;
-                default:
-                    super.handleMessage(msg);
+            try {
+                switch (msg.what) {
+
+                    case INCREASE_SHUTTER:
+                        m_camera.incrementShutterSpeed();
+                        break;
+                    case DECREASE_SHUTTER:
+                        m_camera.decrementShutterSpeed();
+                        break;
+                    case INCREASE_APERTURE:
+                        m_camera.incrementAperture();
+                        break;
+                    case DECREASE_APERTURE:
+                        m_camera.decrementAperture();
+                        break;
+                    case SET_ISO:
+                        modifier.setISOSensitivity(msg.arg1);
+                        setParameters(parameters);
+                        break;
+                    case SET_EV:
+                        parameters.setExposureCompensation(msg.arg1);
+                        setParameters(parameters);
+                        break;
+                    case SET_AUTO_SHUTTER_SPEED_LOW_LIMIT:
+                        modifier.setAutoShutterSpeedLowLimit(msg.arg1);
+                        setParameters(parameters);
+                        break;
+                    case SET_SELF_TIMER:
+                        modifier.setSelfTimer(msg.arg1);
+                        setParameters(parameters);
+                        break;
+                    case SET_PREVIEWMAGNIFICATION:
+                        m_camera.setPreviewMagnification(msg.arg1,(Pair)msg.obj);
+                        break;
+                    case SET_ADJUST_SHUTTER_SPEED:
+                        m_camera.adjustShutterSpeed(msg.arg1);
+                        break;
+                    case START_DISPLAY:
+                        m_camera.getNormalCamera().startPreview();
+                        break;
+                    case STOP_DISPLAY:
+                        m_camera.getNormalCamera().stopPreview();
+                        break;
+                    case CAPTURE_IMAGE:
+                        m_camera.stopDirectShutter(new CameraEx.DirectShutterStoppedCallback() {
+                            @Override
+                            public void onShutterStopped(CameraEx cameraEx) {
+                                m_camera.burstableTakePicture();
+                            }
+                        });
+                        break;
+                    case CANCEL_CAPTURE:
+                        m_camera.cancelTakePicture();
+                        m_camera.startDirectShutter();
+                        break;
+                    case START_PREVIEW:
+                        m_camera.startDirectShutter();
+                        break;
+                    case STOP_PREVIEW:
+                        m_camera.stopDirectShutter(null);
+                        break;
+                    default:
+                        super.handleMessage(msg);
+                }
+            }
+            catch (RuntimeException ex)
+            {
+                ex.printStackTrace();
             }
 
         }

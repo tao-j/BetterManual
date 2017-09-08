@@ -39,6 +39,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     public final static int FRAGMENT_MIN_SHUTTER = 1;
     public final static int FRAGMENT_PREVIEWMAGNIFICATION = 2;
     public final static int FRAGMENT_IMAGEVIEW = 3;
+    public final static int FRAGMENT_WAITFORCAMERARDY = 4;
 
     private Handler   m_handler;
 
@@ -185,6 +186,11 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
                 ImageFragment imageFragment = ImageFragment.getFragment(this);
                 getDialHandler().setDialEventListner(imageFragment);
                 replaceCameraFragment(imageFragment, ImageFragment.class.getSimpleName());
+                break;
+            case FRAGMENT_WAITFORCAMERARDY:
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.remove(getSupportFragmentManager().findFragmentByTag(ImageFragment.class.getSimpleName()));
+                transaction.commit();
                 break;
             case FRAGMENT_CAMERA_UI:
             default:

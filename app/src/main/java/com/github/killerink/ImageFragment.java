@@ -1,35 +1,54 @@
 package com.github.killerink;
 
 import android.database.Cursor;
-import android.database.CursorIndexOutOfBoundsException;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
-import com.github.ma1co.openmemories.framework.ImageInfo;
-import com.github.ma1co.openmemories.framework.MediaManager;
 import com.obsidium.bettermanual.R;
-import com.ortiz.touch.TouchImageView;
+import com.sony.scalar.graphics.OptimizedImage;
+import com.sony.scalar.graphics.OptimizedImageFactory;
+import com.sony.scalar.media.AvindexContentInfo;
+import com.sony.scalar.media.AvindexFactory;
+import com.sony.scalar.provider.AvindexStore;
+import com.sony.scalar.widget.OptimizedImageView;
 
-import java.io.InputStream;
+import java.io.File;
 
 
 public class ImageFragment extends Fragment implements KeyEvents {
 
+    /*
+        FOLDER
+        _id 0 _data null dcf_folder_number 100 dcf_file_number null content_type null exist_jpeg null exist_mpo null exist_raw null content_created_local_date_time null content_created_local_date null content_created_local_time null content_created_utc_date_time null content_created_utc_date null content_created_utc_time null has_gps_info null time_zone null latitude null longitude null rec_order null
+        LAST_CONTENT
+        Nothing to log
+        MEDIA
+        _id 1 _data avindex://1000/00000001-default/00000001-00000925 dcf_folder_number 100 dcf_file_number 1663 content_type 1 exist_jpeg 1 exist_mpo 0 exist_raw 1 content_created_local_date_time 1507114550000 content_created_local_date 20171004 content_created_local_time 105550 content_created_utc_date_time 1507110950000 content_created_utc_date 20171004 content_created_utc_time 095550 has_gps_info 0 time_zone 60 latitude 0 longitude 0 rec_order 1
+        INFO
+        avi_version 45cd5a8d03e44b57b963dc9e781b722e
+        THUMB
+        Nothing to log
+     */
+
     private final String TAG = ImageFragment.class.getSimpleName();
-    private TouchImageView imageView;
-    private MediaManager mediaManager;
+    private OptimizedImageView imageView;
     private ActivityInterface activityInterface;
-    private Cursor cursor;
+    private Cursor mediaCursor;
+    private Cursor fileCursor;
     private Bitmap bitmap;
+
+    final String[] GROUP_QUERY_PROJECTION = new String[] { "_id", "_count", "count_of_one_before", "dcf_folder_number" };
+    final String[] QUERY_PROJECTION = new String[] { "_id", "_data", "_display_name", "datetaken" };
+    protected static final String[] CONTENTS_QUERY_PROJECTION = { "_id", "_data", "dcf_file_number", "dcf_folder_number", "content_created_local_date", "content_created_utc_date", "content_created_local_date_time", "content_created_utc_date_time", "exist_jpeg", "exist_raw", "exist_mpo", "rec_order", "content_type" };
+    final Uri baseUri = AvindexStore.Images.Media.EXTERNAL_CONTENT_URI;
 
     public static ImageFragment getFragment(ActivityInterface activityInterface)
     {
@@ -49,53 +68,113 @@ public class ImageFragment extends Fragment implements KeyEvents {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        imageView = (TouchImageView)view.findViewById(R.id.touchimageview);
-        mediaManager = MediaManager.create(getContext());
+        imageView = (OptimizedImageView) view.findViewById(R.id.touchimageview);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        cursor = mediaManager.queryNewestImages();
-        cursor.moveToFirst();
-        loadImage();
+        activityInterface.getCamera().stopPreview();
+        activityInterface.getCamera().stopDisplay();
+        AvindexStore.loadMedia(AvindexStore.Images.Media.EXTERNAL_DEFAULT_MEDIA_ID, 1);
+        mediaCursor = getContext().getContentResolver().query(baseUri, AvindexStore.Images.Media.ALL_COLUMNS, null, null, null);
+        mediaCursor.moveToFirst();
+        loadOptimizedImg();
+        //loadImage();
     }
 
-    private void loadImage()
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mediaCursor != null && !mediaCursor.isClosed())
+            mediaCursor.close();
+        activityInterface.getCamera().startPreview();
+        activityInterface.getCamera().startDisplay();
+    }
+
+    private void loadOptimizedImg()
     {
-        final TimeLog timeLog = new TimeLog("loadImage");
-        if (cursor.getCount() > 0 && cursor.getPosition() > -1)
-        {
-            ImageInfo info = mediaManager.getImageInfo(cursor);
-            Log.d(TAG,"W:" + info.getWidth() +" H:"+info.getHeight());
-            InputStream inputStream = null;
 
-            try {
-                inputStream = info.getPreviewImage();
-                bitmap = BitmapFactory.decodeStream(inputStream);
-                Log.d(TAG,"image from info.getPreviewImage");
-            }
-            catch (NullPointerException ex)
-            {
-                Log.d(TAG,"unsupported info.getPreviewImage, load it from full....");
-                inputStream = info.getFullImage();
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inSampleSize = 4;
-                options.inDither = true;
-                int paddingl = (info.getWidth() - (info.getWidth()/4))/2;
-                int paddingt = (info.getHeight() - (info.getHeight()/4))/2;
-                Rect rect = new Rect(paddingl,paddingt,paddingl,paddingt);
-                Log.d(TAG,"new W:" +rect.width() +" H:"+rect.height());
-                bitmap = BitmapFactory.decodeStream(inputStream,rect, options);
-                Log.d(TAG, "final bitmapSize W:" +bitmap.getWidth() + " H:" +bitmap.getHeight());
-            }
+        String[] externalMediaIds = AvindexStore.getExternalMediaIds(); // a6000 = 1000
+        Log.d(TAG,"FOLDER");
+        Uri folder= AvindexStore.Images.Folder.getContentUri(AvindexStore.Images.Media.EXTERNAL_DEFAULT_MEDIA_ID);
+        mediaCursor = getCursorFromUri(folder);
+        logCursor(mediaCursor);
+        mediaCursor.close();
 
-            imageView.setImageBitmap(bitmap);
-        }
-        else
-            Log.d(TAG, "No Images");
-        timeLog.logTime();
+        Log.d(TAG,"LAST_CONTENT");
+        Uri lastContent = AvindexStore.Images.LastContent.getContentUri(AvindexStore.Images.Media.EXTERNAL_DEFAULT_MEDIA_ID);
+        mediaCursor = getCursorFromUri(lastContent);
+        logCursor(mediaCursor);
+        mediaCursor.close();
+
+        Log.d(TAG,"MEDIA");
+        Uri media = AvindexStore.Images.Media.getContentUri(AvindexStore.Images.Media.EXTERNAL_DEFAULT_MEDIA_ID);
+        mediaCursor = getCursorFromUri(media);
+        logCursor(mediaCursor);
+        String data = mediaCursor.getString(mediaCursor.getColumnIndexOrThrow("_data"));
+        String id = mediaCursor.getString(mediaCursor.getColumnIndexOrThrow("_id"));
+        mediaCursor.close();
+
+        Log.d(TAG,"INFO");
+        Uri infoUri = AvindexStore.Images.Info.getContentUri(AvindexStore.Images.Media.EXTERNAL_DEFAULT_MEDIA_ID);
+        mediaCursor = getCursorFromUri(infoUri);
+        logCursor(mediaCursor);
+        mediaCursor.close();
+
+        Log.d(TAG,"THUMB");
+        Uri thumburi = AvindexStore.Images.Thumbnails.getContentUri(AvindexStore.Images.Media.EXTERNAL_DEFAULT_MEDIA_ID);
+        mediaCursor = getCursorFromUri(thumburi);
+        logCursor(mediaCursor);
+        if (mediaCursor != null)
+            mediaCursor.close();
+
+        AvindexContentInfo info = AvindexStore.Images.Media.getImageInfoFull(id);
+
+
+        OptimizedImage image = OptimizedImageFactory.decodeImage(data);
+
+        imageView.setOptimizedImage(image);
     }
+
+    private void logCursor(Cursor cursor)
+    {
+        String name;
+        String value;
+        if (cursor != null && cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            int columnCount = cursor.getColumnCount();
+            String out = "";
+            for (int i = 0; i < columnCount; i++) {
+                name = cursor.getColumnName(i);
+                value = cursor.getString(cursor.getColumnIndexOrThrow(cursor.getColumnName(i)));
+
+                out += " " +name + " " +value;
+
+            }
+            Log.d(TAG, out);
+        }
+        else Log.d(TAG, "Nothing to log");
+    }
+
+    private Cursor getCursorFromUri(Uri uri)
+    {
+        return getContext().getContentResolver().query(uri, AvindexStore.Images.Media.ALL_COLUMNS, null, null, null);
+    }
+
+    private Cursor queryLastContent() {
+        Cursor contentFocusPoint = AvindexStore.Images.Media.getContentFocusPoint(getContext().getContentResolver(), AvindexStore.Images.Media.getContentUri(AvindexStore.Images.Media.EXTERNAL_DEFAULT_MEDIA_ID));
+        if (contentFocusPoint != null && !contentFocusPoint.moveToFirst()) {
+            contentFocusPoint.close();
+            contentFocusPoint = null;
+        }
+        return contentFocusPoint;
+    }
+
+    public String getImageId(Cursor cursor) {
+        return cursor.getString(cursor.getColumnIndexOrThrow("_id"));
+    }
+
 
     @Override
     public boolean onUpperDialChanged(int value) {
@@ -104,11 +183,17 @@ public class ImageFragment extends Fragment implements KeyEvents {
 
     @Override
     public boolean onLowerDialChanged(int value) {
-        if (value > 0)
-            cursor.moveToNext();
-        else
-            cursor.moveToPrevious();
-        loadImage();
+        if (value > 0) {
+            mediaCursor.moveToNext();
+            if(mediaCursor.isAfterLast())
+                mediaCursor.moveToFirst();
+        }
+        else {
+            mediaCursor.moveToPrevious();
+            if(mediaCursor.isBeforeFirst())
+                mediaCursor.moveToLast();
+        }
+        loadOptimizedImg();
         return false;
     }
 

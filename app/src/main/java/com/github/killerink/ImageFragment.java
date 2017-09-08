@@ -1,7 +1,9 @@
 package com.github.killerink;
 
+import android.content.ContentUris;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -13,14 +15,18 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.obsidium.bettermanual.R;
+import com.sony.scalar.graphics.JpegExporter;
 import com.sony.scalar.graphics.OptimizedImage;
 import com.sony.scalar.graphics.OptimizedImageFactory;
+import com.sony.scalar.hardware.avio.DisplayManager;
 import com.sony.scalar.media.AvindexContentInfo;
 import com.sony.scalar.media.AvindexFactory;
+import com.sony.scalar.meta.Histogram;
 import com.sony.scalar.provider.AvindexStore;
 import com.sony.scalar.widget.OptimizedImageView;
 
 import java.io.File;
+import java.io.InputStream;
 
 
 public class ImageFragment extends Fragment implements KeyEvents {
@@ -42,8 +48,7 @@ public class ImageFragment extends Fragment implements KeyEvents {
     private OptimizedImageView imageView;
     private ActivityInterface activityInterface;
     private Cursor mediaCursor;
-    private Cursor fileCursor;
-    private Bitmap bitmap;
+    OptimizedImage image;
 
     final String[] GROUP_QUERY_PROJECTION = new String[] { "_id", "_count", "count_of_one_before", "dcf_folder_number" };
     final String[] QUERY_PROJECTION = new String[] { "_id", "_data", "_display_name", "datetaken" };
@@ -69,6 +74,27 @@ public class ImageFragment extends Fragment implements KeyEvents {
         super.onViewCreated(view, savedInstanceState);
 
         imageView = (OptimizedImageView) view.findViewById(R.id.touchimageview);
+
+        imageView.setOnDisplayEventListener(new OptimizedImageView.onDisplayEventListener() {
+            @Override
+            public void onDisplay(int i) {
+                Log.d(TAG,"onDisplay " + i);
+            }
+        });
+
+        imageView.setOnLayoutChangeListener(new OptimizedImageView.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                Log.d(TAG, "onLayoutChange");
+            }
+        });
+
+        imageView.setOnHistogramEventListener(new OptimizedImageView.onHistogramEventListener() {
+            @Override
+            public void onHistogram(int i, Histogram histogram) {
+                Log.d(TAG, "onHistogram");
+            }
+        });
     }
 
     @Override
@@ -76,8 +102,13 @@ public class ImageFragment extends Fragment implements KeyEvents {
         super.onResume();
         activityInterface.getCamera().stopPreview();
         activityInterface.getCamera().stopDisplay();
-        AvindexStore.loadMedia(AvindexStore.Images.Media.EXTERNAL_DEFAULT_MEDIA_ID, 1);
-        mediaCursor = getContext().getContentResolver().query(baseUri, AvindexStore.Images.Media.ALL_COLUMNS, null, null, null);
+        activityInterface.getCamera().closeCamera();
+
+        AvindexStore.loadMedia(AvindexStore.getExternalMediaIds()[0], AvindexStore.CONTENT_TYPE_LOAD_STILL);
+        AvindexStore.Images.waitAndUpdateDatabase(getContext().getContentResolver(), AvindexStore.getExternalMediaIds()[0]);
+
+        Uri media = AvindexStore.Images.Media.getContentUri(AvindexStore.getExternalMediaIds()[0]);
+        mediaCursor = getCursorFromUri(media);
         mediaCursor.moveToFirst();
         loadOptimizedImg();
         //loadImage();
@@ -88,14 +119,14 @@ public class ImageFragment extends Fragment implements KeyEvents {
         super.onPause();
         if (mediaCursor != null && !mediaCursor.isClosed())
             mediaCursor.close();
+        activityInterface.getCamera().startCamera();
         activityInterface.getCamera().startPreview();
         activityInterface.getCamera().startDisplay();
     }
 
     private void loadOptimizedImg()
     {
-
-        String[] externalMediaIds = AvindexStore.getExternalMediaIds(); // a6000 = 1000
+        /*String[] externalMediaIds = AvindexStore.getExternalMediaIds(); // a6000 = 1000
         Log.d(TAG,"FOLDER");
         Uri folder= AvindexStore.Images.Folder.getContentUri(AvindexStore.Images.Media.EXTERNAL_DEFAULT_MEDIA_ID);
         mediaCursor = getCursorFromUri(folder);
@@ -106,17 +137,16 @@ public class ImageFragment extends Fragment implements KeyEvents {
         Uri lastContent = AvindexStore.Images.LastContent.getContentUri(AvindexStore.Images.Media.EXTERNAL_DEFAULT_MEDIA_ID);
         mediaCursor = getCursorFromUri(lastContent);
         logCursor(mediaCursor);
-        mediaCursor.close();
+        mediaCursor.close();*/
 
         Log.d(TAG,"MEDIA");
-        Uri media = AvindexStore.Images.Media.getContentUri(AvindexStore.Images.Media.EXTERNAL_DEFAULT_MEDIA_ID);
-        mediaCursor = getCursorFromUri(media);
+
         logCursor(mediaCursor);
         String data = mediaCursor.getString(mediaCursor.getColumnIndexOrThrow("_data"));
         String id = mediaCursor.getString(mediaCursor.getColumnIndexOrThrow("_id"));
-        mediaCursor.close();
 
-        Log.d(TAG,"INFO");
+
+        /*Log.d(TAG,"INFO");
         Uri infoUri = AvindexStore.Images.Info.getContentUri(AvindexStore.Images.Media.EXTERNAL_DEFAULT_MEDIA_ID);
         mediaCursor = getCursorFromUri(infoUri);
         logCursor(mediaCursor);
@@ -127,14 +157,31 @@ public class ImageFragment extends Fragment implements KeyEvents {
         mediaCursor = getCursorFromUri(thumburi);
         logCursor(mediaCursor);
         if (mediaCursor != null)
-            mediaCursor.close();
+            mediaCursor.close();*/
 
-        AvindexContentInfo info = AvindexStore.Images.Media.getImageInfoFull(id);
+        AvindexContentInfo info = AvindexStore.Images.Media.getImageInfo(id);
 
+        OptimizedImageFactory.Options options = new OptimizedImageFactory.Options();
+        options.bBasicInfo = true;
+        options.bCamInfo = true;
+        options.bGpsInfo = true;
+        options.bExtCamInfo = true;
+        options.imageType = info.getAttributeInt(AvindexContentInfo.TAG_CONTENT_TYPE,2);
+        options.colorType = info.getAttributeInt(AvindexContentInfo.TAG_COLOR_TYPE,1);
+        options.outContentInfo = info;
 
-        OptimizedImage image = OptimizedImageFactory.decodeImage(data);
+        if (image != null) {
+            image.release();
+            image = null;
+        }
+        image = OptimizedImageFactory.decodeImage(data,options);
 
         imageView.setOptimizedImage(image);
+    }
+
+    private String getStringFromCollumn(String column, Cursor cursor)
+    {
+        return cursor.getString(cursor.getColumnIndexOrThrow(column));
     }
 
     private void logCursor(Cursor cursor)
@@ -142,7 +189,8 @@ public class ImageFragment extends Fragment implements KeyEvents {
         String name;
         String value;
         if (cursor != null && cursor.getCount() > 0) {
-            cursor.moveToFirst();
+            if (cursor.getPosition() == -1)
+                cursor.moveToFirst();
             int columnCount = cursor.getColumnCount();
             String out = "";
             for (int i = 0; i < columnCount; i++) {

@@ -67,6 +67,7 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     Camera.Parameters parameters;
     CameraEx.ParametersModifier modifier;
     CameraEx m_camera;
+    protected boolean cameraIsOpen = false;
 
      void sendMsgToCam(int code)
     {

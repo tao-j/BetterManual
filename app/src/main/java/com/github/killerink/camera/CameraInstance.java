@@ -41,6 +41,7 @@ public class CameraInstance extends CameraInternalEventImpl implements SurfaceHo
             options.setPreview(true);
             m_camera = CameraEx.open(0, options);
             Log.d(TAG, "Cam open");
+            cameraIsOpen = true;
             parameters = m_camera.getNormalCamera().getParameters();
             modifier = m_camera.createParametersModifier(parameters);
             dumpParameter();
@@ -108,6 +109,7 @@ public class CameraInstance extends CameraInternalEventImpl implements SurfaceHo
     }
 
     public void closeCamera() {
+        cameraIsOpen = false;
         Log.d(TAG, "closeCamera");
         m_camera.setAutoFocusStartListener(null);
         m_camera.setAutoFocusDoneListener(null);
@@ -195,7 +197,10 @@ public class CameraInstance extends CameraInternalEventImpl implements SurfaceHo
         }
 
         @Override
-        public void handleMessage(Message msg) {
+        public void handleMessage(Message msg)
+        {
+            if (!cameraIsOpen)
+                return;
             try {
                 switch (msg.what) {
 

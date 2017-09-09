@@ -4,6 +4,7 @@ import android.content.ContentUris;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -11,9 +12,11 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.obsidium.bettermanual.R;
@@ -48,10 +51,14 @@ public class ImageFragment extends Fragment implements KeyEvents {
 
     private final String TAG = ImageFragment.class.getSimpleName();
     private OptimizedImageView imageView;
+    private FrameLayout surfaceViewParent;
     private ActivityInterface activityInterface;
     private Cursor mediaCursor;
     OptimizedImage image;
     AvindexContentInfo info;
+    private float scaleFactor = 1;
+    private final float scaleStep = 0.2f;
+    private final float maxScaleFactor = 8;
 
     final String[] GROUP_QUERY_PROJECTION = new String[] { "_id", "_count", "count_of_one_before", "dcf_folder_number" };
     final String[] QUERY_PROJECTION = new String[] { "_id", "_data", "_display_name", "datetaken" };
@@ -76,39 +83,31 @@ public class ImageFragment extends Fragment implements KeyEvents {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        imageView = (OptimizedImageView) view.findViewById(R.id.touchimageview);
+        surfaceViewParent = (FrameLayout)view.findViewById(R.id.surfaceParentView);
+        imageView = new OptimizedImageView(getContext());
+        surfaceViewParent.addView(imageView);
+        imageView.setDisplayPosition(new Point(0,0), OptimizedImageView.PositionType.POS_TYPE_NONE);
 
-        imageView.setOnDisplayEventListener(new OptimizedImageView.onDisplayEventListener() {
-            @Override
-            public void onDisplay(int i) {
-                Log.d(TAG,"onDisplay " + i);
-            }
-        });
 
-        imageView.setOnLayoutChangeListener(new OptimizedImageView.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
-                Log.d(TAG, "onLayoutChange");
-            }
-        });
-
-        imageView.setOnHistogramEventListener(new OptimizedImageView.onHistogramEventListener() {
+        //used to get histogram data
+        /*imageView.setOnHistogramEventListener(new OptimizedImageView.onHistogramEventListener() {
             @Override
             public void onHistogram(int i, Histogram histogram) {
                 Log.d(TAG, "onHistogram");
             }
-        });
+        });*/
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        /*activityInterface.getCamera().stopPreview();
-        activityInterface.getCamera().stopDisplay();*/
+        //stop camera else Images are not load
         activityInterface.getCamera().closeCamera();
 
         AvindexStore.loadMedia(AvindexStore.getExternalMediaIds()[0], AvindexStore.CONTENT_TYPE_LOAD_STILL);
         AvindexStore.Images.waitAndUpdateDatabase(getContext().getContentResolver(), AvindexStore.getExternalMediaIds()[0]);
+
+
 
         Uri media = AvindexStore.Images.Media.getContentUri(AvindexStore.getExternalMediaIds()[0]);
         mediaCursor = getCursorFromUri(media);
@@ -124,46 +123,20 @@ public class ImageFragment extends Fragment implements KeyEvents {
             mediaCursor.close();
         closeImageInfo();
         closeOptimizedImage();
+        //start camera, all other fragments need it.
+        // CameraUiFragment gets loaded automatic when camera returns onCameraOpen callback
         activityInterface.getCamera().startCamera();
-        /*activityInterface.getCamera().startPreview();
-        activityInterface.getCamera().startDisplay();*/
     }
+
 
     private void loadOptimizedImg()
     {
-        /*String[] externalMediaIds = AvindexStore.getExternalMediaIds(); // a6000 = 1000
-        Log.d(TAG,"FOLDER");
-        Uri folder= AvindexStore.Images.Folder.getContentUri(AvindexStore.Images.Media.EXTERNAL_DEFAULT_MEDIA_ID);
-        mediaCursor = getCursorFromUri(folder);
-        logCursor(mediaCursor);
-        mediaCursor.close();
-
-        Log.d(TAG,"LAST_CONTENT");
-        Uri lastContent = AvindexStore.Images.LastContent.getContentUri(AvindexStore.Images.Media.EXTERNAL_DEFAULT_MEDIA_ID);
-        mediaCursor = getCursorFromUri(lastContent);
-        logCursor(mediaCursor);
-        mediaCursor.close();*/
 
         Log.d(TAG,"MEDIA");
 
         logCursor(mediaCursor);
         String data = mediaCursor.getString(mediaCursor.getColumnIndexOrThrow("_data"));
         String id = mediaCursor.getString(mediaCursor.getColumnIndexOrThrow("_id"));
-
-
-        /*Log.d(TAG,"INFO");
-        Uri infoUri = AvindexStore.Images.Info.getContentUri(AvindexStore.Images.Media.EXTERNAL_DEFAULT_MEDIA_ID);
-        mediaCursor = getCursorFromUri(infoUri);
-        logCursor(mediaCursor);
-        mediaCursor.close();
-
-        Log.d(TAG,"THUMB");
-        Uri thumburi = AvindexStore.Images.Thumbnails.getContentUri(AvindexStore.Images.Media.EXTERNAL_DEFAULT_MEDIA_ID);
-        mediaCursor = getCursorFromUri(thumburi);
-        logCursor(mediaCursor);
-        if (mediaCursor != null)
-            mediaCursor.close();*/
-
 
         closeImageInfo();
 
@@ -199,11 +172,6 @@ public class ImageFragment extends Fragment implements KeyEvents {
         }
     }
 
-    private String getStringFromCollumn(String column, Cursor cursor)
-    {
-        return cursor.getString(cursor.getColumnIndexOrThrow(column));
-    }
-
     private void logCursor(Cursor cursor)
     {
         String name;
@@ -230,19 +198,6 @@ public class ImageFragment extends Fragment implements KeyEvents {
         return getContext().getContentResolver().query(uri, AvindexStore.Images.Media.ALL_COLUMNS, null, null, null);
     }
 
-    private Cursor queryLastContent() {
-        Cursor contentFocusPoint = AvindexStore.Images.Media.getContentFocusPoint(getContext().getContentResolver(), AvindexStore.Images.Media.getContentUri(AvindexStore.Images.Media.EXTERNAL_DEFAULT_MEDIA_ID));
-        if (contentFocusPoint != null && !contentFocusPoint.moveToFirst()) {
-            contentFocusPoint.close();
-            contentFocusPoint = null;
-        }
-        return contentFocusPoint;
-    }
-
-    public String getImageId(Cursor cursor) {
-        return cursor.getString(cursor.getColumnIndexOrThrow("_id"));
-    }
-
 
     @Override
     public boolean onUpperDialChanged(int value) {
@@ -252,16 +207,28 @@ public class ImageFragment extends Fragment implements KeyEvents {
     @Override
     public boolean onLowerDialChanged(int value) {
         if (value > 0) {
-            mediaCursor.moveToNext();
-            if(mediaCursor.isAfterLast())
-                mediaCursor.moveToFirst();
+            scaleFactor += scaleStep;
+            if (scaleFactor > maxScaleFactor)
+                scaleFactor = maxScaleFactor;
+
         }
         else {
-            mediaCursor.moveToPrevious();
-            if(mediaCursor.isBeforeFirst())
-                mediaCursor.moveToLast();
+            scaleFactor -= scaleStep;
+            if (scaleFactor < 1)
+                scaleFactor = 1;
         }
-        loadOptimizedImg();
+        OptimizedImageView.LayoutInfo info = imageView.getLayoutInfo();
+        Point mTranslateDenom = new Point(info.imageSize.width(), info.imageSize.height());
+        Point mTranslate = new Point(info.clipSize.centerX(),info.clipSize.centerY());
+
+        imageView.setScale(scaleFactor, OptimizedImageView.BoundType.BOUND_TYPE_LONG_EDGE);
+        info = imageView.getLayoutInfo();
+
+        final int width2 = info.imageSize.width();
+        final int height = info.imageSize.height();
+        final Point point = new Point(info.clipSize.centerX() - width2 * mTranslate.x / mTranslateDenom.x, info.clipSize.centerY() - height * mTranslate.y / mTranslateDenom.y);
+        imageView.translate(point, new Point(width2, height), OptimizedImageView.TranslationType.TRANS_TYPE_INNER_CENTER);
+        imageView.redraw();
         return false;
     }
 
@@ -292,6 +259,10 @@ public class ImageFragment extends Fragment implements KeyEvents {
 
     @Override
     public boolean onLeftKeyUp() {
+        mediaCursor.moveToPrevious();
+        if(mediaCursor.isBeforeFirst())
+            mediaCursor.moveToLast();
+        loadOptimizedImg();
         return false;
     }
 
@@ -302,6 +273,10 @@ public class ImageFragment extends Fragment implements KeyEvents {
 
     @Override
     public boolean onRightKeyUp() {
+        mediaCursor.moveToNext();
+        if(mediaCursor.isAfterLast())
+            mediaCursor.moveToFirst();
+        loadOptimizedImg();
         return false;
     }
 

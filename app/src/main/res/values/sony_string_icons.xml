@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="icon_lowerDial" translatable="false">\uE4CD</string>
-    <string name="icon_enterButton" translatable="false">\uE04C</string>
+    <string name="icon_enterButton" translatable="false">\uEB01</string>
     <string name="icon_ev" translatable="false">\uEB18</string>
-    <string name="icon_menu" translatable="false">\uE51A</string>
-    <string name="icon_zoom" translatable="false">\uE4CD</string>
-    <string name="icon_end" translatable="false">\uE801</string>
-    <string name="icon_select" translatable="false">\uE805</string>
-    <string name="icon_change" translatable="false">\uE4CD</string>
-    <string name="icon_back_forward" translatable="false">\uE806</string>
-    <string name="icon_settings" translatable="false">\uE807</string>
+    <string name="icon_menu" translatable="false">\uEB03</string>
+    <string name="icon_settings" translatable="false">\uE4C8</string>
     <string name="icon_focus" translatable="false">\uE4CD</string>
-    <string name="icon_delet" translatable="false">\uE51B</string>
-    <string name="icon_upscale" translatable="false">\uE80B</string>
-    <string name="icon_downscale" translatable="false">\uE089</string>
+    <string name="icon_delet" translatable="false">\uEB00</string>
+    <string name="icon_plus" translatable="false">\uEB0F</string>
+    <string name="icon_minus" translatable="false">\uEB0E</string>
+    <string name="icon_top_left_dial" translatable="false">\uE518</string>
+    <string name="icon_top_right_dial" translatable="false">\uE519</string>
+    <string name="icon_button_ael" translatable="false">\uE4DE</string>
+    <string name="icon_button_left" translatable="false">\uE81F</string>
+    <string name="icon_button_right" translatable="false">\uE808</string>
+    <string name="icon_button_top" translatable="false">\uE821</string>
+    <string name="icon_button_bottom" translatable="false">\uE820</string>
+    <string name="icon_button_left_right_top_bottom" translatable="false">\uE805</string>
+    <string name="icon_button_left_right" translatable="false">\uE806</string>
+    <string name="icon_button_top_bottom" translatable="false">\uE807</string>
+    <string name="icon_rotate" translatable="false">\u07B</string>
 
 </resources>

@@ -208,6 +208,11 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
             surfaceView.setOnTouchListener(onTouchListner);
     }
 
+    @Override
+    public String getResString(int id) {
+        return getResources().getString(id);
+    }
+
     private void replaceCameraFragment(Fragment fragment, String id)
     {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

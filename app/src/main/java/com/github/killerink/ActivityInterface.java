@@ -23,4 +23,5 @@ public interface ActivityInterface {
     void setColorDepth(boolean highQuality);
     void loadFragment(int fragment);
     void setSurfaceViewOnTouchListner(View.OnTouchListener onTouchListner);
+    String getResString(int id);
 }

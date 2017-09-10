@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.github.killerink.KeyEvents;
 import com.obsidium.bettermanual.CameraUiInterface;
+import com.obsidium.bettermanual.R;
 import com.sony.scalar.sysutil.didep.Settings;
 
 public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
@@ -46,7 +47,10 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
             //cameraUiInterface.setDialMode(CameraUiFragment.DialMode.timelapseSetInterval);
             m_timelapseInterval = 1000;
             updateTimelapseInterval();
-            cameraUiInterface.showHintMessage("\uE4CD to set timelapse interval, \uE04C to confirm");
+            cameraUiInterface.showHintMessage(cameraUiInterface.getActivityInterface().getResString(R.string.icon_lowerDial) +
+                    " to set timelapse interval, "
+                    +cameraUiInterface.getActivityInterface().getResString(R.string.icon_enterButton)
+                    + " to confirm");
 
 
             // Not supported on some camera models
@@ -283,7 +287,10 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
             updateTimelapseInterval();
         }
         else if (currentdial == TLS_SET_INTERVAL) {
-            cameraUiInterface.showHintMessage("\uE4CD to set picture count, \uE04C to confirm");
+            cameraUiInterface.showHintMessage(cameraUiInterface.getActivityInterface().getResString(R.string.icon_lowerDial)
+                    + " to set picture count,"
+                    + cameraUiInterface.getActivityInterface().getResString(R.string.icon_enterButton)
+                    + " to confirm");
             currentdial = TLS_SET_PICCOUNT;
             updateTimelapsePictureCount();
         }

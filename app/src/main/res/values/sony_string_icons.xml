@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="icon_lowerDial" translatable="false">\uE4CD</string>
+    <string name="icon_enterButton" translatable="false">\uE04C</string>
+</resources>

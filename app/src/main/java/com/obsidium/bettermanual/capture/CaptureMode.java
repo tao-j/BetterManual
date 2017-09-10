@@ -1,6 +1,7 @@
 package com.obsidium.bettermanual.capture;
 
 import com.obsidium.bettermanual.CameraUiInterface;
+import com.obsidium.bettermanual.R;
 
 
 public abstract class CaptureMode implements CaptureModeInterface
@@ -44,7 +45,7 @@ public abstract class CaptureMode implements CaptureModeInterface
     public void startCountDown() {
         isActive = true;
         cameraUiInterface.getActivityInterface().getCamera().stopPreview();
-        cameraUiInterface.showHintMessage("\uE04C to abort");
+        cameraUiInterface.showHintMessage(cameraUiInterface.getActivityInterface().getResString(R.string.icon_enterButton) + " to abort");
         // Stop preview (doesn't seem to preserve battery life?)
         cameraUiInterface.getActivityInterface().getCamera().stopDisplay();
 

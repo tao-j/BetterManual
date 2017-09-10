@@ -5,6 +5,7 @@ import android.util.Pair;
 import com.github.killerink.KeyEvents;
 import com.obsidium.bettermanual.CameraUiInterface;
 import com.obsidium.bettermanual.CameraUtil;
+import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.views.ExposureModeView;
 import com.sony.scalar.hardware.CameraEx;
 
@@ -289,7 +290,10 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
         }
         else if(currentDialMode == BRACKET_STEP)
         {
-            cameraUiInterface.showHintMessage("\uE4CD to set picture count, \uE04C to confirm");
+            cameraUiInterface.showHintMessage(cameraUiInterface.getActivityInterface().getResString(R.string.icon_lowerDial)
+                    + "to set picture count,"
+                    + cameraUiInterface.getActivityInterface().getResString(R.string.icon_enterButton)
+                    + " to confirm");
             currentDialMode = BRACKET_PICCOUNT;
             reset();
             updateBracketPicCount();

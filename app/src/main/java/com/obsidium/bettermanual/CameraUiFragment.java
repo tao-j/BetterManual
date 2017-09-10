@@ -653,7 +653,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public boolean onFnKeyUp() {
-        activityInterface.loadFragment(MainActivity.FRAGMENT_PREVIEWMAGNIFICATION);
+
         return false;
     }
 
@@ -664,6 +664,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public boolean onAelKeyUp() {
+        activityInterface.loadFragment(MainActivity.FRAGMENT_PREVIEWMAGNIFICATION);
         return false;
     }
 

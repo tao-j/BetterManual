@@ -254,8 +254,7 @@ public class PreviewMagnificationFragment extends Fragment implements KeyEvents,
 
     @Override
     public boolean onFnKeyUp() {
-        activityInterface.getCamera().stopPreviewMagnification();
-        activityInterface.loadFragment(MainActivity.FRAGMENT_CAMERA_UI);
+
         return false;
     }
 
@@ -266,6 +265,8 @@ public class PreviewMagnificationFragment extends Fragment implements KeyEvents,
 
     @Override
     public boolean onAelKeyUp() {
+        activityInterface.getCamera().stopPreviewMagnification();
+        activityInterface.loadFragment(MainActivity.FRAGMENT_CAMERA_UI);
         return false;
     }
 

@@ -19,7 +19,7 @@ public class EvView extends BaseTextView {
 
     @Override
     public String getNavigationString() {
-        return null;
+        return getResources().getString(R.string.view_ev);
     }
 
     private int             m_maxExposureCompensation;

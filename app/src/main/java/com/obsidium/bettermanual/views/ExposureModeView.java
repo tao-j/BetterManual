@@ -19,7 +19,7 @@ public class ExposureModeView extends BaseImageView {
 
     @Override
     public String getNavigationString() {
-        return null;
+        return getResources().getString(R.string.view_drivemode_navigation);
     }
 
     public enum ExposureModes { manual, aperture, shutter, other }

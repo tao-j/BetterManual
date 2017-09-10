@@ -2,4 +2,17 @@
 <resources>
     <string name="icon_lowerDial" translatable="false">\uE4CD</string>
     <string name="icon_enterButton" translatable="false">\uE04C</string>
+    <string name="icon_ev" translatable="false">\uEB18</string>
+    <string name="icon_menu" translatable="false">\uE51A</string>
+    <string name="icon_zoom" translatable="false">\uE4CD</string>
+    <string name="icon_end" translatable="false">\uE801</string>
+    <string name="icon_select" translatable="false">\uE805</string>
+    <string name="icon_change" translatable="false">\uE4CD</string>
+    <string name="icon_back_forward" translatable="false">\uE806</string>
+    <string name="icon_settings" translatable="false">\uE807</string>
+    <string name="icon_focus" translatable="false">\uE4CD</string>
+    <string name="icon_delet" translatable="false">\uE51B</string>
+    <string name="icon_upscale" translatable="false">\uE80B</string>
+    <string name="icon_downscale" translatable="false">\uE089</string>
+
 </resources>

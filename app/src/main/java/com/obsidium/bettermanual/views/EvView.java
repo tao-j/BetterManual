@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 
 import com.github.killerink.camera.CameraInstance;
+import com.obsidium.bettermanual.R;
 
 /**
  * Created by KillerInk on 22.08.2017.
@@ -92,9 +93,9 @@ public class EvView extends BaseTextView {
         if (m_curExposureCompensation == 0)
             text = "\uEB18\u00B10.0";
         else if (m_curExposureCompensation > 0)
-            text = String.format("\uEB18+%.1f", m_curExposureCompensation * m_exposureCompensationStep);
+            text = String.format(cameraUiInterface.getActivityInterface().getResString(R.string.icon_ev) + "+%.1f", m_curExposureCompensation * m_exposureCompensationStep);
         else
-            text = String.format("\uEB18%.1f", m_curExposureCompensation * m_exposureCompensationStep);
+            text = String.format(cameraUiInterface.getActivityInterface().getResString(R.string.icon_ev) + "%.1f", m_curExposureCompensation * m_exposureCompensationStep);
         setText(text);
         if (notify)
             cameraUiInterface.showMessageDelayed(text);

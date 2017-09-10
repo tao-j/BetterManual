@@ -183,11 +183,20 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         Log.d(TAG,"onResume");
         final TimeLog timeLog = new TimeLog("onResume");
         super.onResume();
-        activityInterface.getDialHandler().setDialEventListner(this);
-        loadUiItems();
-        initUi();
+        activityInterface.getMainHandler().post(setupUiItems);
         timeLog.logTime();
     }
+
+    private Runnable setupUiItems = new Runnable() {
+        @Override
+        public void run() {
+            //first add ui
+            loadUiItems();
+            initUi();
+            //then set the key event listner to avoid nullpointer
+            activityInterface.getDialHandler().setDialEventListner(CameraUiFragment.this);
+        }
+    };
 
     @Override
     public void onPause()
@@ -607,14 +616,14 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         else if (view == m_ivTimelapse)
         {
             activityInterface.getDialHandler().setDialEventListner(timelapse);
-            timelapse.onEnterKeyDown();
+            timelapse.onEnterKeyUp();
 
             return false;
         }
         else if (view == m_ivBracket)
         {
             activityInterface.getDialHandler().setDialEventListner(bracket);
-            bracket.onEnterKeyDown();
+            bracket.onEnterKeyUp();
             //setDialMode(DialMode.bracketSetPicCount);
 
             return false;
@@ -686,7 +695,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
     @Override
     public boolean onEnterKeyDown()
     {
-
         return false;
     }
 

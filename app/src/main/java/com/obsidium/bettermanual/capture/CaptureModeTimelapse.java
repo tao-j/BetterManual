@@ -210,6 +210,11 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
 
     @Override
     public boolean onUpperDialChanged(int value) {
+        return false;
+    }
+
+    @Override
+    public boolean onLowerDialChanged(int value) {
         if (currentdial == TLS_SET_INTERVAL)
         {
             if (value <0)
@@ -218,18 +223,13 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
                 increment();
         }
         else
-            if (currentdial == TLS_SET_PICCOUNT)
-            {
-                if (value < 0)
-                    decrementPicCount();
-                else
-                    incrementPicCount();
-            }
-        return false;
-    }
-
-    @Override
-    public boolean onLowerDialChanged(int value) {
+        if (currentdial == TLS_SET_PICCOUNT)
+        {
+            if (value < 0)
+                decrementPicCount();
+            else
+                incrementPicCount();
+        }
         return false;
     }
 

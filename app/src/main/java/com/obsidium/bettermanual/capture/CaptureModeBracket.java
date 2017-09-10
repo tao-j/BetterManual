@@ -174,7 +174,6 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
 
     protected void updateBracketStep()
     {
-
         final int mod = m_bracketStep % 3;
         final int ev;
         if (mod == 0)
@@ -210,6 +209,12 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
 
     @Override
     public boolean onUpperDialChanged(int value) {
+
+        return false;
+    }
+
+    @Override
+    public boolean onLowerDialChanged(int value) {
         if (currentDialMode == BRACKET_STEP)
         {
             if (value <0)
@@ -225,11 +230,6 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
             else
                 incrementPicCount();
         }
-        return false;
-    }
-
-    @Override
-    public boolean onLowerDialChanged(int value) {
         return false;
     }
 

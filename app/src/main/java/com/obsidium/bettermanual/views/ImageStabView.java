@@ -29,6 +29,11 @@ public class ImageStabView extends BaseImageView {
 
     }
 
+    @Override
+    public String getNavigationString() {
+        return getResources().getString(R.string.view_drivemode_navigation);
+    }
+
     //onetime
     @Override
     public void updateImage() {

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.obsidium.bettermanual.R;
 import com.sony.scalar.hardware.CameraEx;
 
 /**
@@ -15,6 +16,12 @@ public class ApertureView extends BaseTextView implements CameraEx.ApertureChang
     @Override
     public void setIn_DecrementValue(int value) {
         onScrolled(value);
+    }
+
+    @Override
+    public String getNavigationString() {
+
+        return getResources().getString(R.string.view_aperture_navigation);
     }
 
     private class ApertureSetRunner implements Runnable

@@ -3,7 +3,6 @@ package com.github.killerink.camera;
 import android.hardware.Camera;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.util.Pair;
 
 import com.sony.scalar.hardware.CameraEx;

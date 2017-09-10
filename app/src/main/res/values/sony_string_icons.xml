@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
-    <string name="icon_lowerDial" translatable="false">\uE4CD</string>
-    <string name="icon_enterButton" translatable="false">\uEB01</string>
+
+
     <string name="icon_ev" translatable="false">\uEB18</string>
     <string name="icon_menu" translatable="false">\uEB03</string>
     <string name="icon_settings" translatable="false">\uE4C8</string>
@@ -10,7 +11,7 @@
     <string name="icon_plus" translatable="false">\uEB0F</string>
     <string name="icon_minus" translatable="false">\uEB0E</string>
     <string name="icon_top_left_dial" translatable="false">\uE518</string>
-    <string name="icon_top_right_dial" translatable="false">\uE519</string>
+
     <string name="icon_button_ael" translatable="false">\uE4DE</string>
     <string name="icon_button_left" translatable="false">\uE81F</string>
     <string name="icon_button_right" translatable="false">\uE808</string>

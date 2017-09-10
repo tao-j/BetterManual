@@ -17,6 +17,11 @@ public class EvView extends BaseTextView {
         onScrolled(value);
     }
 
+    @Override
+    public String getNavigationString() {
+        return null;
+    }
+
     private int             m_maxExposureCompensation;
     private int             m_minExposureCompensation;
     private int             m_curExposureCompensation;

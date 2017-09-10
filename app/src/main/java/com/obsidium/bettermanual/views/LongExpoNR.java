@@ -25,6 +25,11 @@ public class LongExpoNR extends BaseImageView {
     }
 
     @Override
+    public String getNavigationString() {
+        return getResources().getString(R.string.view_drivemode_navigation);
+    }
+
+    @Override
     public void updateImage() {
         if (activity.getCamera().getLongeExposureNR()) {
             setImageResource(R.drawable.lnr_on);

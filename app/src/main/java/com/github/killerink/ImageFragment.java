@@ -1,37 +1,23 @@
 package com.github.killerink;
 
-import android.content.ContentUris;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 import com.obsidium.bettermanual.R;
-import com.sony.scalar.graphics.JpegExporter;
 import com.sony.scalar.graphics.OptimizedImage;
 import com.sony.scalar.graphics.OptimizedImageFactory;
-import com.sony.scalar.hardware.avio.DisplayManager;
 import com.sony.scalar.media.AvindexContentInfo;
-import com.sony.scalar.media.AvindexFactory;
-import com.sony.scalar.meta.Histogram;
 import com.sony.scalar.provider.AvindexStore;
 import com.sony.scalar.widget.OptimizedImageView;
-
-import java.io.File;
-import java.io.InputStream;
 
 
 public class ImageFragment extends Fragment implements KeyEvents {

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 
 import com.github.killerink.camera.CameraInstance;
+import com.obsidium.bettermanual.R;
 import com.sony.scalar.hardware.CameraEx;
 
 import java.util.List;
@@ -107,5 +108,12 @@ public class IsoView extends BaseTextView implements CameraEx.AutoISOSensitivity
     @Override
     public void setIn_DecrementValue(int value) {
         onScrolled(value);
+    }
+
+    @Override
+    public String getNavigationString() {
+        if (m_curIso == 0)
+            return getResources().getString(R.string.view_iso_navigation_auto);
+        return getResources().getString(R.string.view_iso_navigation_manual);
     }
 }

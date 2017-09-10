@@ -8,7 +8,7 @@ import android.widget.TextView;
 import com.obsidium.bettermanual.CameraUiInterface;
 import com.obsidium.bettermanual.OnSwipeTouchListener;
 
-public abstract class BaseTextView extends TextView implements DialValueSet
+public abstract class BaseTextView extends TextView implements DialViewInterface
 {
 
     protected CameraUiInterface cameraUiInterface;
@@ -76,4 +76,9 @@ public abstract class BaseTextView extends TextView implements DialValueSet
 
     public abstract void onScrolled(int distance);
     public abstract boolean onClick();
+
+    @Override
+    public void setColorToView(Integer color) {
+        setTextColor(color);
+    }
 }

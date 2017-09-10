@@ -1,3 +1,20 @@
+<!DOCTYPE resources [
+    <!ENTITY icon_lowerDial "\uE4CD">
+    <!ENTITY icon_enterButton "\uEB01">
+    <!ENTITY icon_top_right_dial "\uE519">
+    ]>
 <resources>
     <string name="app_name">BetterManual</string>
+    <string name="view_aperture_navigation">&icon_top_right_dial; to change</string>
+    <string name="view_iso_navigation_manual">&icon_top_right_dial; to change, &icon_enterButton; auto/manual</string>
+    <string name="view_iso_navigation_auto">&icon_enterButton; auto/manual</string>
+    <string name="view_shutter_navigation_enable">&icon_top_right_dial; to change, </string>
+    <string name="view_shutter_navigation_disabled">&icon_enterButton; to change MinShutterSpeed </string>
+    <string name="view_drivemode_navigation">&icon_enterButton; to change </string>
+    <string name="view_startBracket_Timelapse">&icon_enterButton; to start </string>
+
+
+    <string name="icon_lowerDial" translatable="false">&icon_lowerDial;</string>
+    <string name="icon_enterButton" translatable="false">&icon_enterButton;</string>
+    <string name="icon_top_right_dial" translatable="false">&icon_top_right_dial;</string>
 </resources>

@@ -91,4 +91,9 @@ public class DriveMode extends BaseImageView
     public void setIn_DecrementValue(int value) {
 
     }
+
+    @Override
+    public String getNavigationString() {
+        return getResources().getString(R.string.view_drivemode_navigation);
+    }
 }

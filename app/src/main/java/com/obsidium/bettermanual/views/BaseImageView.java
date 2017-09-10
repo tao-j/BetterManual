@@ -2,12 +2,13 @@ package com.obsidium.bettermanual.views;
 
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
 import com.github.killerink.ActivityInterface;
 
-public abstract class BaseImageView extends ImageView implements DialValueSet
+public abstract class BaseImageView extends ImageView implements DialViewInterface
 {
 
     protected ActivityInterface activity;
@@ -32,4 +33,12 @@ public abstract class BaseImageView extends ImageView implements DialValueSet
     public abstract void updateImage();
 
     public abstract void toggle();
+
+    @Override
+    public void setColorToView(Integer color) {
+        if (color == Color.WHITE)
+            setColorFilter(null);
+        else
+            setColorFilter(color);
+    }
 }

@@ -1,6 +1,5 @@
 package com.obsidium.bettermanual;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -16,7 +15,6 @@ import android.widget.TextView;
 
 import com.github.killerink.ActivityInterface;
 import com.github.killerink.KeyEvents;
-
 import com.github.killerink.MainActivity;
 import com.github.killerink.TimeLog;
 import com.obsidium.bettermanual.capture.CaptureModeBracket;
@@ -24,7 +22,7 @@ import com.obsidium.bettermanual.capture.CaptureModeTimelapse;
 import com.obsidium.bettermanual.views.ApertureView;
 import com.obsidium.bettermanual.views.BaseImageView;
 import com.obsidium.bettermanual.views.BaseTextView;
-import com.obsidium.bettermanual.views.DialValueSet;
+import com.obsidium.bettermanual.views.DialViewInterface;
 import com.obsidium.bettermanual.views.DriveMode;
 import com.obsidium.bettermanual.views.EvView;
 import com.obsidium.bettermanual.views.ExposureModeView;
@@ -34,11 +32,9 @@ import com.obsidium.bettermanual.views.HistogramView;
 import com.obsidium.bettermanual.views.ImageStabView;
 import com.obsidium.bettermanual.views.IsoView;
 import com.obsidium.bettermanual.views.LongExpoNR;
-import com.obsidium.bettermanual.views.PreviewNavView;
 import com.obsidium.bettermanual.views.ShutterView;
 import com.sony.scalar.hardware.CameraEx;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,8 +64,8 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
     private HistogramView m_vHist;
     private DriveMode driveMode;
     private ExposureModeView exposureMode;
-    private ImageView       m_ivTimelapse;
-    private ImageView       m_ivBracket;
+    private BaseImageView       m_ivTimelapse;
+    private BaseImageView       m_ivBracket;
     private GridView m_vGrid;
     private TextView        m_tvHint;
     private FocusScaleView m_focusScaleView;
@@ -81,7 +77,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
     private ImageStabView imageStabView;
 
-    private List<View> dialViews;
+    private List<DialViewInterface> dialViews;
     private int lastDialView;
 
     // Timelapse
@@ -144,7 +140,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         Log.d(TAG,"onViewCreated");
         final TimeLog timeLog = new TimeLog("onViewCreated");
         super.onViewCreated(view, savedInstanceState);
-        dialViews = new ArrayList<View>();
+        dialViews = new ArrayList<DialViewInterface>();
         bottomHolder = (LinearLayout)view.findViewById(R.id.bottom_holder);
         leftHolder = (LinearLayout) view.findViewById(R.id.left_holder);
 
@@ -209,7 +205,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         clearUiItems();
         if (activityInterface.getCamera().getAutoPictureReviewControls() != null)
             activityInterface.getCamera().getAutoPictureReviewControls().setPictureReviewTime(m_pictureReviewTime);
-        //activityInterface.getCamera().setAutoPictureReviewControl(null);
         super.onPause();
     }
 
@@ -227,14 +222,66 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         dialViews.add(driveMode);
         leftHolder.addView(driveMode);
 
-        m_ivTimelapse = new ImageView(getContext());
+        m_ivTimelapse = new BaseImageView(getContext()) {
+            @Override
+            public void updateImage() {
+
+            }
+
+            @Override
+            public void toggle() {
+                if (timelapse.isActive())
+                    timelapse.abort();
+                else {
+                    activityInterface.getDialHandler().setDialEventListner(timelapse);
+                    timelapse.onEnterKeyUp();
+                }
+            }
+
+            @Override
+            public void setIn_DecrementValue(int value) {
+
+            }
+
+            @Override
+            public String getNavigationString() {
+                return getString(R.string.view_startBracket_Timelapse);
+            }
+        };
         //noinspection ResourceType
         m_ivTimelapse.setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_43_shoot_icon_setting_drivemode_invalid));
         m_ivTimelapse.setOnClickListener(this);
         dialViews.add(m_ivTimelapse);
         leftHolder.addView(m_ivTimelapse);
 
-        m_ivBracket = new ImageView(getContext());
+        m_ivBracket = new BaseImageView(getContext()) {
+            @Override
+            public void updateImage() {
+
+            }
+
+            @Override
+            public void toggle() {
+                if (bracket.isActive())
+                {
+                    bracket.abort();
+                }
+                else {
+                    activityInterface.getDialHandler().setDialEventListner(bracket);
+                    bracket.onEnterKeyUp();
+                }
+            }
+
+            @Override
+            public void setIn_DecrementValue(int value) {
+
+            }
+
+            @Override
+            public String getNavigationString() {
+                return getString(R.string.view_startBracket_Timelapse);
+            }
+        };
         //noinspection ResourceType
         m_ivBracket.setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_contshot));
         m_ivBracket.setOnClickListener(this);
@@ -516,17 +563,10 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
     private void setDialMode(int mode)
     {
-        View lastView = dialViews.get(lastDialView);
-        if (lastView instanceof BaseTextView)
-        {
-            ((BaseTextView)lastView).setTextColor(Color.WHITE);
-        }
-        else if (lastView instanceof BaseImageView)
-        {
-            ((BaseImageView)lastView).setColorFilter(null);
-        }
-        else if (lastView instanceof ImageView)
-            ((ImageView)lastView).setColorFilter(null);
+        DialViewInterface lastView = dialViews.get(lastDialView);
+        if (lastView == null)
+            return;
+        lastView.setColorToView(Color.WHITE);
         lastDialView = lastDialView + mode;
         if (lastDialView >= dialViews.size())
             lastDialView = 0;
@@ -534,16 +574,8 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
             lastDialView = dialViews.size()-1;
 
         lastView = dialViews.get(lastDialView);
-        if (lastView instanceof BaseTextView)
-        {
-            ((BaseTextView)lastView).setTextColor(Color.GREEN);
-        }
-        else if (lastView instanceof BaseImageView)
-        {
-            ((BaseImageView)lastView).setColorFilter(Color.GREEN);
-        }
-        else if (lastView instanceof ImageView)
-            ((ImageView)lastView).setColorFilter(Color.GREEN);
+        lastView.setColorToView(Color.GREEN);
+        showHintMessage(lastView.getNavigationString());
     }
 
     private void stopBulbCapture() {
@@ -568,8 +600,9 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
     @Override
     public boolean onUpperDialChanged(int value)
     {
-        DialValueSet view = (DialValueSet) dialViews.get(lastDialView);
+        DialViewInterface view = (DialViewInterface) dialViews.get(lastDialView);
         view.setIn_DecrementValue(value);
+
         return true;
     }
 
@@ -584,19 +617,10 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
     @Override
     public boolean onEnterKeyUp()
     {
-        View view = dialViews.get(lastDialView);
+        DialViewInterface view = dialViews.get(lastDialView);
         Log.d(TAG,"onEnterKeyDown");
-        if (timelapse.isActive())
-        {
-            timelapse.abort();
-            return false;
-        }
-        else if (bracket.isActive())
-        {
-            bracket.abort();
-            return false;
-        }
-        else if (view instanceof ShutterView || bulbcapture)
+
+        if (view instanceof ShutterView || bulbcapture)
         {
             if (m_tvShutter.getText().equals("BULB")) {
                 if (!bulbcapture) {
@@ -613,41 +637,12 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
                 getShutter().onClick();
             return false;
         }
-        else if (view == m_ivTimelapse)
-        {
-            activityInterface.getDialHandler().setDialEventListner(timelapse);
-            timelapse.onEnterKeyUp();
-
-            return false;
-        }
-        else if (view == m_ivBracket)
-        {
-            activityInterface.getDialHandler().setDialEventListner(bracket);
-            bracket.onEnterKeyUp();
-            //setDialMode(DialMode.bracketSetPicCount);
-
-            return false;
-        }
-        else if (view == exposureMode)
-        {
-            exposureMode.toggle();
-            return false;
-        }
-        else if (view == driveMode)
-        {
-            driveMode.toggle();
-            return false;
-        }
-        else if (view == imageStabView)
-        {
-            imageStabView.toggle();
-        }
-        else if (view == longExpoNR)
-            longExpoNR.toggle();
-        else if (view == iso) {
-            iso.onClick();
-            return false;
-        }
+        else
+            if (view instanceof BaseImageView)
+                ((BaseImageView) view).toggle();
+            else if (view instanceof BaseTextView)
+                ((BaseTextView) view).onClick();
+        showHintMessage(view.getNavigationString());
         return true;
     }
 
@@ -895,11 +890,8 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
     public void onMeteringRange(boolean b, CameraEx cameraEx) {
 
     }
-
     //############CameraEx.ProgramLineRangeOverListener END ###########
 
-
-    //###########CameraEx.PreviewMagnificationListener END###############
 
     //##########CameraEx.FocusDriveListner################
     @Override

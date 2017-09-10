@@ -5,12 +5,20 @@ import android.util.AttributeSet;
 
 import com.github.killerink.MainActivity;
 import com.obsidium.bettermanual.CameraUtil;
+import com.obsidium.bettermanual.R;
 
 public class ShutterView extends BaseTextView {
 
     @Override
     public void setIn_DecrementValue(int value) {
         onScrolled(value);
+    }
+
+    @Override
+    public String getNavigationString() {
+        if (cameraUiInterface.getExposureMode().get() == ExposureModeView.ExposureModes.manual || cameraUiInterface.getExposureMode().get() == ExposureModeView.ExposureModes.shutter)
+            return getResources().getString(R.string.view_shutter_navigation_enable);
+        return getResources().getString(R.string.view_shutter_navigation_disabled);
     }
 
 

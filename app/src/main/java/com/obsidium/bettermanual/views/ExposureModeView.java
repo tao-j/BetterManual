@@ -17,6 +17,11 @@ public class ExposureModeView extends BaseImageView {
 
     }
 
+    @Override
+    public String getNavigationString() {
+        return null;
+    }
+
     public enum ExposureModes { manual, aperture, shutter, other }
     private ExposureModes m_exposureModes;
 

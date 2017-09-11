@@ -3,11 +3,12 @@ package com.obsidium.bettermanual.capture;
 import android.util.Log;
 
 import com.github.killerink.KeyEvents;
+import com.github.killerink.camera.CaptureSession;
 import com.obsidium.bettermanual.CameraUiInterface;
 import com.obsidium.bettermanual.R;
 import com.sony.scalar.sysutil.didep.Settings;
 
-public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
+public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, CaptureSession.CaptureDoneEvent
 {
 
     private final String TAG = CaptureModeTimelapse.class.getSimpleName();
@@ -21,6 +22,7 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
     private final int TLS_SET_INTERVAL = 1;
     private final int TLS_SET_PICCOUNT = 2;
     private int currentdial = TLS_SET_NONE;
+    private CaptureSession captureSession;
 
 
     public CaptureModeTimelapse(CameraUiInterface manualActivity)
@@ -66,6 +68,7 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
 
     @Override
     public void startShooting() {
+        Log.d(TAG,"startShooting");
         cameraUiInterface.hideHintMessage();
         cameraUiInterface.hideMessage();
         try
@@ -75,7 +78,8 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
         catch (NoSuchMethodError e)
         {
         }
-        cameraUiInterface.getActivityInterface().getCamera().takePicture();
+        captureSession = new CaptureSession(cameraUiInterface.getActivityInterface().getCamera(),false,this);
+        cameraUiInterface.getActivityInterface().getBackHandler().post(captureSession);
     }
 
     @Override
@@ -113,7 +117,8 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
 
     }
 
-    @Override
+
+    /*@Override
     public void onShutter(int i) {
         if (i == 0)
         {
@@ -141,7 +146,7 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
         {
             abort();
         }
-    }
+    }*/
 
     @Override
     public void decrement()
@@ -204,7 +209,7 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
         @Override
         public void run()
         {
-            cameraUiInterface.getActivityInterface().getCamera().takePicture();
+            startShooting();
         }
     };
 
@@ -423,5 +428,35 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents
     @Override
     public boolean onDeleteKeyUp() {
         return false;
+    }
+
+    @Override
+    public void onCaptureDone() {
+        Log.d(TAG,"onCaptureDone");
+        ++m_timelapsePicsTaken;
+        if (m_timelapsePicCount < 0 || m_timelapsePicCount == 1) {
+            abort();
+            cameraUiInterface.onCaptureDone();
+            captureSession = null;
+            Log.d(TAG, "abort Timelapse");
+        }
+        else
+        {
+            if (m_timelapsePicCount != 0)
+                --m_timelapsePicCount;
+            if (m_timelapseInterval >= 1000)
+            {
+                if (m_timelapsePicCount > 0)
+                    cameraUiInterface.showMessageDelayed(String.format("%d pictures remaining", m_timelapsePicCount));
+                else
+                    cameraUiInterface.showMessageDelayed(String.format("%d pictures taken", m_timelapsePicsTaken));
+            }
+            if (m_timelapseInterval != 0) {
+                Log.d(TAG,"next Capture in " + m_timelapseInterval);
+                cameraUiInterface.getActivityInterface().getMainHandler().postDelayed(m_timelapseRunnable, m_timelapseInterval);
+            }
+            else
+                startShooting();
+        }
     }
 }

@@ -2,12 +2,18 @@ package com.obsidium.bettermanual.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.View;
 
 import com.github.killerink.MainActivity;
+import com.github.killerink.camera.CaptureSession;
+import com.github.killerink.camera.ShutterSpeedValue;
 import com.obsidium.bettermanual.CameraUtil;
 import com.obsidium.bettermanual.R;
 
-public class ShutterView extends BaseTextView {
+public class ShutterView extends BaseTextView implements CaptureSession.CaptureDoneEvent {
+
+    private final String TAG = ShutterView.class.getSimpleName();
 
     @Override
     public void setIn_DecrementValue(int value) {
@@ -24,6 +30,7 @@ public class ShutterView extends BaseTextView {
 
     // Shutter speed
     private boolean         m_notifyOnNextShutterSpeedChange;
+    private CaptureSession bulbcaptureSession;
     public ShutterView(Context context) {
         super(context);
     }
@@ -53,7 +60,30 @@ public class ShutterView extends BaseTextView {
             cameraUiInterface.getActivityInterface().loadFragment(MainActivity.FRAGMENT_MIN_SHUTTER);
             return true;
         }
+        else if (getText().equals("BULB")) {
+            if (bulbcaptureSession == null) {
+                startBulbCapture();
+                return false;
+
+            } else if (bulbcaptureSession != null && bulbcaptureSession.isBulbCapture()) {
+
+                stopBulbCapture();
+                return false;
+            }
+        }
         return false;
+    }
+
+    private void stopBulbCapture() {
+        bulbcaptureSession.cancelBulbCapture();
+        Log.d(TAG, "Stop BULB");
+    }
+
+    private void startBulbCapture()
+    {
+        bulbcaptureSession = new CaptureSession(cameraUiInterface.getActivityInterface().getCamera(),true,this);
+        cameraUiInterface.getActivityInterface().getBackHandler().post(bulbcaptureSession);
+        Log.d(TAG, "Start BULB");
     }
 
 
@@ -68,4 +98,9 @@ public class ShutterView extends BaseTextView {
         }
     }
 
+    @Override
+    public void onCaptureDone() {
+        cameraUiInterface.onCaptureDone();
+        bulbcaptureSession = null;
+    }
 }

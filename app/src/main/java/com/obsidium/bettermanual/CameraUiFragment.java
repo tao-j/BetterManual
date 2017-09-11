@@ -17,6 +17,7 @@ import com.github.killerink.ActivityInterface;
 import com.github.killerink.KeyEvents;
 import com.github.killerink.MainActivity;
 import com.github.killerink.TimeLog;
+import com.github.killerink.camera.CaptureSession;
 import com.obsidium.bettermanual.capture.CaptureModeBracket;
 import com.obsidium.bettermanual.capture.CaptureModeTimelapse;
 import com.obsidium.bettermanual.views.ApertureView;
@@ -42,7 +43,7 @@ import java.util.List;
 
 public class CameraUiFragment extends Fragment implements View.OnClickListener, CameraEx.ShutterListener,
         CameraUiInterface, KeyEvents, CameraEx.PreviewAnalizeListener,CameraEx.ProgramLineRangeOverListener,
-        CameraEx.FocusDriveListener
+        CameraEx.FocusDriveListener, CaptureSession.CaptureDoneEvent
 {
 
 
@@ -84,6 +85,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
     private CaptureModeTimelapse timelapse;
     private CaptureModeBracket bracket;
+    private CaptureSession captureSession;
 
 
     private final Runnable m_hideFocusScaleRunnable = new Runnable()
@@ -578,19 +580,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         showHintMessage(lastView.getNavigationString());
     }
 
-    private void stopBulbCapture() {
-        Log.d(TAG, "Stop BULB");
-        bulbcapture = false;
-        activityInterface.getCamera().cancelTakePicture();
-    }
 
-    private void startBulbCapture()
-    {
-        m_tvHint.setVisibility(View.GONE);
-        m_tvMsg.setVisibility(View.GONE);
-        bulbcapture = true;
-        activityInterface.getCamera().takePicture();
-    }
 
 
     /*  ##################################################################
@@ -619,29 +609,10 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
     {
         DialViewInterface view = dialViews.get(lastDialView);
         Log.d(TAG,"onEnterKeyDown");
-
-        if (view instanceof ShutterView || bulbcapture)
-        {
-            if (m_tvShutter.getText().equals("BULB")) {
-                if (!bulbcapture) {
-                    startBulbCapture();
-                    return false;
-
-                } else if (bulbcapture) {
-
-                    stopBulbCapture();
-                    return false;
-                }
-            }
-            else
-                getShutter().onClick();
-            return false;
-        }
-        else
-            if (view instanceof BaseImageView)
-                ((BaseImageView) view).toggle();
-            else if (view instanceof BaseTextView)
-                ((BaseTextView) view).onClick();
+        if (view instanceof BaseImageView)
+            ((BaseImageView) view).toggle();
+        else if (view instanceof BaseTextView)
+            ((BaseTextView) view).onClick();
         showHintMessage(view.getNavigationString());
         return true;
     }
@@ -849,14 +820,11 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
     @Override
     public void onShutter(int i, CameraEx cameraEx)
     {
-        if (!bulbcapture) {
-
             activityInterface.getCamera().cancelTakePicture();
-            if (timelapse.isActive())
+            /*if (timelapse.isActive())
                 timelapse.onShutter(i);
             else if (bracket.isActive())
-                bracket.onShutter(i);
-        }
+                bracket.onShutter(i);*/
     }
     //################# CameraEx.ShutterListener END#############
 
@@ -907,4 +875,9 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
     }
     //##########CameraEx.FocusDriveListner ENDs################
 
+    @Override
+    public void onCaptureDone() {
+        activityInterface.getCamera().setShutterListener(this);
+        captureSession = null;
+    }
 }

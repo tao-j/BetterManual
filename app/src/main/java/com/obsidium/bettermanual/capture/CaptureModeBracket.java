@@ -1,16 +1,20 @@
 package com.obsidium.bettermanual.capture;
 
+import android.util.Log;
 import android.util.Pair;
 
 import com.github.killerink.KeyEvents;
+import com.github.killerink.camera.CaptureSession;
+import com.github.killerink.camera.ShutterSpeedValue;
 import com.obsidium.bettermanual.CameraUiInterface;
 import com.obsidium.bettermanual.CameraUtil;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.views.ExposureModeView;
 import com.sony.scalar.hardware.CameraEx;
 
-public class CaptureModeBracket extends CaptureMode implements  CameraEx.ShutterSpeedChangeListener, KeyEvents {
+public class CaptureModeBracket extends CaptureMode implements  CameraEx.ShutterSpeedChangeListener, KeyEvents, CaptureSession.CaptureDoneEvent {
 
+    private final String TAG = CaptureModeBracket.class.getSimpleName();
     // Bracketing
     private int             m_bracketStep;  // in 1/3 stops
     private int             m_bracketMaxPicCount;
@@ -23,6 +27,9 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
     private final int BRACKET_STEP = 1;
     private final int BRACKET_PICCOUNT = 2;
     private int currentDialMode = BRACKET_NON;
+    private CaptureSession captureSession;
+    private final int MAX_RETRYS = 3;
+    private int retryCount = 0;
 
 
     public CaptureModeBracket(CameraUiInterface cameraUiInterface)
@@ -67,10 +74,12 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
 
     @Override
     public void startShooting() {
+        Log.d(TAG,"startShooting");
         cameraUiInterface.hideHintMessage();
         cameraUiInterface.hideMessage();
         // Take first picture at set shutter speed
-        cameraUiInterface.getActivityInterface().getCamera().takePicture();
+        captureSession = new CaptureSession(cameraUiInterface.getActivityInterface().getCamera(),false,this);
+        cameraUiInterface.getActivityInterface().getBackHandler().post(captureSession);
     }
 
     @Override
@@ -97,37 +106,17 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
             cameraUiInterface.getActivityInterface().getCamera().adjustShutterSpeed(-shutterDiff);
     }
 
-    @Override
+   /* @Override
     public void onShutter(int i) {
         if (i == 0)
         {
-            if (--m_bracketPicCount == 0)
-                abort();
-            else
-            {
-                m_bracketShutterDelta += m_bracketStep;
-                final int shutterIndex = CameraUtil.getShutterValueIndex(cameraUiInterface.getActivityInterface().getCamera().getShutterSpeed());
-                if (m_bracketShutterDelta % 2 == 0)
-                {
-                    // Even, reduce shutter speed
-                    m_bracketNextShutterSpeed = new Pair<Integer, Integer>(CameraUtil.SHUTTER_SPEEDS[shutterIndex + m_bracketShutterDelta][0],
-                            CameraUtil.SHUTTER_SPEEDS[shutterIndex + m_bracketShutterDelta][1]);
-                    cameraUiInterface.getActivityInterface().getCamera().adjustShutterSpeed(-m_bracketShutterDelta);
-                }
-                else
-                {
-                    // Odd, increase shutter speed
-                    m_bracketNextShutterSpeed = new Pair<Integer, Integer>(CameraUtil.SHUTTER_SPEEDS[shutterIndex - m_bracketShutterDelta][0],
-                            CameraUtil.SHUTTER_SPEEDS[shutterIndex - m_bracketShutterDelta][1]);
-                    cameraUiInterface.getActivityInterface().getCamera().adjustShutterSpeed(m_bracketShutterDelta);
-                }
-            }
+
         }
         else
         {
             abort();
         }
-    }
+    }*/
 
     @Override
     public void increment() {
@@ -168,7 +157,7 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
     protected void calcMaxBracketPicCount()
     {
         final int index = CameraUtil.getShutterValueIndex(cameraUiInterface.getActivityInterface().getCamera().getShutterSpeed());
-        final int maxSteps = Math.min(index, CameraUtil.SHUTTER_SPEEDS.length - 1 - index);
+        final int maxSteps = Math.min(index, CameraUtil.SHUTTER_SPEED_VALUES.length - 1 - index);
         m_bracketMaxPicCount = (maxSteps / m_bracketStep) * 2 + 1;
     }
 
@@ -194,16 +183,29 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
     @Override
     public void onShutterSpeedChange(CameraEx.ShutterSpeedInfo shutterSpeedInfo, CameraEx cameraEx)
     {
+        Log.d(TAG, "onShutterSpeedChange");
         cameraUiInterface.getShutter().updateShutterSpeed(shutterSpeedInfo.currentShutterSpeed_n, shutterSpeedInfo.currentShutterSpeed_d);
-        if (m_bracketNextShutterSpeed != null)
-        {
+        if (m_bracketPicCount > 0) {
 
-            if (shutterSpeedInfo.currentShutterSpeed_n == m_bracketNextShutterSpeed.first &&
-                    shutterSpeedInfo.currentShutterSpeed_d == m_bracketNextShutterSpeed.second)
-            {
-                // Focus speed adjusted, take next picture
-                cameraUiInterface.getActivityInterface().getCamera().takePicture();
-            }
+            if (m_bracketNextShutterSpeed != null) {
+                Log.d(TAG, "currentshutterspeed:" + shutterSpeedInfo.currentShutterSpeed_n + "/" + shutterSpeedInfo.currentShutterSpeed_d);
+                Log.d(TAG, "bracketNextShutterSpeed:" + m_bracketNextShutterSpeed.first + "/" + m_bracketNextShutterSpeed.second);
+
+                if (shutterSpeedInfo.currentShutterSpeed_n == m_bracketNextShutterSpeed.first &&
+                        shutterSpeedInfo.currentShutterSpeed_d == m_bracketNextShutterSpeed.second) {
+                    Log.d(TAG, "shutterspeed match start capture");
+                    // Shutter speed adjusted, take next picture
+                    startShooting();
+                } else {
+                    retryCount++;
+                    Log.d(TAG, "shutterspeed does not match wait for next callback");
+                    if (retryCount < MAX_RETRYS)
+                        cameraUiInterface.getActivityInterface().getCamera().adjustShutterSpeed(m_bracketShutterDelta);
+                    else //capture anyway
+                        startShooting();
+                }
+            } else
+                Log.d(TAG, "m_bracketNextShutterSpeed null");
         }
     }
 
@@ -425,5 +427,49 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
     @Override
     public boolean onDeleteKeyUp() {
         return false;
+    }
+
+    @Override
+    public void onCaptureDone() {
+        Log.d(TAG,"onCaptureDone :" + m_bracketPicCount);
+        if (--m_bracketPicCount == 0) {
+            Log.d(TAG,"abort");
+            abort();
+            cameraUiInterface.onCaptureDone();
+            captureSession = null;
+        }
+        else
+        {
+            Log.d(TAG,"prepare next capture");
+            retryCount = 0;
+            m_bracketShutterDelta += m_bracketStep;
+            final int shutterIndex = CameraUtil.getShutterValueIndex(cameraUiInterface.getActivityInterface().getCamera().getShutterSpeed());
+            Log.d(TAG,"shutterIndex:" + shutterIndex);
+            if (m_bracketShutterDelta % 2 == 0)
+            {
+                // Even, reduce shutter speed
+                Log.d(TAG,"reduce");
+                int newShutterspeed = shutterIndex - m_bracketShutterDelta;
+                if (newShutterspeed < 0)
+                    newShutterspeed = 0;
+                Log.d(TAG,"newshutterindex:" +newShutterspeed + " bracketdelta:" + m_bracketShutterDelta);
+                ShutterSpeedValue shutterSpeedValue = CameraUtil.SHUTTER_SPEED_VALUES[newShutterspeed];
+                m_bracketNextShutterSpeed = shutterSpeedValue.getPair();
+                cameraUiInterface.getActivityInterface().getCamera().adjustShutterSpeed(m_bracketShutterDelta);
+            }
+            else
+            {
+                Log.d(TAG,"increase");
+                // Odd, increase shutter speed
+                int newShutterspeed = shutterIndex + m_bracketShutterDelta;
+                if (newShutterspeed > CameraUtil.SHUTTER_SPEED_VALUES.length)
+                    newShutterspeed = CameraUtil.SHUTTER_SPEED_VALUES.length-1;
+                Log.d(TAG,"newshutterindex:" +newShutterspeed + " bracketdelta:" + m_bracketShutterDelta);
+                ShutterSpeedValue shutterSpeedValue = CameraUtil.SHUTTER_SPEED_VALUES[newShutterspeed];
+                m_bracketNextShutterSpeed = shutterSpeedValue.getPair();
+                cameraUiInterface.getActivityInterface().getCamera().adjustShutterSpeed(-m_bracketShutterDelta);
+            }
+        }
+
     }
 }

@@ -460,6 +460,8 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
 
     public Pair getShutterSpeed()
     {
+        parameters = m_camera.getNormalCamera().getParameters();
+        modifier = m_camera.createParametersModifier(parameters);
         return modifier.getShutterSpeed();
     }
 

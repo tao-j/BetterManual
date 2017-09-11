@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.github.killerink.ActivityInterface;
 import com.github.killerink.KeyEvents;
 import com.github.killerink.MainActivity;
+import com.github.killerink.camera.ShutterSpeedValue;
 import com.sony.scalar.hardware.CameraEx;
 
 public class MinShutterFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, KeyEvents
@@ -45,7 +46,7 @@ public class MinShutterFragment extends Fragment implements SeekBar.OnSeekBarCha
         super.onViewCreated(view, savedInstanceState);
         m_sbShutter = (SeekBar) view.findViewById(R.id.sbShutter);
         m_sbShutter.setOnSeekBarChangeListener(this);
-        m_sbShutter.setMax(CameraUtil.MIN_SHUTTER_VALUES.length - 1);
+        m_sbShutter.setMax(CameraUtil.SHUTTER_SPEED_VALUES.length - 1);
 
         m_tvInfo = (TextView) view.findViewById(R.id.tvInfo);
 
@@ -234,7 +235,8 @@ public class MinShutterFragment extends Fragment implements SeekBar.OnSeekBarCha
     public boolean onUpperDialChanged(int value)
     {
         m_sbShutter.incrementProgressBy(value);
-        activityInterface.getCamera().setAutoShutterSpeedLowLimit(CameraUtil.MIN_SHUTTER_VALUES[m_sbShutter.getProgress()]);
+        int speed = CameraUtil.SHUTTER_SPEED_VALUES[m_sbShutter.getProgress()].getMillisecond();
+        activityInterface.getCamera().setAutoShutterSpeedLowLimit(speed);
         return true;
     }
 
@@ -288,7 +290,7 @@ public class MinShutterFragment extends Fragment implements SeekBar.OnSeekBarCha
     {
         if (fromUser)
         {
-            activityInterface.getCamera().setAutoShutterSpeedLowLimit(CameraUtil.MIN_SHUTTER_VALUES[progress]);
+            activityInterface.getCamera().setAutoShutterSpeedLowLimit(CameraUtil.SHUTTER_SPEED_VALUES[progress].getMillisecond());
         }
     }
     public void onStartTrackingTouch(SeekBar var1)

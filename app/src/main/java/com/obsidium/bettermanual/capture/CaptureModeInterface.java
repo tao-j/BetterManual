@@ -9,7 +9,6 @@ interface CaptureModeInterface {
 
     boolean isActive();
 
-    void onShutter(int i);
 
     void increment();
     void decrement();

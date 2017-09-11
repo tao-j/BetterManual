@@ -1,13 +1,14 @@
 package com.obsidium.bettermanual;
 
 import com.github.killerink.ActivityInterface;
+import com.github.killerink.camera.CaptureSession;
 import com.obsidium.bettermanual.views.ApertureView;
 import com.obsidium.bettermanual.views.DriveMode;
 import com.obsidium.bettermanual.views.ExposureModeView;
 import com.obsidium.bettermanual.views.IsoView;
 import com.obsidium.bettermanual.views.ShutterView;
 
-public interface CameraUiInterface
+public interface CameraUiInterface extends CaptureSession.CaptureDoneEvent
 {
     void showMessageDelayed(String msg);
     void showMessage(String msg);

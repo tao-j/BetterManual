@@ -131,12 +131,10 @@ public class CameraInstance extends CameraInternalEventImpl implements SurfaceHo
 
     public void takePicture() {
         sendMsgToCam(CAPTURE_IMAGE);
-
     }
 
     public void cancelTakePicture() {
         sendMsgToCam(CANCEL_CAPTURE);
-
     }
     
 

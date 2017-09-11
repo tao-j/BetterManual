@@ -234,14 +234,15 @@ public class MinShutterFragment extends Fragment implements SeekBar.OnSeekBarCha
     @Override
     public boolean onUpperDialChanged(int value)
     {
-        m_sbShutter.incrementProgressBy(value);
-        int speed = CameraUtil.SHUTTER_SPEED_VALUES[m_sbShutter.getProgress()].getMillisecond();
-        activityInterface.getCamera().setAutoShutterSpeedLowLimit(speed);
+
         return true;
     }
 
     @Override
     public boolean onLowerDialChanged(int value) {
+        m_sbShutter.incrementProgressBy(value);
+        int speed = CameraUtil.SHUTTER_SPEED_VALUES[m_sbShutter.getProgress()].getMillisecond();
+        activityInterface.getCamera().setAutoShutterSpeedLowLimit(speed);
         return false;
     }
 

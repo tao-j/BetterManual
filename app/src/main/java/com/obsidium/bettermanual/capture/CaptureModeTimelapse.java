@@ -22,7 +22,6 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, Capt
     private final int TLS_SET_INTERVAL = 1;
     private final int TLS_SET_PICCOUNT = 2;
     private int currentdial = TLS_SET_NONE;
-    private CaptureSession captureSession;
 
 
     public CaptureModeTimelapse(CameraUiInterface manualActivity)
@@ -78,8 +77,9 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, Capt
         catch (NoSuchMethodError e)
         {
         }
-        captureSession = new CaptureSession(cameraUiInterface.getActivityInterface().getCamera(),false,this);
-        cameraUiInterface.getActivityInterface().getBackHandler().post(captureSession);
+        cameraUiInterface.getActivityInterface().getCamera().captureSession.setBulbCapture(false);
+        cameraUiInterface.getActivityInterface().getCamera().captureSession.setEventListner(this);
+        cameraUiInterface.getActivityInterface().getBackHandler().post(cameraUiInterface.getActivityInterface().getCamera().captureSession);
     }
 
     @Override
@@ -436,8 +436,7 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, Capt
         ++m_timelapsePicsTaken;
         if (m_timelapsePicCount < 0 || m_timelapsePicCount == 1) {
             abort();
-            cameraUiInterface.onCaptureDone();
-            captureSession = null;
+            cameraUiInterface.getActivityInterface().getCamera().captureSession.setEventListner(null);
             Log.d(TAG, "abort Timelapse");
         }
         else

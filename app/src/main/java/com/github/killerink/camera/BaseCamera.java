@@ -68,6 +68,8 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     CameraEx m_camera;
     protected boolean cameraIsOpen = false;
 
+    public CaptureSession captureSession;
+
      void sendMsgToCam(int code)
     {
         sendMsg(cameraHandler,code);

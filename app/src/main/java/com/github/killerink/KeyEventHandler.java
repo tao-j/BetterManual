@@ -15,6 +15,7 @@ public class KeyEventHandler {
 
     private KeyEvents dialEventListner;
     private KeyEvents defaultListner;
+    private final boolean log = false;
 
     public KeyEventHandler(KeyEvents defaultListner)
     {
@@ -33,7 +34,10 @@ public class KeyEventHandler {
 
     public boolean onKeyUp(int keyCode, KeyEvent event)
     {
-        Log.d(TAG,"onKeyUp " + getKeyString(event.getScanCode()));
+        if (dialEventListner == null)
+            return true;
+        if (log)
+            Log.d(TAG,"onKeyUp " + getKeyString(event.getScanCode()));
         if (dialEventListner != null) {
             switch (event.getScanCode()) {
                 case ScalarInput.ISV_KEY_UP:
@@ -83,7 +87,10 @@ public class KeyEventHandler {
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        Log.d(TAG,"onKeyDown " + getKeyString(event.getScanCode()));
+        if (dialEventListner == null)
+            return true;
+        if (log)
+            Log.d(TAG,"onKeyDown " + getKeyString(event.getScanCode()));
         switch (event.getScanCode()) {
             case ScalarInput.ISV_KEY_UP:
                 return dialEventListner.onUpKeyDown();

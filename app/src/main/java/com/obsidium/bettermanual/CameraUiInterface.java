@@ -8,7 +8,7 @@ import com.obsidium.bettermanual.views.ExposureModeView;
 import com.obsidium.bettermanual.views.IsoView;
 import com.obsidium.bettermanual.views.ShutterView;
 
-public interface CameraUiInterface extends CaptureSession.CaptureDoneEvent
+public interface CameraUiInterface
 {
     void showMessageDelayed(String msg);
     void showMessage(String msg);

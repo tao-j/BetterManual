@@ -30,7 +30,6 @@ public class ShutterView extends BaseTextView implements CaptureSession.CaptureD
 
     // Shutter speed
     private boolean         m_notifyOnNextShutterSpeedChange;
-    private CaptureSession bulbcaptureSession;
     public ShutterView(Context context) {
         super(context);
     }
@@ -61,11 +60,11 @@ public class ShutterView extends BaseTextView implements CaptureSession.CaptureD
             return true;
         }
         else if (getText().equals("BULB")) {
-            if (bulbcaptureSession == null) {
+            if (!cameraUiInterface.getActivityInterface().getCamera().captureSession.isBulbCapture()) {
                 startBulbCapture();
                 return false;
 
-            } else if (bulbcaptureSession != null && bulbcaptureSession.isBulbCapture()) {
+            } else if (cameraUiInterface.getActivityInterface().getCamera().captureSession.isBulbCapture()) {
 
                 stopBulbCapture();
                 return false;
@@ -75,14 +74,15 @@ public class ShutterView extends BaseTextView implements CaptureSession.CaptureD
     }
 
     private void stopBulbCapture() {
-        bulbcaptureSession.cancelBulbCapture();
+        cameraUiInterface.getActivityInterface().getCamera().captureSession.cancelBulbCapture();
         Log.d(TAG, "Stop BULB");
     }
 
     private void startBulbCapture()
     {
-        bulbcaptureSession = new CaptureSession(cameraUiInterface.getActivityInterface().getCamera(),true,this);
-        cameraUiInterface.getActivityInterface().getBackHandler().post(bulbcaptureSession);
+        cameraUiInterface.getActivityInterface().getCamera().captureSession.setBulbCapture(true);
+        cameraUiInterface.getActivityInterface().getCamera().captureSession.setEventListner(this);
+        cameraUiInterface.getActivityInterface().getBackHandler().post(cameraUiInterface.getActivityInterface().getCamera().captureSession);
         Log.d(TAG, "Start BULB");
     }
 
@@ -100,7 +100,6 @@ public class ShutterView extends BaseTextView implements CaptureSession.CaptureD
 
     @Override
     public void onCaptureDone() {
-        cameraUiInterface.onCaptureDone();
-        bulbcaptureSession = null;
+
     }
 }

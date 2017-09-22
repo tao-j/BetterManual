@@ -1,6 +1,7 @@
 package com.github.killerink.camera;
 
 import android.os.Message;
+import android.util.Log;
 import android.util.Pair;
 
 import com.sony.scalar.hardware.CameraEx;
@@ -16,6 +17,8 @@ class CameraInternalEventImpl extends BaseCamera implements  CameraEx.PreviewAna
         CameraEx.AutoFocusDoneListener, CameraEx.AutoFocusStartListener
 {
 
+    private final String TAG = CameraInternalEventImpl.class.getSimpleName();
+
     CameraInternalEventImpl()
     {
         autoPictureReviewControl = new CameraEx.AutoPictureReviewControl();
@@ -25,6 +28,7 @@ class CameraInternalEventImpl extends BaseCamera implements  CameraEx.PreviewAna
     //ImageCaptureCallback
     @Override
     public void onShutter(int i, CameraEx cameraEx) {
+        Log.d(TAG,"onShutter");
         sendMsgToUi(MSG_SHUTTERLISTNER,i);
     }
 

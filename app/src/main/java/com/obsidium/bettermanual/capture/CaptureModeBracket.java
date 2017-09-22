@@ -27,7 +27,6 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
     private final int BRACKET_STEP = 1;
     private final int BRACKET_PICCOUNT = 2;
     private int currentDialMode = BRACKET_NON;
-    private CaptureSession captureSession;
     private final int MAX_RETRYS = 3;
     private int retryCount = 0;
 
@@ -78,8 +77,9 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
         cameraUiInterface.hideHintMessage();
         cameraUiInterface.hideMessage();
         // Take first picture at set shutter speed
-        captureSession = new CaptureSession(cameraUiInterface.getActivityInterface().getCamera(),false,this);
-        cameraUiInterface.getActivityInterface().getBackHandler().post(captureSession);
+        cameraUiInterface.getActivityInterface().getCamera().captureSession.setBulbCapture(false);
+        cameraUiInterface.getActivityInterface().getCamera().captureSession.setEventListner(this);
+        cameraUiInterface.getActivityInterface().getBackHandler().post(cameraUiInterface.getActivityInterface().getCamera().captureSession);
     }
 
     @Override
@@ -88,8 +88,6 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
         //m_handler.removeCallbacks(m_timelapseRunnable);
         isActive = false;
         cameraUiInterface.showMessageDelayed("Bracketing finished");
-        cameraUiInterface.getActivityInterface().getCamera().startPreview();
-        cameraUiInterface.getActivityInterface().getCamera().startDisplay();
 
         // Update controls
         cameraUiInterface.hideHintMessage();
@@ -435,8 +433,7 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
         if (--m_bracketPicCount == 0) {
             Log.d(TAG,"abort");
             abort();
-            cameraUiInterface.onCaptureDone();
-            captureSession = null;
+            cameraUiInterface.getActivityInterface().getCamera().captureSession.setEventListner(null);
         }
         else
         {

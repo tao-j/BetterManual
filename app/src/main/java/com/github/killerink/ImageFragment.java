@@ -90,8 +90,8 @@ public class ImageFragment extends Fragment implements KeyEvents {
         //stop camera else Images are not load
         activityInterface.getCamera().closeCamera();
 
-        AvindexStore.loadMedia(AvindexStore.getExternalMediaIds()[0], AvindexStore.CONTENT_TYPE_LOAD_STILL);
-        AvindexStore.Images.waitAndUpdateDatabase(getContext().getContentResolver(), AvindexStore.getExternalMediaIds()[0]);
+        /*AvindexStore.loadMedia(AvindexStore.getExternalMediaIds()[0], AvindexStore.CONTENT_TYPE_LOAD_STILL);
+        AvindexStore.Images.waitAndUpdateDatabase(getContext().getContentResolver(), AvindexStore.getExternalMediaIds()[0]);*/
 
 
 
@@ -117,30 +117,32 @@ public class ImageFragment extends Fragment implements KeyEvents {
 
     private void loadOptimizedImg()
     {
+        if (mediaCursor.getPosition() > -1 && mediaCursor.getCount() > 0)
+        {
+            Log.d(TAG,"MEDIA");
 
-        Log.d(TAG,"MEDIA");
+            logCursor(mediaCursor);
+            String data = mediaCursor.getString(mediaCursor.getColumnIndexOrThrow("_data"));
+            String id = mediaCursor.getString(mediaCursor.getColumnIndexOrThrow("_id"));
 
-        logCursor(mediaCursor);
-        String data = mediaCursor.getString(mediaCursor.getColumnIndexOrThrow("_data"));
-        String id = mediaCursor.getString(mediaCursor.getColumnIndexOrThrow("_id"));
+            closeImageInfo();
 
-        closeImageInfo();
+            info = AvindexStore.Images.Media.getImageInfo(id);
 
-        info = AvindexStore.Images.Media.getImageInfo(id);
+            OptimizedImageFactory.Options options = new OptimizedImageFactory.Options();
+            options.bBasicInfo = false;
+            options.bCamInfo = false;
+            options.bGpsInfo = false;
+            options.bExtCamInfo = false;
+            options.imageType = info.getAttributeInt(AvindexContentInfo.TAG_CONTENT_TYPE,2);
+            options.colorType = info.getAttributeInt(AvindexContentInfo.TAG_COLOR_TYPE,1);
+            options.outContentInfo = info;
 
-        OptimizedImageFactory.Options options = new OptimizedImageFactory.Options();
-        options.bBasicInfo = false;
-        options.bCamInfo = false;
-        options.bGpsInfo = false;
-        options.bExtCamInfo = false;
-        options.imageType = info.getAttributeInt(AvindexContentInfo.TAG_CONTENT_TYPE,2);
-        options.colorType = info.getAttributeInt(AvindexContentInfo.TAG_COLOR_TYPE,1);
-        options.outContentInfo = info;
+            closeOptimizedImage();
+            image = OptimizedImageFactory.decodeImage(data,options);
 
-        closeOptimizedImage();
-        image = OptimizedImageFactory.decodeImage(data,options);
-
-        imageView.setOptimizedImage(image);
+            imageView.setOptimizedImage(image);
+        }
     }
 
     private void closeOptimizedImage() {
@@ -204,17 +206,19 @@ public class ImageFragment extends Fragment implements KeyEvents {
                 scaleFactor = 1;
         }
         OptimizedImageView.LayoutInfo info = imageView.getLayoutInfo();
-        Point mTranslateDenom = new Point(info.imageSize.width(), info.imageSize.height());
-        Point mTranslate = new Point(info.clipSize.centerX(),info.clipSize.centerY());
+        if (info != null) {
+            Point mTranslateDenom = new Point(info.imageSize.width(), info.imageSize.height());
+            Point mTranslate = new Point(info.clipSize.centerX(), info.clipSize.centerY());
 
-        imageView.setScale(scaleFactor, OptimizedImageView.BoundType.BOUND_TYPE_LONG_EDGE);
-        info = imageView.getLayoutInfo();
+            imageView.setScale(scaleFactor, OptimizedImageView.BoundType.BOUND_TYPE_LONG_EDGE);
+            info = imageView.getLayoutInfo();
 
-        final int width2 = info.imageSize.width();
-        final int height = info.imageSize.height();
-        final Point point = new Point(info.clipSize.centerX() - width2 * mTranslate.x / mTranslateDenom.x, info.clipSize.centerY() - height * mTranslate.y / mTranslateDenom.y);
-        imageView.translate(point, new Point(width2, height), OptimizedImageView.TranslationType.TRANS_TYPE_INNER_CENTER);
-        imageView.redraw();
+            final int width2 = info.imageSize.width();
+            final int height = info.imageSize.height();
+            final Point point = new Point(info.clipSize.centerX() - width2 * mTranslate.x / mTranslateDenom.x, info.clipSize.centerY() - height * mTranslate.y / mTranslateDenom.y);
+            imageView.translate(point, new Point(width2, height), OptimizedImageView.TranslationType.TRANS_TYPE_INNER_CENTER);
+            imageView.redraw();
+        }
         return false;
     }
 

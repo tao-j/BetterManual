@@ -35,15 +35,16 @@ import com.obsidium.bettermanual.views.IsoView;
 import com.obsidium.bettermanual.views.LongExpoNR;
 import com.obsidium.bettermanual.views.ShutterView;
 import com.sony.scalar.hardware.CameraEx;
+import com.sony.scalar.provider.AvindexStore;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
 
-public class CameraUiFragment extends Fragment implements View.OnClickListener, CameraEx.ShutterListener,
+public class CameraUiFragment extends Fragment implements View.OnClickListener,
         CameraUiInterface, KeyEvents, CameraEx.PreviewAnalizeListener,CameraEx.ProgramLineRangeOverListener,
-        CameraEx.FocusDriveListener, CaptureSession.CaptureDoneEvent
+        CameraEx.FocusDriveListener
 {
 
 
@@ -60,7 +61,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
     private EvView evCompensation;
     private TextView        m_tvExposure;
     private TextView        m_tvLog;
-    private TextView        m_tvMagnification;
     private TextView        m_tvMsg;
     private HistogramView m_vHist;
     private DriveMode driveMode;
@@ -85,7 +85,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
     private CaptureModeTimelapse timelapse;
     private CaptureModeBracket bracket;
-    private CaptureSession captureSession;
 
 
     private final Runnable m_hideFocusScaleRunnable = new Runnable()
@@ -150,9 +149,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         m_tvLog.setVisibility(LOGGING_ENABLED ? View.VISIBLE : View.GONE);
 
         m_vHist = (HistogramView)view.findViewById(R.id.vHist);
-
-        m_tvMagnification = (TextView)view.findViewById(R.id.tvMagnification);
-
 
         m_tvMsg = (TextView)view.findViewById(R.id.tvMsg);
 
@@ -381,7 +377,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
         //returns when a capture is done, seems to replace the default android camera1 api CaptureCallback that get called with Camera.takePicture(shutter,raw, jpeg)
         //also it seems Camera.takePicture is nonfunctional/crash on a6000
-        activityInterface.getCamera().setShutterListener(this);
+        //activityInterface.getCamera().setShutterListener(this);
 
         //m_camera.setJpegListener(); maybe is used to get jpeg/raw data returned
 
@@ -624,6 +620,12 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public boolean onFnKeyUp() {
+        activityInterface.getBackHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                activityInterface.getCamera().cancleCapture();
+            }
+        });
 
         return false;
     }
@@ -808,24 +810,6 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
         ## CameraEx Events impl ##
         ########################## */
 
-    //################# CameraEx.ShutterListener #############
-    /**
-     * Returned from camera when a capture is done
-     * STATUS_CANCELED = 1;
-     * STATUS_ERROR = 2;
-     * STATUS_OK = 0;
-     * @param i code
-     * @param cameraEx did capture Image
-     */
-    @Override
-    public void onShutter(int i, CameraEx cameraEx)
-    {
-            activityInterface.getCamera().cancelTakePicture();
-            /*if (timelapse.isActive())
-                timelapse.onShutter(i);
-            else if (bracket.isActive())
-                bracket.onShutter(i);*/
-    }
     //################# CameraEx.ShutterListener END#############
 
     //###################### CameraEx.PreviewAnalizeListener #################
@@ -875,9 +859,4 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener, 
     }
     //##########CameraEx.FocusDriveListner ENDs################
 
-    @Override
-    public void onCaptureDone() {
-        activityInterface.getCamera().setShutterListener(this);
-        captureSession = null;
-    }
 }

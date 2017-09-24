@@ -90,13 +90,7 @@ public class ShutterView extends BaseTextView implements CaptureSession.CaptureD
     public void updateShutterSpeed(int n, int d)
     {
         final String text = CameraUtil.formatShutterSpeed(n, d);
-        this.post(new Runnable() {
-            @Override
-            public void run() {
-                setText(text);
-            }
-        });
-
+        setText(text);
         if (m_notifyOnNextShutterSpeedChange)
         {
             cameraUiInterface.showMessageDelayed(text);

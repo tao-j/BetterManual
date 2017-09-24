@@ -24,6 +24,19 @@ public class ApertureView extends BaseTextView implements CameraEx.ApertureChang
         return getResources().getString(R.string.view_aperture_navigation);
     }
 
+    private class ApertureSetRunner implements Runnable
+    {
+        private int direction;
+        public ApertureSetRunner(int direction)
+        {
+            this.direction = direction;
+        }
+        @Override
+        public void run() {
+
+        }
+    }
+
     // Aperture
     private boolean         m_notifyOnNextApertureChange;
     private boolean         m_haveApertureControl;
@@ -65,20 +78,13 @@ public class ApertureView extends BaseTextView implements CameraEx.ApertureChang
     public void onApertureChange(CameraEx.ApertureInfo apertureInfo, CameraEx cameraEx) {
         // Disable aperture control if not available
         m_haveApertureControl = apertureInfo.currentAperture != 0;
-        final String text = String.format("f%.1f", (float)apertureInfo.currentAperture / 100.0f);
-        this.post(new Runnable() {
-            @Override
-            public void run() {
-                setVisibility(m_haveApertureControl ? View.VISIBLE : View.GONE);
+        setVisibility(m_haveApertureControl ? View.VISIBLE : View.GONE);
                 /*
                 log(String.format("currentAperture %d currentAvailableMin %d currentAvailableMax %d\n",
                         apertureInfo.currentAperture, apertureInfo.currentAvailableMin, apertureInfo.currentAvailableMax));
                 */
-
-                setText(text);
-            }
-        });
-
+        final String text = String.format("f%.1f", (float)apertureInfo.currentAperture / 100.0f);
+        setText(text);
         if (m_notifyOnNextApertureChange)
         {
             m_notifyOnNextApertureChange = false;

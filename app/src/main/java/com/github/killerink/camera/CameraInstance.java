@@ -26,8 +26,8 @@ public class CameraInstance extends CameraInternalEventImpl implements SurfaceHo
 
     public CameraInstance(HandlerThread hthread) {
         super();
-        cameraHandler = new BackGroundHandler(hthread.getLooper());
-        uiHandler = new MainHandler(Looper.getMainLooper());
+        cameraHandler = new Handler(hthread.getLooper());
+        uiHandler = new Handler(Looper.getMainLooper());
 
     }
 
@@ -49,7 +49,13 @@ public class CameraInstance extends CameraInternalEventImpl implements SurfaceHo
             modifier = m_camera.createParametersModifier(parameters);
             dumpParameter();
 
-            fireOnCameraOpen(true);
+            uiHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    fireOnCameraOpen(true);
+                }
+            });
+
 
             if (surfaceHolder != null && isSurfaceCreated) {
                 setSurfaceHolder(surfaceHolder);
@@ -59,6 +65,13 @@ public class CameraInstance extends CameraInternalEventImpl implements SurfaceHo
 
         }
     };
+
+    @Override
+    public void fireOnCameraOpen(boolean isopen) {
+        captureSession = new CaptureSession(this,m_camera);
+        m_camera.setAutoPictureReviewControl(getAutoPictureReviewControls());
+        super.fireOnCameraOpen(isopen);
+    }
 
     private void dumpParameter() {
         StringTokenizer localStringTokenizer = new StringTokenizer(((Camera.Parameters)parameters).flatten(), ";");
@@ -175,7 +188,7 @@ public class CameraInstance extends CameraInternalEventImpl implements SurfaceHo
     }
 
 
-    private class BackGroundHandler extends Handler {
+    /*private class BackGroundHandler extends Handler {
 
         private final String TAG = BackGroundHandler.class.getSimpleName();
         public BackGroundHandler(Looper looper) {
@@ -259,9 +272,9 @@ public class CameraInstance extends CameraInternalEventImpl implements SurfaceHo
 
 
         }
-    }
+    }*/
 
-    private class MainHandler extends Handler {
+    /*private class MainHandler extends Handler {
         public MainHandler(Looper mainLooper) {
             super(mainLooper);
         }
@@ -353,6 +366,6 @@ public class CameraInstance extends CameraInternalEventImpl implements SurfaceHo
                 }
 
         }
-    }
+    }*/
 }
 

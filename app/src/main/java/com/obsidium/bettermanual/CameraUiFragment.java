@@ -814,9 +814,15 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener,
 
     //###################### CameraEx.PreviewAnalizeListener #################
     @Override
-    public void onAnalizedData(CameraEx.AnalizedData analizedData, CameraEx cameraEx) {
-        if (analizedData != null && analizedData.hist != null && analizedData.hist.Y != null && m_vHist.getVisibility() == View.VISIBLE)
-            m_vHist.setHistogram(analizedData.hist.Y);
+    public void onAnalizedData(final CameraEx.AnalizedData analizedData, CameraEx cameraEx) {
+        activityInterface.getMainHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                if (analizedData != null && analizedData.hist != null && analizedData.hist.Y != null && m_vHist.getVisibility() == View.VISIBLE)
+                    m_vHist.setHistogram(analizedData.hist.Y);
+            }
+        });
+
     }
     //############### CameraEx.PreviewAnalizeListener END###############
 
@@ -836,7 +842,13 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener,
             text = String.format("+%.1f", (float)ev / 3.0f);
         else
             text = String.format("%.1f", (float)ev / 3.0f);
-        m_tvExposure.setText(text);
+        m_tvExposure.post(new Runnable() {
+            @Override
+            public void run() {
+                m_tvExposure.setText(text);
+            }
+        });
+
     }
 
     @Override
@@ -848,13 +860,19 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener,
 
     //##########CameraEx.FocusDriveListner################
     @Override
-    public void onChanged(CameraEx.FocusPosition focusPosition, CameraEx cameraEx) {
+    public void onChanged(final CameraEx.FocusPosition focusPosition, CameraEx cameraEx) {
 
-            m_lFocusScale.setVisibility(View.VISIBLE);
-            m_focusScaleView.setMaxPosition(focusPosition.maxPosition);
-            m_focusScaleView.setCurPosition(focusPosition.currentPosition);
-            activityInterface.getMainHandler().removeCallbacks(m_hideFocusScaleRunnable);
-            activityInterface.getMainHandler().postDelayed(m_hideFocusScaleRunnable, 2000);
+        activityInterface.getMainHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                m_lFocusScale.setVisibility(View.VISIBLE);
+                m_focusScaleView.setMaxPosition(focusPosition.maxPosition);
+                m_focusScaleView.setCurPosition(focusPosition.currentPosition);
+                activityInterface.getMainHandler().removeCallbacks(m_hideFocusScaleRunnable);
+                activityInterface.getMainHandler().postDelayed(m_hideFocusScaleRunnable, 2000);
+            }
+        });
+
 
     }
     //##########CameraEx.FocusDriveListner ENDs################

@@ -29,18 +29,18 @@ class CameraInternalEventImpl extends BaseCamera implements  CameraEx.PreviewAna
     @Override
     public void onShutter(int i, CameraEx cameraEx) {
         Log.d(TAG,"onShutter");
-        sendMsgToUi(MSG_SHUTTERLISTNER,i);
+        //sendMsgToUi(MSG_SHUTTERLISTNER,i);
     }
 
     @Override
     public void onAnalizedData(CameraEx.AnalizedData analizedData, CameraEx cameraEx) {
-        sendMsgToUi(MSG_PREVIEWANALIZELISTNER, analizedData);
+        //sendMsgToUi(MSG_PREVIEWANALIZELISTNER, analizedData);
     }
 
     //ISO AUTO SENSITIVY LISTNER INTERNAL USED
     @Override
     public void onChanged(int i, CameraEx cameraEx) {
-        sendMsgToUi(MSG_AUTO_ISO_SENSITIVY_LISTNER,i);
+        //sendMsgToUi(MSG_AUTO_ISO_SENSITIVY_LISTNER,i);
     }
 
     @Override
@@ -48,12 +48,12 @@ class CameraInternalEventImpl extends BaseCamera implements  CameraEx.PreviewAna
         synchronized (locker){
             this.shutterSpeedInfo = shutterSpeedInfo;
         }
-        sendMsgToUi(MSG_SHUTTERSPEEDCHANGEDLISTNER, shutterSpeedInfo);
+        //sendMsgToUi(MSG_SHUTTERSPEEDCHANGEDLISTNER, shutterSpeedInfo);
     }
 
     @Override
     public void onApertureChange(CameraEx.ApertureInfo apertureInfo, CameraEx cameraEx) {
-        sendMsgToUi(MSG_APERTURECHANGEDLISTNER, apertureInfo);
+        //sendMsgToUi(MSG_APERTURECHANGEDLISTNER, apertureInfo);
     }
 
     @Override
@@ -63,7 +63,7 @@ class CameraInternalEventImpl extends BaseCamera implements  CameraEx.PreviewAna
 
     @Override
     public void onEVRange(int ev, CameraEx cameraEx) {
-        sendMsgToUi(MSG_AUTO_ISO_SENSITIVY_LISTNER,ev);
+        //sendMsgToUi(MSG_AUTO_ISO_SENSITIVY_LISTNER,ev);
     }
 
     @Override
@@ -74,14 +74,14 @@ class CameraInternalEventImpl extends BaseCamera implements  CameraEx.PreviewAna
     //FOCUSDRIVE
     @Override
     public void onChanged(CameraEx.FocusPosition focusPosition, CameraEx cameraEx) {
-        sendMsgToUi(MSG_FOCUS_DRIVE_LISTNER,focusPosition);
+        //sendMsgToUi(MSG_FOCUS_DRIVE_LISTNER,focusPosition);
     }
 
     //Preview Magnification
     @Override
     public void onChanged(boolean b, int i, int i1, Pair pair, CameraEx cameraEx) {
-        PreviewMagnificationHelper helper = new PreviewMagnificationHelper(b,i,i1,pair);
-        sendMsgToUi(MSG_PREVIEW_MAGNIFICATION_LISTNER_CHANGED, helper);
+        /*PreviewMagnificationHelper helper = new PreviewMagnificationHelper(b,i,i1,pair);
+        sendMsgToUi(MSG_PREVIEW_MAGNIFICATION_LISTNER_CHANGED, helper);*/
     }
 
     @Override
@@ -102,7 +102,7 @@ class CameraInternalEventImpl extends BaseCamera implements  CameraEx.PreviewAna
     //AutoFocusStart
     @Override
     public void onStart(CameraEx cameraEx) {
-        sendMsgToUi(MSG_AUTO_FOCUS_START_LISTNER);
+        //sendMsgToUi(MSG_AUTO_FOCUS_START_LISTNER);
     }
 
 

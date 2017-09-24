@@ -45,6 +45,26 @@ public class CameraInstance extends CameraInternalEventImpl implements SurfaceHo
 
             Log.d(TAG, "Cam open");
             cameraIsOpen = true;
+            captureSession = new CaptureSession(CameraInstance.this,m_camera);
+            m_camera.setAutoFocusStartListener(CameraInstance.this);
+            m_camera.setAutoFocusDoneListener(CameraInstance.this);
+            m_camera.setPreviewStartListener(new CameraEx.PreviewStartListener() {
+                @Override
+                public void onStart(CameraEx cameraEx) {
+                    Log.d(TAG, "Preview onStart");
+                }
+            });
+
+            m_camera.setAutoPictureReviewControl(getAutoPictureReviewControls());
+            m_camera.setPreviewAnalizeListener(CameraInstance.this);
+            m_camera.setAutoISOSensitivityListener(CameraInstance.this);
+            m_camera.setShutterListener(captureSession);
+
+            m_camera.setApertureChangeListener(CameraInstance.this);
+            m_camera.setProgramLineRangeOverListener(CameraInstance.this);
+            m_camera.setPreviewMagnificationListener(CameraInstance.this);
+            m_camera.setFocusDriveListener(CameraInstance.this);
+            m_camera.setShutterSpeedChangeListener(CameraInstance.this);
             parameters = m_camera.getNormalCamera().getParameters();
             modifier = m_camera.createParametersModifier(parameters);
             dumpParameter();
@@ -315,26 +335,6 @@ public class CameraInstance extends CameraInternalEventImpl implements SurfaceHo
                         break;
 
                     case CAMERAOPEN:
-                        captureSession = new CaptureSession(CameraInstance.this,m_camera);
-                        m_camera.setAutoFocusStartListener(CameraInstance.this);
-                        m_camera.setAutoFocusDoneListener(CameraInstance.this);
-                        m_camera.setPreviewStartListener(new CameraEx.PreviewStartListener() {
-                            @Override
-                            public void onStart(CameraEx cameraEx) {
-                                Log.d(TAG, "Preview onStart");
-                            }
-                        });
-
-                        m_camera.setAutoPictureReviewControl(getAutoPictureReviewControls());
-                        m_camera.setPreviewAnalizeListener(CameraInstance.this);
-                        m_camera.setAutoISOSensitivityListener(CameraInstance.this);
-                        m_camera.setShutterListener(captureSession);
-
-                        m_camera.setApertureChangeListener(CameraInstance.this);
-                        m_camera.setProgramLineRangeOverListener(CameraInstance.this);
-                        m_camera.setPreviewMagnificationListener(CameraInstance.this);
-                        m_camera.setFocusDriveListener(CameraInstance.this);
-                        m_camera.setShutterSpeedChangeListener(CameraInstance.this);
 
                         if (cameraEventsListner != null) {
                             if (msg.arg1 == 0)

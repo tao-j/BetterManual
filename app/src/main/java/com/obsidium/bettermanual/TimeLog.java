@@ -1,4 +1,4 @@
-package com.github.killerink;
+package com.obsidium.bettermanual;
 
 import android.util.Log;
 

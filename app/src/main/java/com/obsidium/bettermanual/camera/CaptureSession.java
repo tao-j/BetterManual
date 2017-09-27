@@ -1,15 +1,9 @@
-package com.github.killerink.camera;
+package com.obsidium.bettermanual.camera;
 
-import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.sony.scalar.graphics.AvindexGraphics;
 import com.sony.scalar.hardware.CameraEx;
-import com.sony.scalar.hardware.CameraSequence;
-import com.sony.scalar.media.AvindexFactory;
-import com.sony.scalar.provider.AvindexStore;
-import com.sony.scalar.provider.AvindexUpdateObserver;
 
 /**
  * Created by KillerInk on 10.09.2017.

@@ -2,7 +2,7 @@ package com.obsidium.bettermanual;
 
 import android.util.Pair;
 
-import com.github.killerink.camera.ShutterSpeedValue;
+import com.obsidium.bettermanual.camera.ShutterSpeedValue;
 
 public class CameraUtil
 {

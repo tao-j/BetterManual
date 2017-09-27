@@ -1,7 +1,5 @@
 package com.obsidium.bettermanual;
 
-import com.github.killerink.ActivityInterface;
-import com.github.killerink.camera.CaptureSession;
 import com.obsidium.bettermanual.views.ApertureView;
 import com.obsidium.bettermanual.views.DriveMode;
 import com.obsidium.bettermanual.views.ExposureModeView;

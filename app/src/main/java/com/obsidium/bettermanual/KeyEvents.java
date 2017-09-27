@@ -1,4 +1,4 @@
-package com.github.killerink;
+package com.obsidium.bettermanual;
 
 /**
  * Created by KillerInk on 24.08.2017.

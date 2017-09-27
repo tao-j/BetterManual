@@ -1,4 +1,4 @@
-package com.github.killerink.camera;
+package com.obsidium.bettermanual.camera;
 
 import android.util.Pair;
 

@@ -1,18 +1,18 @@
 package com.github.ma1co.pmcademo.app;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 
-import com.github.killerink.KeyEventHandler;
-import com.github.killerink.KeyEvents;
 import com.github.ma1co.openmemories.framework.DeviceInfo;
+import com.obsidium.bettermanual.KeyEventHandler;
+import com.obsidium.bettermanual.KeyEvents;
 import com.sony.scalar.hardware.avio.DisplayManager;
 import com.sony.scalar.sysutil.didep.Gpelibrary;
 
-public class BaseActivity extends FragmentActivity implements KeyEvents {
+public class BaseActivity extends Activity implements KeyEvents {
 
     private final String TAG = BaseActivity.class.getSimpleName();
 

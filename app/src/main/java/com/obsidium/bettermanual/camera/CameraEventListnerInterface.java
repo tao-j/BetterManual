@@ -1,4 +1,4 @@
-package com.github.killerink.camera;
+package com.obsidium.bettermanual.camera;
 
 import com.sony.scalar.hardware.CameraEx;
 
@@ -22,6 +22,7 @@ interface CameraEventListnerInterface
     void setAutoFocusDoneListener(CameraEx.AutoFocusDoneListener autoFocusDoneListener);
     void setCameraEventsListner(BaseCamera.CameraEvents eventsListner);
     void fireOnCameraOpen(boolean isopen);
+    void setShutterListener(CameraEx.ShutterListener shutterListener);
 
 
 }

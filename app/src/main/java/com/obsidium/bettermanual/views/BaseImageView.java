@@ -6,7 +6,7 @@ import android.graphics.Color;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
-import com.github.killerink.ActivityInterface;
+import com.obsidium.bettermanual.ActivityInterface;
 
 public abstract class BaseImageView extends ImageView implements DialViewInterface
 {

@@ -2,10 +2,10 @@ package com.obsidium.bettermanual.capture;
 
 import android.util.Log;
 
-import com.github.killerink.KeyEvents;
-import com.github.killerink.camera.CaptureSession;
 import com.obsidium.bettermanual.CameraUiInterface;
+import com.obsidium.bettermanual.KeyEvents;
 import com.obsidium.bettermanual.R;
+import com.obsidium.bettermanual.camera.CaptureSession;
 import com.sony.scalar.sysutil.didep.Settings;
 
 public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, CaptureSession.CaptureDoneEvent

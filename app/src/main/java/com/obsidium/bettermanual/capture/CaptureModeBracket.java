@@ -3,12 +3,12 @@ package com.obsidium.bettermanual.capture;
 import android.util.Log;
 import android.util.Pair;
 
-import com.github.killerink.KeyEvents;
-import com.github.killerink.camera.CaptureSession;
-import com.github.killerink.camera.ShutterSpeedValue;
 import com.obsidium.bettermanual.CameraUiInterface;
 import com.obsidium.bettermanual.CameraUtil;
+import com.obsidium.bettermanual.KeyEvents;
 import com.obsidium.bettermanual.R;
+import com.obsidium.bettermanual.camera.CaptureSession;
+import com.obsidium.bettermanual.camera.ShutterSpeedValue;
 import com.obsidium.bettermanual.views.ExposureModeView;
 import com.sony.scalar.hardware.CameraEx;
 

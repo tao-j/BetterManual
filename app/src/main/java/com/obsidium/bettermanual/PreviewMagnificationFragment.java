@@ -1,25 +1,19 @@
 package com.obsidium.bettermanual;
 
 import android.content.Context;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.util.Pair;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.github.killerink.ActivityInterface;
-import com.github.killerink.KeyEvents;
 import com.obsidium.bettermanual.views.PreviewNavView;
 import com.sony.scalar.hardware.CameraEx;
 
 import java.util.List;
 
 
-public class PreviewMagnificationFragment extends Fragment implements KeyEvents, CameraEx.PreviewMagnificationListener {
+public class PreviewMagnificationFragment extends BaseLayout implements KeyEvents, CameraEx.PreviewMagnificationListener {
+
+
 
     private class SurfaceSwipeTouchListener extends OnSwipeTouchListener
     {
@@ -56,30 +50,12 @@ public class PreviewMagnificationFragment extends Fragment implements KeyEvents,
     private Pair<Integer, Integer> m_curPreviewMagnificationPos = new Pair<Integer, Integer>(0, 0);
     private int             m_curPreviewMagnificationMaxPos;
 
-    public static PreviewMagnificationFragment getFragment(ActivityInterface activityInterface)
-    {
-        PreviewMagnificationFragment cu = new PreviewMagnificationFragment();
-        cu.activityInterface = activityInterface;
-        return cu;
-    }
+    public PreviewMagnificationFragment(Context context, ActivityInterface activityInterface) {
+        super(context, activityInterface);
+        inflateLayout(R.layout.preview_magnification_fragment);
+        magnification = (TextView) findViewById(R.id.tvMagnification);
+        previewNavView = (PreviewNavView)findViewById(R.id.vPreviewNav);
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.d(TAG,"onCreateView");
-        return inflater.inflate(R.layout.preview_magnification_fragment,container,false);
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        magnification = (TextView) view.findViewById(R.id.tvMagnification);
-        previewNavView = (PreviewNavView)view.findViewById(R.id.vPreviewNav);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
         activityInterface.setSurfaceViewOnTouchListner(new SurfaceSwipeTouchListener(getContext()));
         activityInterface.getCamera().setPreviewMagnificationListener(this);
         m_supportedPreviewMagnifications = (List<Integer>) activityInterface.getCamera().getSupportedPreviewMagnification();
@@ -87,24 +63,9 @@ public class PreviewMagnificationFragment extends Fragment implements KeyEvents,
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void Destroy() {
         activityInterface.setSurfaceViewOnTouchListner(null);
     }
-
-    /*private void togglePreviewMagnificationViews(final boolean magnificationActive)
-    {
-        activityInterface.getMainHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                m_previewNavView.setVisibility(magnificationActive ? View.VISIBLE : View.GONE);
-                m_tvMagnification.setVisibility(magnificationActive ? View.VISIBLE : View.GONE);
-                m_vHist.setVisibility(magnificationActive ? View.GONE : View.VISIBLE);
-                setLeftViewVisibility(!magnificationActive);
-            }
-        });
-
-    }*/
 
     //##############CameraEx.PreviewMagnificationListener###############
     @Override

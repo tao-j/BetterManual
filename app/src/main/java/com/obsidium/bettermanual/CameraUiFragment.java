@@ -1,21 +1,14 @@
 package com.obsidium.bettermanual;
 
+import android.content.Context;
 import android.graphics.Color;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.util.Pair;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.github.killerink.ActivityInterface;
-import com.github.killerink.KeyEvents;
-import com.github.killerink.TimeLog;
 import com.obsidium.bettermanual.capture.CaptureModeBracket;
 import com.obsidium.bettermanual.capture.CaptureModeTimelapse;
 import com.obsidium.bettermanual.views.ApertureView;
@@ -38,8 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-
-public class CameraUiFragment extends Fragment implements View.OnClickListener,
+public class CameraUiFragment extends BaseLayout implements View.OnClickListener,
         CameraUiInterface, KeyEvents, CameraEx.PreviewAnalizeListener,CameraEx.ProgramLineRangeOverListener,
         CameraEx.FocusDriveListener
 {
@@ -112,88 +104,56 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener,
     private int             m_viewFlags;
     private boolean bulbcapture = false;
 
-    private ActivityInterface activityInterface;
-
-
-    public static CameraUiFragment getCameraUiFragment(ActivityInterface activityInterface)
+    public CameraUiFragment(Context context, ActivityInterface activityInterface)
     {
-        CameraUiFragment cu = new CameraUiFragment();
-        cu.setActivityInterface(activityInterface);
-        return cu;
-    }
-
-    private void setActivityInterface(ActivityInterface activityInterface) {
+        super(context,activityInterface);
+        inflateLayout(R.layout.camera_ui_fragment);
         this.activityInterface = activityInterface;
-    }
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.d(TAG,"onCreateView");
-        return inflater.inflate(R.layout.camera_ui_fragment,container,false);
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        Log.d(TAG,"onViewCreated");
-        final TimeLog timeLog = new TimeLog("onViewCreated");
-        super.onViewCreated(view, savedInstanceState);
         dialViews = new ArrayList<DialViewInterface>();
-        bottomHolder = (LinearLayout)view.findViewById(R.id.bottom_holder);
-        leftHolder = (LinearLayout) view.findViewById(R.id.left_holder);
+        bottomHolder = (LinearLayout)findViewById(R.id.bottom_holder);
+        leftHolder = (LinearLayout)findViewById(R.id.left_holder);
 
-        m_tvLog = (TextView)view.findViewById(R.id.tvLog);
+        m_tvLog = (TextView)findViewById(R.id.tvLog);
         m_tvLog.setVisibility(LOGGING_ENABLED ? View.VISIBLE : View.GONE);
 
-        m_vHist = (HistogramView)view.findViewById(R.id.vHist);
+        m_vHist = (HistogramView)findViewById(R.id.vHist);
 
-        m_tvMsg = (TextView)view.findViewById(R.id.tvMsg);
+        m_tvMsg = (TextView)findViewById(R.id.tvMsg);
 
-        m_vGrid = (GridView)view.findViewById(R.id.vGrid);
+        m_vGrid = (GridView)findViewById(R.id.vGrid);
 
-        m_tvHint = (TextView)view.findViewById(R.id.tvHint);
+        m_tvHint = (TextView)findViewById(R.id.tvHint);
         m_tvHint.setVisibility(View.GONE);
 
-        m_focusScaleView = (FocusScaleView)view.findViewById(R.id.vFocusScale);
-        m_lFocusScale = view.findViewById(R.id.lFocusScale);
+        m_focusScaleView = (FocusScaleView)findViewById(R.id.vFocusScale);
+        m_lFocusScale = findViewById(R.id.lFocusScale);
         m_lFocusScale.setVisibility(View.GONE);
 
         //noinspection ResourceType
-        ((ImageView)view.findViewById(R.id.ivFocusRight)).setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_rec_focuscontrol_far));
+        ((ImageView)findViewById(R.id.ivFocusRight)).setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_rec_focuscontrol_far));
         //noinspection ResourceType
-        ((ImageView)view.findViewById(R.id.ivFocusLeft)).setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_rec_focuscontrol_near));
+        ((ImageView)findViewById(R.id.ivFocusLeft)).setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_rec_focuscontrol_near));
 
         timelapse = new CaptureModeTimelapse(this);
         bracket = new CaptureModeBracket(this);
-        timeLog.logTime();
-    }
 
-    @Override
-    public void onResume()
-    {
-        Log.d(TAG,"onResume");
-        final TimeLog timeLog = new TimeLog("onResume");
-        super.onResume();
         loadUiItems();
         initUi();
         //then set the key event listner to avoid nullpointer
         activityInterface.getDialHandler().setDialEventListner(CameraUiFragment.this);
-        timeLog.logTime();
     }
 
-    @Override
-    public void onPause()
+    public void Destroy()
     {
-        Log.d(TAG,"onPause");
-        //save View visibility
         activityInterface.getPreferences().setViewFlags(m_viewFlags);
         activityInterface.getPreferences().setDialMode(lastDialView);
 
         clearUiItems();
         if (activityInterface.getCamera().getAutoPictureReviewControls() != null)
             activityInterface.getCamera().getAutoPictureReviewControls().setPictureReviewTime(m_pictureReviewTime);
-        super.onPause();
     }
+
 
     private void loadUiItems() {
         final TimeLog timeLog = new TimeLog("loadUiItems");
@@ -232,7 +192,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener,
 
             @Override
             public String getNavigationString() {
-                return getString(R.string.view_startBracket_Timelapse);
+                return activityInterface.getResString(R.string.view_startBracket_Timelapse);
             }
         };
         //noinspection ResourceType
@@ -266,7 +226,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener,
 
             @Override
             public String getNavigationString() {
-                return getString(R.string.view_startBracket_Timelapse);
+                return activityInterface.getResString(R.string.view_startBracket_Timelapse);
             }
         };
         //noinspection ResourceType
@@ -705,7 +665,14 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener,
     public boolean onShutterKeyUp()
     {
         Log.d(TAG,"onShutterKeyUp");
-        return false;
+        return true;
+    }
+
+    @Override
+    public boolean onShutterKeyDown()
+    {
+        Log.d(TAG,"onShutterKeyDown");
+        return true;
     }
 
     @Override
@@ -774,12 +741,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener,
         return false;
     }
 
-    @Override
-    public boolean onShutterKeyDown()
-    {
-        Log.d(TAG,"onShutterKeyDown");
-        return false;
-    }
+
 
     @Override
     public boolean onDeleteKeyUp()

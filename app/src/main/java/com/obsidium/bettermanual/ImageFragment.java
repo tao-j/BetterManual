@@ -1,19 +1,13 @@
-package com.github.killerink;
+package com.obsidium.bettermanual;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.net.Uri;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.SurfaceHolder;
 import android.widget.FrameLayout;
 
-import com.obsidium.bettermanual.MainActivity;
-import com.obsidium.bettermanual.R;
 import com.sony.scalar.graphics.OptimizedImage;
 import com.sony.scalar.graphics.OptimizedImageFactory;
 import com.sony.scalar.hardware.CameraEx;
@@ -22,7 +16,7 @@ import com.sony.scalar.provider.AvindexStore;
 import com.sony.scalar.widget.OptimizedImageView;
 
 
-public class ImageFragment extends Fragment implements KeyEvents {
+public class ImageFragment extends BaseLayout implements KeyEvents {
 
     /*
         FOLDER
@@ -40,7 +34,6 @@ public class ImageFragment extends Fragment implements KeyEvents {
     private final String TAG = ImageFragment.class.getSimpleName();
     private OptimizedImageView imageView;
     private FrameLayout surfaceViewParent;
-    private ActivityInterface activityInterface;
     private Cursor mediaCursor;
     OptimizedImage image;
     AvindexContentInfo info;
@@ -53,44 +46,19 @@ public class ImageFragment extends Fragment implements KeyEvents {
     protected static final String[] CONTENTS_QUERY_PROJECTION = { "_id", "_data", "dcf_file_number", "dcf_folder_number", "content_created_local_date", "content_created_utc_date", "content_created_local_date_time", "content_created_utc_date_time", "exist_jpeg", "exist_raw", "exist_mpo", "rec_order", "content_type" };
     final Uri baseUri = AvindexStore.Images.Media.EXTERNAL_CONTENT_URI;
 
-    public static ImageFragment getFragment(ActivityInterface activityInterface)
-    {
-        ImageFragment fragment = new ImageFragment();
-        fragment.activityInterface = activityInterface;
-        return fragment;
-    }
+    public ImageFragment(Context context,ActivityInterface activityInterface) {
+        super(context,activityInterface);
+        inflateLayout(R.layout.image_fragment);
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        //NOTE: to use fragments its important to not attachToRoot!
-        return inflater.inflate(R.layout.image_fragment,container,false);
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        surfaceViewParent = (FrameLayout)view.findViewById(R.id.surfaceParentView);
+        surfaceViewParent = (FrameLayout) findViewById(R.id.surfaceParentView);
         imageView = new OptimizedImageView(getContext());
         surfaceViewParent.addView(imageView);
         imageView.setDisplayPosition(new Point(0,0), OptimizedImageView.PositionType.POS_TYPE_NONE);
 
 
-        //used to get histogram data
-        /*imageView.setOnHistogramEventListener(new OptimizedImageView.onHistogramEventListener() {
-            @Override
-            public void onHistogram(int i, Histogram histogram) {
-                Log.d(TAG, "onHistogram");
-            }
-        });*/
-    }
 
-    @Override
-    public void onResume() {
-        super.onResume();
         //stop camera else Images are not load
-        activityInterface.getCamera().closeCamera();
+
 
         /*AvindexStore.loadMedia(AvindexStore.getExternalMediaIds()[0], AvindexStore.CONTENT_TYPE_LOAD_STILL);
         AvindexStore.Images.waitAndUpdateDatabase(getContext().getContentResolver(), AvindexStore.getExternalMediaIds()[0]);*/
@@ -101,21 +69,24 @@ public class ImageFragment extends Fragment implements KeyEvents {
         mediaCursor = getCursorFromUri(media);
         mediaCursor.moveToFirst();
         loadOptimizedImg();
-        //loadImage();
+
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+
+    }
+
+    @Override
+    public void Destroy() {
         if (mediaCursor != null && !mediaCursor.isClosed())
             mediaCursor.close();
         closeImageInfo();
         closeOptimizedImage();
-        //start camera, all other fragments need it.
-        // CameraUiFragment gets loaded automatic when camera returns onCameraOpen callback
-        activityInterface.getCamera().startCamera((CameraEx.ShutterListener) activityInterface);
-    }
 
+    }
 
     private void loadOptimizedImg()
     {

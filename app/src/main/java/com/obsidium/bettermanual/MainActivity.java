@@ -4,21 +4,19 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
-import com.github.killerink.ActivityInterface;
-import com.github.killerink.ImageFragment;
-import com.github.killerink.KeyEventHandler;
-import com.github.killerink.TimeLog;
-import com.github.killerink.camera.CameraInstance;
-import com.github.killerink.camera.CaptureSession;
 import com.github.ma1co.pmcademo.app.BaseActivity;
+import com.obsidium.bettermanual.camera.CameraInstance;
+import com.obsidium.bettermanual.camera.CaptureSession;
 import com.sony.scalar.hardware.CameraEx;
+
+import java.io.IOException;
 
 /**
  * Created by KillerInk on 27.08.2017.
@@ -29,7 +27,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     private final String TAG = MainActivity.class.getSimpleName();
     private Preferences preferences;
 
-    private CameraInstance wrapper;
+    private CameraInstance cameraInstance;
 
     public final static int FRAGMENT_CAMERA_UI = 0;
     public final static int FRAGMENT_MIN_SHUTTER = 1;
@@ -42,9 +40,14 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     private SurfaceHolder m_surfaceHolder;
     SurfaceView surfaceView;
 
+    LinearLayout layoutHolder;
+    FrameLayout surfaceViewHolder;
+
     private boolean isBulbCapture = false;
     private boolean isCaptureInProgress = false;
     private CaptureSession.CaptureDoneEvent eventListner;
+
+    private BaseLayout currentLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,11 +58,10 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         m_handler = new Handler();
         setContentView(R.layout.main_activity);
 
-        surfaceView = (SurfaceView)findViewById(R.id.surfaceView);
+        surfaceViewHolder = (FrameLayout) findViewById(R.id.surfaceView);
         //surfaceView.setOnTouchListener(new CameraUiFragment.SurfaceSwipeTouchListener(getContext()));
-        m_surfaceHolder = surfaceView.getHolder();
-        m_surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        m_surfaceHolder.addCallback(this);
+        addSurfaceView();
+        layoutHolder = (LinearLayout)findViewById(R.id.fragment_holder);
         preferences = new Preferences(getApplicationContext());
     }
 
@@ -67,21 +69,18 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     protected void onResume() {
         Log.d(TAG,"onResume");
         super.onResume();
-        wrapper = new CameraInstance();
-        wrapper.setCameraEventsListner(this);
-
-
-
+        cameraInstance = new CameraInstance();
+        cameraInstance.setCameraEventsListner(this);
     }
 
     @Override
     protected void onPause() {
         Log.d(TAG,"onPause");
         super.onPause();
-        if (wrapper !=null) {
+        if (cameraInstance !=null) {
             saveDefaults();
-            wrapper.closeCamera();
-            wrapper = null;
+            cameraInstance.closeCamera();
+            cameraInstance = null;
         }
 
     }
@@ -113,7 +112,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
 
     @Override
     public CameraInstance getCamera() {
-        return wrapper;
+        return cameraInstance;
     }
 
     @Override
@@ -140,33 +139,41 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
 
     @Override
     public void loadFragment(int fragment) {
+        if (currentLayout != null) {
+            currentLayout.Destroy();
+            layoutHolder.removeAllViews();
+        }
         switch (fragment)
         {
             case FRAGMENT_MIN_SHUTTER:
-                MinShutterFragment msa = MinShutterFragment.getMinShutterActivity(this);
+                MinShutterFragment msa = new MinShutterFragment(getApplicationContext(),this);
                 getDialHandler().setDialEventListner(msa);
-                replaceCameraFragment(msa, MinShutterFragment.class.getSimpleName());
+                currentLayout = msa;
+                layoutHolder.addView(msa);
                 break;
             case FRAGMENT_PREVIEWMAGNIFICATION:
-                PreviewMagnificationFragment pmf = PreviewMagnificationFragment.getFragment(this);
+                PreviewMagnificationFragment pmf = new PreviewMagnificationFragment(getApplicationContext(),this);
                 getDialHandler().setDialEventListner(pmf);
-                replaceCameraFragment(pmf, PreviewMagnificationFragment.class.getSimpleName());
+                currentLayout = pmf;
+                layoutHolder.addView(pmf);
                 break;
             case FRAGMENT_IMAGEVIEW:
-                ImageFragment imageFragment = ImageFragment.getFragment(this);
+                getCamera().closeCamera();
+                removeSurfaceView();
+                ImageFragment imageFragment = new ImageFragment(getApplicationContext(),this);
                 getDialHandler().setDialEventListner(imageFragment);
-                replaceCameraFragment(imageFragment, ImageFragment.class.getSimpleName());
+                currentLayout = imageFragment;
+                layoutHolder.addView(imageFragment);
                 break;
             case FRAGMENT_WAITFORCAMERARDY:
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.remove(getSupportFragmentManager().findFragmentByTag(ImageFragment.class.getSimpleName()));
-                transaction.commit();
+                addSurfaceView();
                 break;
             case FRAGMENT_CAMERA_UI:
             default:
-                CameraUiFragment ui = CameraUiFragment.getCameraUiFragment(this);
-                getDialHandler().setDialEventListner(ui);
-                replaceCameraFragment(ui, CameraUiFragment.class.getSimpleName());
+                CameraUiFragment cameraUiFragment = new CameraUiFragment(getApplicationContext(),this);
+                getDialHandler().setDialEventListner(cameraUiFragment);
+                currentLayout = cameraUiFragment;
+                layoutHolder.addView(cameraUiFragment);
                 break;
 
         }
@@ -206,19 +213,18 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     public void cancelBulbCapture()
     {
         isBulbCapture = false;
-        wrapper.cancleCapture();
-    }
-
-    private void replaceCameraFragment(Fragment fragment, String id)
-    {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_holder, fragment, id);
-        transaction.commit();
+        cameraInstance.cancleCapture();
     }
 
     @Override
     public void onCameraOpen(boolean isOpen) {
         Log.d(TAG, "onCameraOpen");
+        getCamera().enableHwShutterButton();
+        getCamera().setShutterListener(this);
+        getCamera().setSurfaceHolder(m_surfaceHolder);
+        getCamera().startDisplay();
+
+
         loadFragment(FRAGMENT_CAMERA_UI);
         loadDefaults();
     }
@@ -254,10 +260,24 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
 
     }
 
+    private void addSurfaceView() {
+        surfaceView = new SurfaceView(getApplicationContext());
+        m_surfaceHolder = surfaceView.getHolder();
+        m_surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        m_surfaceHolder.addCallback(this);
+        surfaceViewHolder.addView(surfaceView);
+    }
+
+    private void removeSurfaceView()
+    {
+        surfaceView = null;
+        surfaceViewHolder.removeAllViews();
+    }
+
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
-        wrapper.setSurfaceHolder(surfaceHolder);
-        wrapper.startCamera(this);
+        cameraInstance.setSurfaceHolder(surfaceHolder);
+        cameraInstance.startCamera(this);
     }
 
     @Override
@@ -283,7 +303,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         Log.d(TAG, "onShutter:" + logCaptureCode(i)+ " isBulb:" + isBulbCapture);
         Log.d(TAG, "RunMainThread: " + (Thread.currentThread() == Looper.getMainLooper().getThread()));
         if (!isBulbCapture) {
-            wrapper.cancleCapture();
+            cameraInstance.cancleCapture();
             //this.cameraEx.startDirectShutter();
             isCaptureInProgress = false;
             if (eventListner != null)

@@ -1,12 +1,7 @@
-package com.github.killerink.camera;
+package com.obsidium.bettermanual.camera;
 
 import android.hardware.Camera;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
-import android.util.Pair;
 import android.view.SurfaceHolder;
 
 import com.sony.scalar.hardware.CameraEx;
@@ -26,42 +21,19 @@ public class CameraInstance extends BaseCamera  {
     }
 
 
-    //There are two ways to start the preview.
-    //1. is to use CameraEx.Options.setPreview(true). Then preview seems to start when a surface gets attached to cam.
-    //2. is to open camera with null Options and then call CameraEx.getNormalCamera().startPreview();
-
     public void startCamera(CameraEx.ShutterListener shutterListener) {
-        //CameraEx.OpenOptions options = new CameraEx.OpenOptions();
-        //options.setPreview(true);
+        CameraEx.OpenOptions options = new CameraEx.OpenOptions();
+        options.setPreview(true);
         Log.d(TAG, "Open Cam");
         m_camera = CameraEx.open(0, null);
         Log.d(TAG, "Cam open");
         cameraIsOpen = true;
-        enableHwShutterButton();
-        m_camera.setShutterListener(shutterListener);
-        try {
-            m_camera.getNormalCamera().setPreviewDisplay(surfaceHolder);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        m_camera.getNormalCamera().startPreview();
-
-
-        m_camera.setPreviewStartListener(new CameraEx.PreviewStartListener() {
-            @Override
-            public void onStart(CameraEx cameraEx) {
-                Log.d(TAG, "Preview onStart");
-            }
-        });
-
-        autoPictureReviewControl = new CameraEx.AutoPictureReviewControl();
-        m_camera.setAutoPictureReviewControl(getAutoPictureReviewControls());
-
-
 
         initParameters();
-
+        autoPictureReviewControl = new CameraEx.AutoPictureReviewControl();
+        m_camera.setAutoPictureReviewControl(getAutoPictureReviewControls());
         fireOnCameraOpen(true);
+
     }
 
     public void initParameters()

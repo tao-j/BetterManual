@@ -1,11 +1,10 @@
-package com.github.killerink;
+package com.obsidium.bettermanual;
 
 import android.os.Handler;
 import android.view.View;
 
-import com.github.killerink.camera.CameraInstance;
-import com.github.killerink.camera.CaptureSession;
-import com.obsidium.bettermanual.Preferences;
+import com.obsidium.bettermanual.camera.CameraInstance;
+import com.obsidium.bettermanual.camera.CaptureSession;
 import com.sony.scalar.hardware.avio.DisplayManager;
 
 /**

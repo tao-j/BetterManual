@@ -1,8 +1,6 @@
-package com.github.killerink.camera;
+package com.obsidium.bettermanual.camera;
 
 import android.hardware.Camera;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Pair;
 
 import com.sony.scalar.hardware.CameraEx;
@@ -107,8 +105,20 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     }
 
     @Override
+    public void setShutterListener(CameraEx.ShutterListener shutterListener) {
+        m_camera.setShutterListener(shutterListener);
+    }
+
+    @Override
     public CameraEx.ShutterSpeedInfo getShutterSpeedInfo()
     {
+        if (shutterSpeedInfo == null) {
+            shutterSpeedInfo = new CameraEx.ShutterSpeedInfo();
+            Pair<Integer, Integer> p = modifier.getShutterSpeed();
+            shutterSpeedInfo.currentShutterSpeed_d = p.first;
+            shutterSpeedInfo.currentShutterSpeed_n = p.second;
+
+        }
         return shutterSpeedInfo;
     }
 

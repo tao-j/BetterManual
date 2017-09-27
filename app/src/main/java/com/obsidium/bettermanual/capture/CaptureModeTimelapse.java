@@ -77,9 +77,9 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, Capt
         catch (NoSuchMethodError e)
         {
         }
-        cameraUiInterface.getActivityInterface().getCamera().captureSession.setBulbCapture(false);
-        cameraUiInterface.getActivityInterface().getCamera().captureSession.setEventListner(this);
-        cameraUiInterface.getActivityInterface().getBackHandler().post(cameraUiInterface.getActivityInterface().getCamera().captureSession);
+        cameraUiInterface.getActivityInterface().setBulbCapture(false);
+        cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(this);
+        cameraUiInterface.getActivityInterface().getCamera().takePicture();
     }
 
     @Override
@@ -88,7 +88,7 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, Capt
         cameraUiInterface.getActivityInterface().getMainHandler().removeCallbacks(m_timelapseRunnable);
         isActive = false;
         cameraUiInterface.showMessageDelayed("Timelapse finished");
-        cameraUiInterface.getActivityInterface().getCamera().startPreview();
+        cameraUiInterface.getActivityInterface().getCamera().enableHwShutterButton();
         cameraUiInterface.getActivityInterface().getCamera().startDisplay();
 
             // Update controls
@@ -436,7 +436,7 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, Capt
         ++m_timelapsePicsTaken;
         if (m_timelapsePicCount < 0 || m_timelapsePicCount == 1) {
             abort();
-            cameraUiInterface.getActivityInterface().getCamera().captureSession.setEventListner(null);
+            cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(null);
             Log.d(TAG, "abort Timelapse");
         }
         else

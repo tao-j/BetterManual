@@ -3,11 +3,9 @@ package com.obsidium.bettermanual.views;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.View;
 
-import com.github.killerink.MainActivity;
+import com.obsidium.bettermanual.MainActivity;
 import com.github.killerink.camera.CaptureSession;
-import com.github.killerink.camera.ShutterSpeedValue;
 import com.obsidium.bettermanual.CameraUtil;
 import com.obsidium.bettermanual.R;
 
@@ -60,11 +58,11 @@ public class ShutterView extends BaseTextView implements CaptureSession.CaptureD
             return true;
         }
         else if (getText().equals("BULB")) {
-            if (!cameraUiInterface.getActivityInterface().getCamera().captureSession.isBulbCapture()) {
+            if (!cameraUiInterface.getActivityInterface().isBulbCapture()) {
                 startBulbCapture();
                 return false;
 
-            } else if (cameraUiInterface.getActivityInterface().getCamera().captureSession.isBulbCapture()) {
+            } else if (cameraUiInterface.getActivityInterface().isBulbCapture()) {
 
                 stopBulbCapture();
                 return false;
@@ -74,15 +72,15 @@ public class ShutterView extends BaseTextView implements CaptureSession.CaptureD
     }
 
     private void stopBulbCapture() {
-        cameraUiInterface.getActivityInterface().getCamera().captureSession.cancelBulbCapture();
+        cameraUiInterface.getActivityInterface().cancelBulbCapture();
         Log.d(TAG, "Stop BULB");
     }
 
     private void startBulbCapture()
     {
-        cameraUiInterface.getActivityInterface().getCamera().captureSession.setBulbCapture(true);
-        cameraUiInterface.getActivityInterface().getCamera().captureSession.setEventListner(this);
-        cameraUiInterface.getActivityInterface().getBackHandler().post(cameraUiInterface.getActivityInterface().getCamera().captureSession);
+        cameraUiInterface.getActivityInterface().setBulbCapture(true);
+        cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(this);
+        cameraUiInterface.getActivityInterface().getCamera().takePicture();
         Log.d(TAG, "Start BULB");
     }
 

@@ -77,9 +77,9 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
         cameraUiInterface.hideHintMessage();
         cameraUiInterface.hideMessage();
         // Take first picture at set shutter speed
-        cameraUiInterface.getActivityInterface().getCamera().captureSession.setBulbCapture(false);
-        cameraUiInterface.getActivityInterface().getCamera().captureSession.setEventListner(this);
-        cameraUiInterface.getActivityInterface().getBackHandler().post(cameraUiInterface.getActivityInterface().getCamera().captureSession);
+        cameraUiInterface.getActivityInterface().setBulbCapture(false);
+        cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(this);
+        cameraUiInterface.getActivityInterface().getCamera().takePicture();
     }
 
     @Override
@@ -433,7 +433,7 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
         if (--m_bracketPicCount == 0) {
             Log.d(TAG,"abort");
             abort();
-            cameraUiInterface.getActivityInterface().getCamera().captureSession.setEventListner(null);
+            cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(null);
         }
         else
         {

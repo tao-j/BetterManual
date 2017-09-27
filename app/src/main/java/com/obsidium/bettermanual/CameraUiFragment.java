@@ -15,9 +15,7 @@ import android.widget.TextView;
 
 import com.github.killerink.ActivityInterface;
 import com.github.killerink.KeyEvents;
-import com.github.killerink.MainActivity;
 import com.github.killerink.TimeLog;
-import com.github.killerink.camera.CaptureSession;
 import com.obsidium.bettermanual.capture.CaptureModeBracket;
 import com.obsidium.bettermanual.capture.CaptureModeTimelapse;
 import com.obsidium.bettermanual.views.ApertureView;
@@ -35,7 +33,6 @@ import com.obsidium.bettermanual.views.IsoView;
 import com.obsidium.bettermanual.views.LongExpoNR;
 import com.obsidium.bettermanual.views.ShutterView;
 import com.sony.scalar.hardware.CameraEx;
-import com.sony.scalar.provider.AvindexStore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -177,20 +174,12 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener,
         Log.d(TAG,"onResume");
         final TimeLog timeLog = new TimeLog("onResume");
         super.onResume();
-        activityInterface.getMainHandler().post(setupUiItems);
+        loadUiItems();
+        initUi();
+        //then set the key event listner to avoid nullpointer
+        activityInterface.getDialHandler().setDialEventListner(CameraUiFragment.this);
         timeLog.logTime();
     }
-
-    private Runnable setupUiItems = new Runnable() {
-        @Override
-        public void run() {
-            //first add ui
-            loadUiItems();
-            initUi();
-            //then set the key event listner to avoid nullpointer
-            activityInterface.getDialHandler().setDialEventListner(CameraUiFragment.this);
-        }
-    };
 
     @Override
     public void onPause()
@@ -620,12 +609,7 @@ public class CameraUiFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public boolean onFnKeyUp() {
-        activityInterface.getBackHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                activityInterface.getCamera().cancleCapture();
-            }
-        });
+        activityInterface.getCamera().cancleCapture();
 
         return false;
     }

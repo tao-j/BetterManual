@@ -1,9 +1,8 @@
-package com.github.killerink;
+package com.obsidium.bettermanual;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -12,26 +11,23 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
+import com.github.killerink.ActivityInterface;
+import com.github.killerink.ImageFragment;
+import com.github.killerink.KeyEventHandler;
+import com.github.killerink.TimeLog;
 import com.github.killerink.camera.CameraInstance;
+import com.github.killerink.camera.CaptureSession;
 import com.github.ma1co.pmcademo.app.BaseActivity;
-import com.obsidium.bettermanual.CameraUiFragment;
-import com.obsidium.bettermanual.CustomExceptionHandler;
-import com.obsidium.bettermanual.MinShutterFragment;
-import com.obsidium.bettermanual.Preferences;
-import com.obsidium.bettermanual.PreviewMagnificationFragment;
-import com.obsidium.bettermanual.R;
 import com.sony.scalar.hardware.CameraEx;
 
 /**
  * Created by KillerInk on 27.08.2017.
  */
 
-public class MainActivity extends BaseActivity implements ActivityInterface, CameraInstance.CameraEvents {
+public class MainActivity extends BaseActivity implements ActivityInterface, CameraInstance.CameraEvents, SurfaceHolder.Callback,CameraEx.ShutterListener {
 
     private final String TAG = MainActivity.class.getSimpleName();
     private Preferences preferences;
-    private HandlerThread mHandlerThread;
-    private Handler mbgHandler;
 
     private CameraInstance wrapper;
 
@@ -46,19 +42,24 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     private SurfaceHolder m_surfaceHolder;
     SurfaceView surfaceView;
 
+    private boolean isBulbCapture = false;
+    private boolean isCaptureInProgress = false;
+    private CaptureSession.CaptureDoneEvent eventListner;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG,"onCreate");
         super.onCreate(savedInstanceState);
         if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler))
             Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());
-        m_handler = new Handler(Looper.getMainLooper());
+        m_handler = new Handler();
         setContentView(R.layout.main_activity);
 
         surfaceView = (SurfaceView)findViewById(R.id.surfaceView);
         //surfaceView.setOnTouchListener(new CameraUiFragment.SurfaceSwipeTouchListener(getContext()));
         m_surfaceHolder = surfaceView.getHolder();
         m_surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        m_surfaceHolder.addCallback(this);
         preferences = new Preferences(getApplicationContext());
     }
 
@@ -66,11 +67,9 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     protected void onResume() {
         Log.d(TAG,"onResume");
         super.onResume();
-        startBackgroundThread();
-        wrapper = new CameraInstance(mHandlerThread);
-        m_surfaceHolder.addCallback(wrapper);
+        wrapper = new CameraInstance();
         wrapper.setCameraEventsListner(this);
-        wrapper.startCamera();
+
 
 
     }
@@ -81,11 +80,9 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         super.onPause();
         if (wrapper !=null) {
             saveDefaults();
-            m_surfaceHolder.removeCallback(wrapper);
             wrapper.closeCamera();
             wrapper = null;
         }
-        stopBackgroundThread();
 
     }
 
@@ -98,28 +95,6 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         getPreferences().setBurstDriveSpeed(getCamera().getBurstDriveSpeed());
     }
 
-
-    public void startBackgroundThread(){
-        mHandlerThread = new HandlerThread("HandlerThread");
-        mHandlerThread.start();
-        mbgHandler = new Handler(mHandlerThread.getLooper());
-    }
-
-    private void stopBackgroundThread()
-    {
-        Log.d(TAG,"stopBackgroundThread");
-        if(mHandlerThread == null)
-            return;
-
-        mHandlerThread.quit();
-        try {
-            mHandlerThread.join();
-            mHandlerThread = null;
-            mHandlerThread = null;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 
     @Override
     public boolean hasTouchScreen() {
@@ -144,11 +119,6 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     @Override
     public Handler getMainHandler() {
         return m_handler;
-    }
-
-    @Override
-    public Handler getBackHandler() {
-        return mbgHandler;
     }
 
     @Override
@@ -213,6 +183,32 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         return getResources().getString(id);
     }
 
+    public void setBulbCapture(boolean bulbCapture)
+    {
+        this.isBulbCapture = bulbCapture;
+    }
+
+    public void setCaptureDoneEventListner(CaptureSession.CaptureDoneEvent eventListner)
+    {
+        this.eventListner = eventListner;
+    }
+
+    public boolean isCaptureInProgress()
+    {
+        return isCaptureInProgress;
+    }
+
+    public boolean isBulbCapture()
+    {
+        return isBulbCapture;
+    }
+
+    public void cancelBulbCapture()
+    {
+        isBulbCapture = false;
+        wrapper.cancleCapture();
+    }
+
     private void replaceCameraFragment(Fragment fragment, String id)
     {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -223,48 +219,88 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     @Override
     public void onCameraOpen(boolean isOpen) {
         Log.d(TAG, "onCameraOpen");
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                loadFragment(FRAGMENT_CAMERA_UI);
-            }
-        });
+        loadFragment(FRAGMENT_CAMERA_UI);
         loadDefaults();
     }
 
     private void loadDefaults()
     {
-        getBackHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                final TimeLog timeLog = new TimeLog("loadDefaults");
-                //Log.d(TAG,"Parameters: " + params.flatten());
-                // Focus mode
-                getCamera().setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
-                // Scene mode
-                final String sceneMode = getPreferences().getSceneMode();
-                getCamera().setSceneMode(sceneMode);
-                // Drive mode and burst speed
-                getCamera().setDriveMode(getPreferences().getDriveMode());
-                getCamera().setBurstDriveSpeed(getPreferences().getBurstDriveSpeed());
-                // Minimum shutter speed
-                if(getCamera().isAutoShutterSpeedLowLimitSupported()) {
-                    if (sceneMode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
-                        getCamera().setAutoShutterSpeedLowLimit(-1);
-                    else
-                        getCamera().setAutoShutterSpeedLowLimit(getPreferences().getMinShutterSpeed());
-                }
-                // Disable self timer
-                getCamera().setSelfTimer(0);
-                // Force aspect ratio to 3:2
-                getCamera().setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
-                // View visibility
+        final TimeLog timeLog = new TimeLog("loadDefaults");
+        //Log.d(TAG,"Parameters: " + params.flatten());
+        // Focus mode
+        getCamera().setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
+        // Scene mode
+        final String sceneMode = getPreferences().getSceneMode();
+        getCamera().setSceneMode(sceneMode);
+        // Drive mode and burst speed
+        getCamera().setDriveMode(getPreferences().getDriveMode());
+        getCamera().setBurstDriveSpeed(getPreferences().getBurstDriveSpeed());
+        // Minimum shutter speed
+        if(getCamera().isAutoShutterSpeedLowLimitSupported()) {
+            if (sceneMode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
+                getCamera().setAutoShutterSpeedLowLimit(-1);
+            else
+                getCamera().setAutoShutterSpeedLowLimit(getPreferences().getMinShutterSpeed());
+        }
+        // Disable self timer
+        getCamera().setSelfTimer(0);
+        // Force aspect ratio to 3:2
+        getCamera().setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
+        // View visibility
 
                 /*if (getCamera().isLongExposureNoiseReductionSupported())
                     getCamera().setLongExposureNoiseReduction(getP);*/
-                timeLog.logTime();
-            }
-        });
+        timeLog.logTime();
 
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder surfaceHolder) {
+        wrapper.setSurfaceHolder(surfaceHolder);
+        wrapper.startCamera(this);
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
+
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+
+    }
+
+    /**
+     * Returned from camera when a capture is done
+     * STATUS_CANCELED = 1;
+     * STATUS_ERROR = 2;
+     * STATUS_OK = 0;
+     * @param i code
+     * @param cameraEx2 did capture Image
+     */
+    @Override
+    public void onShutter(int i, CameraEx cameraEx2) {
+        Log.d(TAG, "onShutter:" + logCaptureCode(i)+ " isBulb:" + isBulbCapture);
+        Log.d(TAG, "RunMainThread: " + (Thread.currentThread() == Looper.getMainLooper().getThread()));
+        if (!isBulbCapture) {
+            wrapper.cancleCapture();
+            //this.cameraEx.startDirectShutter();
+            isCaptureInProgress = false;
+            if (eventListner != null)
+                eventListner.onCaptureDone();
+        }
+    }
+
+    private String logCaptureCode(int status)
+    {
+        switch (status)
+        {
+            case 1:
+                return "Canceled";
+            case 2:
+                return "Error";
+            default:
+                return "OK";
+        }
     }
 }

@@ -12,9 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import com.obsidium.bettermanual.MainActivity;
 import com.obsidium.bettermanual.R;
 import com.sony.scalar.graphics.OptimizedImage;
 import com.sony.scalar.graphics.OptimizedImageFactory;
+import com.sony.scalar.hardware.CameraEx;
 import com.sony.scalar.media.AvindexContentInfo;
 import com.sony.scalar.provider.AvindexStore;
 import com.sony.scalar.widget.OptimizedImageView;
@@ -111,7 +113,7 @@ public class ImageFragment extends Fragment implements KeyEvents {
         closeOptimizedImage();
         //start camera, all other fragments need it.
         // CameraUiFragment gets loaded automatic when camera returns onCameraOpen callback
-        activityInterface.getCamera().startCamera();
+        activityInterface.getCamera().startCamera((CameraEx.ShutterListener) activityInterface);
     }
 
 

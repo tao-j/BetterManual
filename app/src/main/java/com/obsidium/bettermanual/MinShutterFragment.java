@@ -12,8 +12,6 @@ import android.widget.TextView;
 
 import com.github.killerink.ActivityInterface;
 import com.github.killerink.KeyEvents;
-import com.github.killerink.MainActivity;
-import com.github.killerink.camera.ShutterSpeedValue;
 import com.sony.scalar.hardware.CameraEx;
 
 public class MinShutterFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, KeyEvents

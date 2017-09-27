@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import com.github.killerink.ActivityInterface;
 import com.github.killerink.KeyEvents;
-import com.github.killerink.MainActivity;
 import com.obsidium.bettermanual.views.PreviewNavView;
 import com.sony.scalar.hardware.CameraEx;
 

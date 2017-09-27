@@ -36,12 +36,12 @@ public class CaptureSession implements Runnable, CameraEx.ShutterListener {
         //cameraInstance.setShutterListener(this);
     }
 
-    public void setBulbCapture(boolean bulbCapture)
+    /*public void setBulbCapture(boolean bulbCapture)
     {
         this.isBulbCapture = bulbCapture;
     }
 
-    public void setEventListner(CaptureDoneEvent eventListner)
+    public void setCaptureDoneEventListner(CaptureDoneEvent eventListner)
     {
         this.eventListner = eventListner;
     }
@@ -60,7 +60,7 @@ public class CaptureSession implements Runnable, CameraEx.ShutterListener {
     {
         isBulbCapture = false;
         cameraEx.cancelTakePicture();
-    }
+    }*/
 
     @Override
     public void run() {
@@ -82,9 +82,9 @@ public class CaptureSession implements Runnable, CameraEx.ShutterListener {
     @Override
     public void onShutter(int i, CameraEx cameraEx2) {
         Log.d(TAG, "onShutter:" + logCaptureCode(i)+ " isBulb:" + isBulbCapture);
+        Log.d(TAG, "RunMainThread: " + (Thread.currentThread() == Looper.getMainLooper().getThread()));
         if (!isBulbCapture) {
-            this.cameraEx.cancelTakePicture();
-            this.cameraEx.getNormalCamera().cancelAutoFocus();
+            cameraInstance.cancleCapture();
             //this.cameraEx.startDirectShutter();
             isCaptureInProgress = false;
             if (eventListner != null)

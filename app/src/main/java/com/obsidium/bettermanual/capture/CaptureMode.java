@@ -44,7 +44,7 @@ public abstract class CaptureMode implements CaptureModeInterface
     @Override
     public void startCountDown() {
         isActive = true;
-        //cameraUiInterface.getActivityInterface().getCamera().stopPreview();
+        //cameraUiInterface.getActivityInterface().getCamera().disableHwShutterButton();
         cameraUiInterface.showHintMessage(cameraUiInterface.getActivityInterface().getResString(R.string.icon_enterButton) + " to abort");
         // Stop preview (doesn't seem to preserve battery life?)
         cameraUiInterface.getActivityInterface().getCamera().stopDisplay();

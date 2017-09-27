@@ -21,193 +21,78 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
         void onCameraOpen(boolean isOpen);
     }
 
-    class PreviewMagnificationHelper
-    {
-        boolean enable;
-        int magFactor;
-        int magLevel;
-        Pair coordinates;
-        public PreviewMagnificationHelper(boolean enable, int magFactor, int magLevel, Pair coordinates)
-        {
-            this.enable = enable;
-            this.magFactor = magFactor;
-            this.magLevel = magLevel;
-            this.coordinates = coordinates;
-        }
-
-    }
-
-
     CameraEx.AutoPictureReviewControl autoPictureReviewControl;
-    CameraEx.PreviewAnalizeListener previewAnalizeListener;
-
-    CameraEx.AutoISOSensitivityListener autoISOSensitivityListener;
-
-    CameraEx.ShutterSpeedChangeListener shutterSpeedChangeListener;
-
-    CameraEx.ShutterListener shutterListener;
-    CameraEx.ApertureChangeListener apertureChangeListener;
-    CameraEx.ProgramLineRangeOverListener programLineRangeOverListener;
-    CameraEx.FocusDriveListener focusDriveListener;
-    CameraEx.PreviewMagnificationListener previewMagnificationListener;
-    CameraEx.AutoFocusStartListener autoFocusStartListener;
-    CameraEx.AutoFocusDoneListener autoFocusDoneListener;
-
-    CameraInternalEventImpl.CameraEvents cameraEventsListner;
-
-    final Object locker = new Object();
-
-
+    CameraEvents cameraEventsListner;
     CameraEx.ShutterSpeedInfo shutterSpeedInfo;
-
-    Handler uiHandler;
-    Handler cameraHandler;
-
     Camera.Parameters parameters;
     CameraEx.ParametersModifier modifier;
     CameraEx m_camera;
     protected boolean cameraIsOpen = false;
 
-    public CaptureSession captureSession;
-
-     void sendMsgToCam(int code)
-    {
-        sendMsg(cameraHandler,code);
-    }
-
-    void sendMsgToCam(int code, int value)
-    {
-        sendMsg(cameraHandler, code,value);
-    }
-
-    void sendMsgToUi(int code)
-    {
-        sendMsg(uiHandler,code);
-    }
-
-    void sendMsgToUi(int code, int value)
-    {
-        sendMsg(uiHandler, code,value);
-    }
-
-    void sendMsgToUi(int code, Object value)
-    {
-        sendMsg(uiHandler, code,value);
-    }
-
-    private void sendMsg(Handler handler, int code)
-    {
-        Message msg = handler.obtainMessage();
-        msg.what = code;
-        handler.sendMessage(msg);
-    }
-
-    private void sendMsg(Handler handler, int code, int value)
-    {
-        Message msg = handler.obtainMessage();
-        msg.what = code;
-        msg.arg1 = value;
-        handler.sendMessage(msg);
-    }
-    private void sendMsg(Handler handler, int code, Object value)
-    {
-        Message msg = handler.obtainMessage();
-        msg.what = code;
-        msg.obj = value;
-        handler.sendMessage(msg);
-    }
 
     @Override
     public CameraEx.AutoPictureReviewControl getAutoPictureReviewControls()
     {
-        synchronized (locker) {
-            return autoPictureReviewControl;
-        }
+        return autoPictureReviewControl;
     }
 
     @Override
     public void setPreviewAnalizeListener(CameraEx.PreviewAnalizeListener previewAnalizeListener)
     {
-        synchronized (locker) {
-            this.previewAnalizeListener = previewAnalizeListener;
-        }
+        m_camera.setPreviewAnalizeListener(previewAnalizeListener);
     }
 
     @Override
     public void setAutoISOSensitivityListener(CameraEx.AutoISOSensitivityListener autoISOSensitivityListener)
     {
-        synchronized (locker) {
-            this.autoISOSensitivityListener = autoISOSensitivityListener;
-        }
+        m_camera.setAutoISOSensitivityListener(autoISOSensitivityListener);
     }
 
     @Override
     public void setShutterSpeedChangeListener(CameraEx.ShutterSpeedChangeListener shutterSpeedChangeListener)
     {
-        synchronized (locker) {
-            this.shutterSpeedChangeListener = shutterSpeedChangeListener;
-        }
+        m_camera.setShutterSpeedChangeListener(shutterSpeedChangeListener);
     }
 
-    @Override
-    public void setShutterListener(CameraEx.ShutterListener shutterListener)
-    {
-        synchronized (locker) {
-            this.shutterListener = shutterListener;
-        }
-    }
 
     @Override
     public void setApertureChangeListener(CameraEx.ApertureChangeListener apertureChangeListener)
     {
-        synchronized (locker) {
-            this.apertureChangeListener = apertureChangeListener;
-        }
+        m_camera.setApertureChangeListener(apertureChangeListener);
     }
 
     @Override
     public void setProgramLineRangeOverListener(CameraEx.ProgramLineRangeOverListener programLineRangeOverListener)
     {
-        synchronized (locker) {
-            this.programLineRangeOverListener = programLineRangeOverListener;
-        }
+       m_camera.setProgramLineRangeOverListener(programLineRangeOverListener);
     }
 
     @Override
     public void setFocusDriveListener(CameraEx.FocusDriveListener focusDriveListener)
     {
-        synchronized (locker) {
-            this.focusDriveListener = focusDriveListener;
-        }
+       m_camera.setFocusDriveListener(focusDriveListener);
     }
 
     @Override
     public void setPreviewMagnificationListener(CameraEx.PreviewMagnificationListener previewMagnificationListener)
     {
-        synchronized (locker) {
-            this.previewMagnificationListener = previewMagnificationListener;
-        }
+        m_camera.setPreviewMagnificationListener(previewMagnificationListener);
     }
 
     @Override
     public void setAutoFocusStartListener(CameraEx.AutoFocusStartListener autoFocusStartListener)
     {
-        synchronized (locker)
-        {
-            this.autoFocusStartListener = autoFocusStartListener;
-        }
+        m_camera.setAutoFocusStartListener(autoFocusStartListener);
     }
 
     @Override
     public void setAutoFocusDoneListener(CameraEx.AutoFocusDoneListener autoFocusDoneListener)
     {
-        synchronized (locker){
-            this.autoFocusDoneListener = autoFocusDoneListener;
-        }
+        m_camera.setAutoFocusDoneListener(autoFocusDoneListener);
     }
 
     @Override
-    public void setCameraEventsListner(CameraInternalEventImpl.CameraEvents eventsListner)
+    public void setCameraEventsListner(CameraEvents eventsListner)
     {
         this.cameraEventsListner = eventsListner;
     }
@@ -217,22 +102,14 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     {
         if (cameraEventsListner != null)
         {
-            Message msg = uiHandler.obtainMessage();
-            if (isopen)
-                msg.arg1 = 1;
-            else
-                msg.arg1 = 0;
-            msg.what = CAMERAOPEN;
-            uiHandler.sendMessage(msg);
+            cameraEventsListner.onCameraOpen(true);
         }
     }
 
     @Override
     public CameraEx.ShutterSpeedInfo getShutterSpeedInfo()
     {
-        synchronized (locker) {
-            return shutterSpeedInfo;
-        }
+        return shutterSpeedInfo;
     }
 
     private Camera.Parameters getParameters()
@@ -250,7 +127,8 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     }
 
     public void setExposureCompensation(int value) {
-        sendMsgToCam(SET_EV,value);
+        parameters.setExposureCompensation(value);
+        setParameters(parameters);
     }
 
     public int getMaxExposureCompensation() {
@@ -333,7 +211,8 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
 
     public void setAutoShutterSpeedLowLimit(int value)
     {
-        sendMsgToCam(SET_AUTO_SHUTTER_SPEED_LOW_LIMIT,value);
+        modifier.setAutoShutterSpeedLowLimit(value);
+        setParameters(parameters);
     }
 
     public int getAutoShutterSpeedLowLimit()
@@ -343,7 +222,8 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
 
     public void setSelfTimer(int value)
     {
-        sendMsgToCam(SET_SELF_TIMER, value);
+        modifier.setSelfTimer(value);
+        setParameters(parameters);
     }
 
     public List<Integer> getSupportedISOSensitivities()
@@ -358,16 +238,13 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
 
     public void setISOSensitivity(int value)
     {
-        sendMsgToCam(SET_ISO,value);
+        modifier.setISOSensitivity(value);
+        setParameters(parameters);
     }
 
     public void setPreviewMagnification(int factor, Pair position)
     {
-        Message msg = cameraHandler.obtainMessage();
-        msg.what = SET_PREVIEWMAGNIFICATION;
-        msg.arg1 = factor;
-        msg.obj = position;
-        cameraHandler.sendMessage(msg);
+        m_camera.setPreviewMagnification(factor, position);
     }
 
     @Override
@@ -380,19 +257,19 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     }
 
     public void decrementShutterSpeed(){
-        sendMsgToCam(DECREASE_SHUTTER);
+        m_camera.decrementShutterSpeed();
     }
     public void incrementShutterSpeed()
     {
-        sendMsgToCam(INCREASE_SHUTTER);
+        m_camera.incrementShutterSpeed();
     }
 
     public void decrementAperture(){
-        sendMsgToCam(DECREASE_APERTURE);
+        m_camera.decrementAperture();
     }
 
     public void incrementAperture(){
-        sendMsgToCam(INCREASE_APERTURE);
+        m_camera.incrementAperture();
     }
 
 
@@ -446,6 +323,7 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     public void setLiveSlowShutter(String liveSlowShutter)
     {
         modifier.setSlowShutterLiveviewMode(liveSlowShutter);
+        setParameters(parameters);
     }
 
     @Override
@@ -469,7 +347,9 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
 
     public void adjustShutterSpeed(int val)
     {
-        sendMsgToCam(SET_ADJUST_SHUTTER_SPEED,val);
+        m_camera.adjustShutterSpeed(val);
     }
+
+
 
 }

@@ -16,8 +16,6 @@ import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
 import com.sony.scalar.hardware.CameraEx;
 
-import java.io.IOException;
-
 /**
  * Created by KillerInk on 27.08.2017.
  */
@@ -49,6 +47,8 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
 
     private BaseLayout currentLayout;
 
+    private AvIndexHandler avIndexHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG,"onCreate");
@@ -60,7 +60,8 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
 
         surfaceViewHolder = (FrameLayout) findViewById(R.id.surfaceView);
         //surfaceView.setOnTouchListener(new CameraUiFragment.SurfaceSwipeTouchListener(getContext()));
-        addSurfaceView();
+        avIndexHandler = new AvIndexHandler(getContentResolver());
+
         layoutHolder = (LinearLayout)findViewById(R.id.fragment_holder);
         preferences = new Preferences(getApplicationContext());
     }
@@ -69,6 +70,8 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     protected void onResume() {
         Log.d(TAG,"onResume");
         super.onResume();
+        avIndexHandler.onResume();
+        addSurfaceView();
         cameraInstance = new CameraInstance();
         cameraInstance.setCameraEventsListner(this);
     }
@@ -76,7 +79,9 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     @Override
     protected void onPause() {
         Log.d(TAG,"onPause");
+        removeSurfaceView();
         super.onPause();
+        avIndexHandler.onPause();
         if (cameraInstance !=null) {
             saveDefaults();
             cameraInstance.closeCamera();
@@ -195,6 +200,11 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         this.isBulbCapture = bulbCapture;
     }
 
+    @Override
+    public AvIndexHandler getAvIndexHandler() {
+        return avIndexHandler;
+    }
+
     public void setCaptureDoneEventListner(CaptureSession.CaptureDoneEvent eventListner)
     {
         this.eventListner = eventListner;
@@ -222,7 +232,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         getCamera().enableHwShutterButton();
         getCamera().setShutterListener(this);
         getCamera().setSurfaceHolder(m_surfaceHolder);
-        getCamera().startDisplay();
+        getCamera().startPreview();
 
 
         loadFragment(FRAGMENT_CAMERA_UI);
@@ -303,7 +313,8 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         Log.d(TAG, "onShutter:" + logCaptureCode(i)+ " isBulb:" + isBulbCapture);
         Log.d(TAG, "RunMainThread: " + (Thread.currentThread() == Looper.getMainLooper().getThread()));
         if (!isBulbCapture) {
-            cameraInstance.cancleCapture();
+                cameraInstance.cancleCapture();
+            avIndexHandler.update();
             //this.cameraEx.startDirectShutter();
             isCaptureInProgress = false;
             if (eventListner != null)

@@ -89,7 +89,7 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, Capt
         isActive = false;
         cameraUiInterface.showMessageDelayed("Timelapse finished");
         cameraUiInterface.getActivityInterface().getCamera().enableHwShutterButton();
-        cameraUiInterface.getActivityInterface().getCamera().startDisplay();
+        cameraUiInterface.getActivityInterface().getCamera().startPreview();
 
             // Update controls
         cameraUiInterface.getActivityInterface().getMainHandler().post(new Runnable() {

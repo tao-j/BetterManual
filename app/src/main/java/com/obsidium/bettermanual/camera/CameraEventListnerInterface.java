@@ -23,6 +23,8 @@ interface CameraEventListnerInterface
     void setCameraEventsListner(BaseCamera.CameraEvents eventsListner);
     void fireOnCameraOpen(boolean isopen);
     void setShutterListener(CameraEx.ShutterListener shutterListener);
+    void setFocusLightStateListner(CameraEx.FocusLightStateListener focusLightStateListner);
+    void setSettingsChangedListner(CameraEx.SettingChangedListener settingsChangedListner);
 
 
 }

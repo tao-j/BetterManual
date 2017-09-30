@@ -18,33 +18,18 @@ import com.sony.scalar.widget.OptimizedImageView;
 
 public class ImageFragment extends BaseLayout implements KeyEvents {
 
-    /*
-        FOLDER
-        _id 0 _data null dcf_folder_number 100 dcf_file_number null content_type null exist_jpeg null exist_mpo null exist_raw null content_created_local_date_time null content_created_local_date null content_created_local_time null content_created_utc_date_time null content_created_utc_date null content_created_utc_time null has_gps_info null time_zone null latitude null longitude null rec_order null
-        LAST_CONTENT
-        Nothing to log
-        MEDIA
-        _id 1 _data avindex://1000/00000001-default/00000001-00000925 dcf_folder_number 100 dcf_file_number 1663 content_type 1 exist_jpeg 1 exist_mpo 0 exist_raw 1 content_created_local_date_time 1507114550000 content_created_local_date 20171004 content_created_local_time 105550 content_created_utc_date_time 1507110950000 content_created_utc_date 20171004 content_created_utc_time 095550 has_gps_info 0 time_zone 60 latitude 0 longitude 0 rec_order 1
-        INFO
-        avi_version 45cd5a8d03e44b57b963dc9e781b722e
-        THUMB
-        Nothing to log
-     */
+
 
     private final String TAG = ImageFragment.class.getSimpleName();
     private OptimizedImageView imageView;
     private FrameLayout surfaceViewParent;
-    private Cursor mediaCursor;
     OptimizedImage image;
     AvindexContentInfo info;
     private float scaleFactor = 1;
     private final float scaleStep = 0.2f;
     private final float maxScaleFactor = 8;
 
-    final String[] GROUP_QUERY_PROJECTION = new String[] { "_id", "_count", "count_of_one_before", "dcf_folder_number" };
-    final String[] QUERY_PROJECTION = new String[] { "_id", "_data", "_display_name", "datetaken" };
-    protected static final String[] CONTENTS_QUERY_PROJECTION = { "_id", "_data", "dcf_file_number", "dcf_folder_number", "content_created_local_date", "content_created_utc_date", "content_created_local_date_time", "content_created_utc_date_time", "exist_jpeg", "exist_raw", "exist_mpo", "rec_order", "content_type" };
-    final Uri baseUri = AvindexStore.Images.Media.EXTERNAL_CONTENT_URI;
+
 
     public ImageFragment(Context context,ActivityInterface activityInterface) {
         super(context,activityInterface);
@@ -54,20 +39,6 @@ public class ImageFragment extends BaseLayout implements KeyEvents {
         imageView = new OptimizedImageView(getContext());
         surfaceViewParent.addView(imageView);
         imageView.setDisplayPosition(new Point(0,0), OptimizedImageView.PositionType.POS_TYPE_NONE);
-
-
-
-        //stop camera else Images are not load
-
-
-        /*AvindexStore.loadMedia(AvindexStore.getExternalMediaIds()[0], AvindexStore.CONTENT_TYPE_LOAD_STILL);
-        AvindexStore.Images.waitAndUpdateDatabase(getContext().getContentResolver(), AvindexStore.getExternalMediaIds()[0]);*/
-
-
-
-        Uri media = AvindexStore.Images.Media.getContentUri(AvindexStore.getExternalMediaIds()[0]);
-        mediaCursor = getCursorFromUri(media);
-        mediaCursor.moveToFirst();
         loadOptimizedImg();
 
     }
@@ -81,8 +52,6 @@ public class ImageFragment extends BaseLayout implements KeyEvents {
 
     @Override
     public void Destroy() {
-        if (mediaCursor != null && !mediaCursor.isClosed())
-            mediaCursor.close();
         closeImageInfo();
         closeOptimizedImage();
 
@@ -90,17 +59,17 @@ public class ImageFragment extends BaseLayout implements KeyEvents {
 
     private void loadOptimizedImg()
     {
-        if (mediaCursor.getPosition() > -1 && mediaCursor.getCount() > 0)
+        if (activityInterface.getAvIndexHandler().getPosition() > -1 && activityInterface.getAvIndexHandler().getCount() > 0)
         {
             Log.d(TAG,"MEDIA");
 
-            logCursor(mediaCursor);
-            String data = mediaCursor.getString(mediaCursor.getColumnIndexOrThrow("_data"));
-            String id = mediaCursor.getString(mediaCursor.getColumnIndexOrThrow("_id"));
+            //logCursor(mediaCursor);
+            String data = activityInterface.getAvIndexHandler().getData();
+            String id = activityInterface.getAvIndexHandler().getId();
 
             closeImageInfo();
 
-            info = AvindexStore.Images.Media.getImageInfo(id);
+            info = activityInterface.getAvIndexHandler().getContentInfo();
 
             OptimizedImageFactory.Options options = new OptimizedImageFactory.Options();
             options.bBasicInfo = false;
@@ -222,9 +191,7 @@ public class ImageFragment extends BaseLayout implements KeyEvents {
 
     @Override
     public boolean onLeftKeyUp() {
-        mediaCursor.moveToPrevious();
-        if(mediaCursor.isBeforeFirst())
-            mediaCursor.moveToLast();
+        activityInterface.getAvIndexHandler().moveToPrevious();
         loadOptimizedImg();
         return false;
     }
@@ -236,9 +203,7 @@ public class ImageFragment extends BaseLayout implements KeyEvents {
 
     @Override
     public boolean onRightKeyUp() {
-        mediaCursor.moveToNext();
-        if(mediaCursor.isAfterLast())
-            mediaCursor.moveToFirst();
+        activityInterface.getAvIndexHandler().moveToNext();
         loadOptimizedImg();
         return false;
     }

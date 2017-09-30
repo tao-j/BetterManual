@@ -38,12 +38,10 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
 
     private final String TAG = PreviewMagnificationFragment.class.getSimpleName();
 
-    private ActivityInterface activityInterface;
     private TextView magnification;
     private PreviewNavView previewNavView;
 
     // Preview magnification
-    private List<Integer> m_supportedPreviewMagnifications;
     private boolean         m_zoomLeverPressed;
     private int             m_curPreviewMagnification;
     private float           m_curPreviewMagnificationFactor;
@@ -58,8 +56,6 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
 
         activityInterface.setSurfaceViewOnTouchListner(new SurfaceSwipeTouchListener(getContext()));
         activityInterface.getCamera().setPreviewMagnificationListener(this);
-        m_supportedPreviewMagnifications = (List<Integer>) activityInterface.getCamera().getSupportedPreviewMagnification();
-        Log.d(TAG,m_supportedPreviewMagnifications.toString());
     }
 
     @Override
@@ -225,9 +221,10 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
 
     @Override
     public boolean onAelKeyUp() {
+        activityInterface.getDialHandler().setDefaultListner();
         activityInterface.getCamera().stopPreviewMagnification();
         activityInterface.loadFragment(MainActivity.FRAGMENT_CAMERA_UI);
-        return false;
+        return true;
     }
 
     @Override

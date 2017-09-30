@@ -5,14 +5,17 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 
 import com.sony.scalar.hardware.CameraEx;
+import com.sony.scalar.hardware.CameraSequence;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.StringTokenizer;
 
 
-public class CameraInstance extends BaseCamera  {
+public class CameraInstance extends CameraInternalEventListner implements  CameraSequence.ShutterSequenceCallback   {
     private final String TAG = CameraInstance.class.getSimpleName();
+
+//    public CameraSequence cameraSequence;
 
     private SurfaceHolder surfaceHolder;
 
@@ -26,12 +29,17 @@ public class CameraInstance extends BaseCamera  {
         options.setPreview(true);
         Log.d(TAG, "Open Cam");
         m_camera = CameraEx.open(0, null);
+        /*cameraSequence = CameraSequence.open(m_camera);
+        setOptions(null);
+        cameraSequence.setShutterSequenceCallback(this);*/
         Log.d(TAG, "Cam open");
         cameraIsOpen = true;
 
         initParameters();
+        initListners();
         autoPictureReviewControl = new CameraEx.AutoPictureReviewControl();
         m_camera.setAutoPictureReviewControl(getAutoPictureReviewControls());
+        m_camera.withSupportedParameters(false);
         fireOnCameraOpen(true);
 
     }
@@ -43,6 +51,15 @@ public class CameraInstance extends BaseCamera  {
         dumpParameter();
     }
 
+    /*public void setOptions(CameraSequence.Options paramOptions)
+    {
+
+            if (paramOptions == null) {
+                paramOptions = new CameraSequence.Options();
+            }
+            paramOptions.setOption("AUTO_RELEASE_LOCK_ENABLED", true);
+        cameraSequence.setReleaseLock(false);
+    }*/
 
     private void dumpParameter() {
         StringTokenizer localStringTokenizer = new StringTokenizer(((Camera.Parameters)parameters).flatten(), ";");
@@ -79,21 +96,11 @@ public class CameraInstance extends BaseCamera  {
     public void closeCamera() {
         cameraIsOpen = false;
         Log.d(TAG, "closeCamera");
-        m_camera.cancelTakePicture();
-        m_camera.setAutoFocusStartListener(null);
-        m_camera.setAutoFocusDoneListener(null);
-        m_camera.setPreviewStartListener(null);
-        m_camera.setAutoPictureReviewControl(null);
-        m_camera.setPreviewAnalizeListener(null);
-        m_camera.setAutoISOSensitivityListener(null);
-        m_camera.setShutterListener(null);
-        m_camera.setApertureChangeListener(null);
-        m_camera.setProgramLineRangeOverListener(null);
-        m_camera.setPreviewMagnificationListener(null);
-        m_camera.setFocusDriveListener(null);
-        m_camera.setShutterSpeedChangeListener(null);
-
+        removeListners();
+        /*cameraSequence.setShutterSequenceCallback(null);
+        cameraSequence.release();*/
         m_camera.getNormalCamera().stopPreview();
+        m_camera.getNormalCamera().release();
         m_camera.release();
         m_camera = null;
     }
@@ -102,11 +109,11 @@ public class CameraInstance extends BaseCamera  {
         this.surfaceHolder = surface;
     }
 
-    public void startDisplay() {
+    public void startPreview() {
         m_camera.getNormalCamera().startPreview();
     }
 
-    public void stopDisplay() {
+    public void stopPreview() {
         m_camera.getNormalCamera().stopPreview();
     }
 
@@ -134,5 +141,24 @@ public class CameraInstance extends BaseCamera  {
             }
         });
     }
+
+    @Override
+    public void onShutterSequence(CameraSequence.RawData rawData, CameraSequence cameraSequence) {
+        Log.d(TAG,"onShutterSequence");
+        m_camera.cancelTakePicture();
+        cameraSequence.setReleaseLock(true);
+    }
+
+  /*  @Override
+    public void onSplitShutterSequence(CameraSequence.RawData rawData, CameraSequence.SplitExposureProgressInfo splitExposureProgressInfo, CameraSequence cameraSequence) {
+        Log.d(TAG, "onSplitShutterSequence();");
+        cameraSequence.setReleaseLock(false);
+    }
+
+    @Override
+    public void onShutterSequence(CameraSequence.RawData rawData, CameraSequence cameraSequence) {
+        Log.d(TAG,"onShutterSequence");
+        cameraSequence.setReleaseLock(false);
+    }*/
 }
 

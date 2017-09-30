@@ -47,7 +47,7 @@ public abstract class CaptureMode implements CaptureModeInterface
         //cameraUiInterface.getActivityInterface().getCamera().disableHwShutterButton();
         cameraUiInterface.showHintMessage(cameraUiInterface.getActivityInterface().getResString(R.string.icon_enterButton) + " to abort");
         // Stop preview (doesn't seem to preserve battery life?)
-        cameraUiInterface.getActivityInterface().getCamera().stopDisplay();
+        cameraUiInterface.getActivityInterface().getCamera().stopPreview();
 
         // Hide some bottom views
         cameraUiInterface.getActivityInterface().getPreferences().setViewFlags(cameraUiInterface.getActiveViewsFlag());

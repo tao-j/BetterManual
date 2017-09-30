@@ -28,5 +28,6 @@ public interface ActivityInterface {
     boolean isBulbCapture();
     void cancelBulbCapture();
     void setBulbCapture(boolean bulbCapture);
+    AvIndexHandler getAvIndexHandler();
 
 }

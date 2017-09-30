@@ -27,8 +27,20 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     CameraEx m_camera;
     protected boolean cameraIsOpen = false;
 
+    CameraEx.PreviewAnalizeListener previewAnalizeListener;
+    CameraEx.AutoISOSensitivityListener autoISOSensitivityListener;
+    CameraEx.ShutterSpeedChangeListener shutterSpeedChangeListener;
+    CameraEx.ApertureChangeListener apertureChangeListener;
+    CameraEx.ProgramLineRangeOverListener programLineRangeOverListener;
+    CameraEx.FocusDriveListener focusDriveListener;
+    CameraEx.PreviewMagnificationListener previewMagnificationListener;
+    CameraEx.AutoFocusStartListener autoFocusStartListener;
+    CameraEx.AutoFocusDoneListener autoFocusDoneListener;
+    CameraEx.ShutterListener shutterListener;
+    CameraEx.FocusLightStateListener focusLightStateListener;
+    CameraEx.SettingChangedListener settingChangedListener;
 
-    @Override
+
     public CameraEx.AutoPictureReviewControl getAutoPictureReviewControls()
     {
         return autoPictureReviewControl;
@@ -37,56 +49,56 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     @Override
     public void setPreviewAnalizeListener(CameraEx.PreviewAnalizeListener previewAnalizeListener)
     {
-        m_camera.setPreviewAnalizeListener(previewAnalizeListener);
+        this.previewAnalizeListener = previewAnalizeListener;
     }
 
     @Override
     public void setAutoISOSensitivityListener(CameraEx.AutoISOSensitivityListener autoISOSensitivityListener)
     {
-        m_camera.setAutoISOSensitivityListener(autoISOSensitivityListener);
+        this.autoISOSensitivityListener = autoISOSensitivityListener;
     }
 
     @Override
     public void setShutterSpeedChangeListener(CameraEx.ShutterSpeedChangeListener shutterSpeedChangeListener)
     {
-        m_camera.setShutterSpeedChangeListener(shutterSpeedChangeListener);
+        this.shutterSpeedChangeListener = shutterSpeedChangeListener;
     }
 
 
     @Override
     public void setApertureChangeListener(CameraEx.ApertureChangeListener apertureChangeListener)
     {
-        m_camera.setApertureChangeListener(apertureChangeListener);
+        this.apertureChangeListener = apertureChangeListener;
     }
 
     @Override
     public void setProgramLineRangeOverListener(CameraEx.ProgramLineRangeOverListener programLineRangeOverListener)
     {
-       m_camera.setProgramLineRangeOverListener(programLineRangeOverListener);
+       this.programLineRangeOverListener = programLineRangeOverListener;
     }
 
     @Override
     public void setFocusDriveListener(CameraEx.FocusDriveListener focusDriveListener)
     {
-       m_camera.setFocusDriveListener(focusDriveListener);
+       this.focusDriveListener = focusDriveListener;
     }
 
     @Override
     public void setPreviewMagnificationListener(CameraEx.PreviewMagnificationListener previewMagnificationListener)
     {
-        m_camera.setPreviewMagnificationListener(previewMagnificationListener);
+        this.previewMagnificationListener = previewMagnificationListener;
     }
 
     @Override
     public void setAutoFocusStartListener(CameraEx.AutoFocusStartListener autoFocusStartListener)
     {
-        m_camera.setAutoFocusStartListener(autoFocusStartListener);
+        this.autoFocusStartListener = autoFocusStartListener;
     }
 
     @Override
     public void setAutoFocusDoneListener(CameraEx.AutoFocusDoneListener autoFocusDoneListener)
     {
-        m_camera.setAutoFocusDoneListener(autoFocusDoneListener);
+        this.autoFocusDoneListener = autoFocusDoneListener;
     }
 
     @Override
@@ -106,7 +118,17 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
 
     @Override
     public void setShutterListener(CameraEx.ShutterListener shutterListener) {
-        m_camera.setShutterListener(shutterListener);
+        this.shutterListener = shutterListener;
+    }
+
+    @Override
+    public void setFocusLightStateListner(CameraEx.FocusLightStateListener focusLightStateListner) {
+        this.focusLightStateListener = focusLightStateListner;
+    }
+
+    @Override
+    public void setSettingsChangedListner(CameraEx.SettingChangedListener settingsChangedListner) {
+        this.settingChangedListener = settingsChangedListner;
     }
 
     @Override
@@ -142,15 +164,23 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     }
 
     public int getMaxExposureCompensation() {
-        return getParameters().getMaxExposureCompensation();
+        return parameters.getMaxExposureCompensation();
     }
 
     public int getMinExposureCompensation() {
-        return getParameters().getMinExposureCompensation();
+        return parameters.getMinExposureCompensation();
     }
 
     public float getExposureCompensationStep() {
-        return getParameters().getExposureCompensationStep();
+        float ret = 0;
+        try {
+            ret = parameters.getExposureCompensationStep();
+        }
+        catch (NullPointerException ex)
+        {
+            ex.printStackTrace();
+        }
+        return ret;
     }
 
     public boolean isLongExposureNoiseReductionSupported()

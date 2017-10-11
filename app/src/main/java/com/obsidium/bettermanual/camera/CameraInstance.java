@@ -42,7 +42,8 @@ public class CameraInstance extends CameraInternalEventListner implements  Camer
         initParameters();
         initListners();
 
-        m_camera.withSupportedParameters(false);
+        //when false cameraparameters contains only the active parameters, but supported stuff is missing
+        m_camera.withSupportedParameters(true);
         fireOnCameraOpen(true);
 
     }

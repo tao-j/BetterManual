@@ -93,6 +93,8 @@ public class IsoView extends BaseTextView implements CameraEx.AutoISOSensitivity
     }
 
     private int getFirstManualIso() {
+        if (m_supportedIsos == null)
+            return 0;
         for (Integer iso : m_supportedIsos) {
             if (iso != 0)
                 return iso;

@@ -12,9 +12,10 @@ import android.view.View;
 
 public class StarDriftAlginView extends View {
 
-    final int margine = 5;
+    private int margine = 5;
     private Paint crossPaint;
     private Paint gridPaint;
+    private final int gridSize = 20;
 
     private boolean drawGrid = false;
 
@@ -51,16 +52,14 @@ public class StarDriftAlginView extends View {
 
         if (drawGrid)
         {
-            for (int i = margine*4; i < getHeight(); i+=margine*4)
+            for (int i = gridSize; i < getHeight(); i+=gridSize)
             {
-                if (i > centerY + margine || i < centerY - margine)
-                    canvas.drawLine(0, i, getWidth(), i,gridPaint);
+                canvas.drawLine(0, i, getWidth(), i,gridPaint);
             }
 
-            for (int i = margine*4; i < getWidth(); i+=margine*4)
+            for (int i = gridSize; i < getWidth(); i+=gridSize)
             {
-                if (i > centerX + margine || i < centerX - margine)
-                    canvas.drawLine(i, 0, i, getHeight(),gridPaint);
+                canvas.drawLine(i, 0, i, getHeight(),gridPaint);
             }
         }
 
@@ -73,9 +72,24 @@ public class StarDriftAlginView extends View {
 
     }
 
-    public void setDrawGrid(boolean drawGrid)
+    public void toggleDrawGrid()
     {
-        this.drawGrid = drawGrid;
+        if (drawGrid)
+            drawGrid = false;
+        else
+            drawGrid = true;
         invalidate();
+    }
+
+    public void increaseSize()
+    {
+        if (margine < 100)
+            margine++;
+    }
+
+    public void decraseSize()
+    {
+        if (margine > 2)
+            margine--;
     }
 }

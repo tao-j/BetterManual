@@ -6,6 +6,7 @@ import android.util.Pair;
 import android.widget.TextView;
 
 import com.obsidium.bettermanual.views.PreviewNavView;
+import com.obsidium.bettermanual.views.StarDriftAlginView;
 import com.sony.scalar.hardware.CameraEx;
 
 import java.util.List;
@@ -48,11 +49,15 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
     private Pair<Integer, Integer> m_curPreviewMagnificationPos = new Pair<Integer, Integer>(0, 0);
     private int             m_curPreviewMagnificationMaxPos;
 
+    private StarDriftAlginView starDriftAlginView;
+
     public PreviewMagnificationFragment(Context context, ActivityInterface activityInterface) {
         super(context, activityInterface);
         inflateLayout(R.layout.preview_magnification_fragment);
         magnification = (TextView) findViewById(R.id.tvMagnification);
         previewNavView = (PreviewNavView)findViewById(R.id.vPreviewNav);
+        starDriftAlginView = (StarDriftAlginView)findViewById(R.id.stardriftalgin);
+        starDriftAlginView.setVisibility(GONE);
 
         activityInterface.setSurfaceViewOnTouchListner(new SurfaceSwipeTouchListener(getContext()));
         activityInterface.getCamera().setPreviewMagnificationListener(this);
@@ -121,6 +126,14 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
 
     @Override
     public boolean onLowerDialChanged(int value) {
+        if (starDriftAlginView.getVisibility() == VISIBLE) {
+            if (value < 0)
+                starDriftAlginView.decraseSize();
+            else
+                starDriftAlginView.increaseSize();
+            starDriftAlginView.invalidate();
+        }
+
         return false;
     }
 
@@ -211,6 +224,8 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
     @Override
     public boolean onFnKeyUp() {
 
+        if (starDriftAlginView.getVisibility() == VISIBLE)
+            starDriftAlginView.toggleDrawGrid();
         return false;
     }
 
@@ -234,6 +249,10 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
 
     @Override
     public boolean onMenuKeyUp() {
+        if (starDriftAlginView.getVisibility() == GONE)
+            starDriftAlginView.setVisibility(VISIBLE);
+        else
+            starDriftAlginView.setVisibility(GONE);
         return false;
     }
 

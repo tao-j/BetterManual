@@ -1,14 +1,21 @@
 package com.obsidium.bettermanual;
 
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Handler;
+import android.util.Log;
 
 import com.github.ma1co.openmemories.framework.ImageInfo;
 import com.sony.scalar.database.avindex.AvindexDatabase;
 import com.sony.scalar.database.avindex.AvindexDatabaseManager;
 import com.sony.scalar.media.AvindexContentInfo;
+import com.sony.scalar.media.MediaInfo;
 import com.sony.scalar.provider.AvindexStore;
 
 /**
@@ -28,8 +35,10 @@ import com.sony.scalar.provider.AvindexStore;
         Nothing to log
      */
 
-public class AvIndexHandler
+public class AvIndexHandler extends BroadcastReceiver
 {
+    private final String TAG = AvIndexHandler.class.getSimpleName();
+
     private ContentResolver contentResolver;
     private Cursor cursor;
     private final Uri mediaStorageUri;
@@ -39,19 +48,37 @@ public class AvIndexHandler
     protected static final String[] CONTENTS_QUERY_PROJECTION = { "_id", "_data", "dcf_file_number", "dcf_folder_number", "content_created_local_date", "content_created_utc_date", "content_created_local_date_time", "content_created_utc_date_time", "exist_jpeg", "exist_raw", "exist_mpo", "rec_order", "content_type" };
     //final Uri baseUri = AvindexStore.Images.Media.EXTERNAL_CONTENT_URI;
 
+    public IntentFilter MEDIA_INTENTS = new IntentFilter();
+    public IntentFilter AVAILABLE_SIZE_INTENTS = new IntentFilter("com.sony.scalar.providers.avindex.action.AVINDEX_MEDIA_AVAILABLE_SIZE_CHANGED");
+
+    private ContentObserver contentObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            super.onChange(selfChange);
+        }
+    };
+
     public AvIndexHandler(ContentResolver contentResolver)
     {
         this.contentResolver = contentResolver;
         mediaStorageUri = AvindexStore.Images.Media.getContentUri(AvindexStore.getExternalMediaIds()[0]);
+        MEDIA_INTENTS.addAction("android.intent.action.MEDIA_CHECKING");
+        MEDIA_INTENTS.addAction("android.intent.action.MEDIA_MOUNTED");
+        MEDIA_INTENTS.addAction("android.intent.action.MEDIA_NOFS");
+        MEDIA_INTENTS.addAction("android.intent.action.MEDIA_UNMOUNTABLE");
+        MEDIA_INTENTS.addAction("android.intent.action.MEDIA_UNMOUNTED");
+        MEDIA_INTENTS.addAction("android.intent.action.MEDIA_REMOVED");
+        MEDIA_INTENTS.addDataScheme("file");
          /*AvindexStore.loadMedia(AvindexStore.getExternalMediaIds()[0], AvindexStore.CONTENT_TYPE_LOAD_STILL);
         AvindexStore.Images.waitAndUpdateDatabase(getContext().getContentResolver(), AvindexStore.getExternalMediaIds()[0]);*/
 
     }
 
-    public void onResume()
+    public void onResume(Context context)
     {
         cursor = getCursorFromUri(mediaStorageUri);
         cursor.moveToFirst();
+        update();
     }
 
     private Cursor getCursorFromUri(Uri uri)
@@ -59,7 +86,7 @@ public class AvIndexHandler
         return contentResolver.query(uri, AvindexStore.Images.Media.ALL_COLUMNS, null, null, null);
     }
 
-    public void onPause()
+    public void onPause(Context context)
     {
         if (cursor != null && cursor.isClosed())
             cursor.close();
@@ -95,17 +122,22 @@ public class AvIndexHandler
             I/_InfraScalarMprWrapper_: InfraScalarMprWrapper::cancelWaitAndUpdateDatabase# return ret = true
          */
         //AvindexStore.Images.cancelWaitAndUpdateDatabase(contentResolver, AvindexStore.getExternalMediaIds()[0]);
-        AvindexDatabaseManager avindexDatabaseManager = AvindexDatabaseManager.getInstance();
+       /* AvindexDatabaseManager avindexDatabaseManager = AvindexDatabaseManager.getInstance();
         AvindexDatabase[] avindexDatabases = avindexDatabaseManager.getAllDatabase();
         for (AvindexDatabase database : avindexDatabases)
             database.updateDatabase();
+
+        if (cursor != null && cursor.isClosed())
+            cursor.close();
+        cursor = getCursorFromUri(mediaStorageUri);*/
         AvindexStore.Images.waitAndUpdateDatabase(contentResolver, AvindexStore.getExternalMediaIds()[0]);
         AvindexStore.loadMedia(AvindexStore.getExternalMediaIds()[0], 1);
         AvindexStore.Images.waitAndUpdateDatabase(contentResolver, AvindexStore.getExternalMediaIds()[0]);
         AvindexStore.waitLoadMediaComplete(AvindexStore.getExternalMediaIds()[0]);
-        if (cursor != null && cursor.isClosed())
-            cursor.close();
-        cursor = getCursorFromUri(mediaStorageUri);
+        AvindexStore.cancelWaitLoadMediaComplete(AvindexStore.getExternalMediaIds()[0]);
+        MediaInfo info = AvindexStore.getMediaInfo(AvindexStore.getExternalMediaIds()[0]);
+        String state = android.os.Environment.getExternalStorageState();
+        int remaining = AvindexStore.Images.getAvailableCount(AvindexStore.getExternalMediaIds()[0]);
     }
 
     public void moveToNext()
@@ -131,4 +163,10 @@ public class AvIndexHandler
     {
         return cursor.getCount();
     }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Log.d(TAG,intent.getAction());
+    }
+
 }

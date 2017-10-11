@@ -34,11 +34,14 @@ public class CameraInstance extends CameraInternalEventListner implements  Camer
         cameraSequence.setShutterSequenceCallback(this);*/
         Log.d(TAG, "Cam open");
         cameraIsOpen = true;
+        autoPictureReviewControl = new CameraEx.AutoPictureReviewControl();
+        m_camera.setAutoPictureReviewControl(getAutoPictureReviewControls());
+        autoPictureReviewControl.setPictureReviewTime(0);
+        autoPictureReviewControl.cancelAutoPictureReview();
 
         initParameters();
         initListners();
-        autoPictureReviewControl = new CameraEx.AutoPictureReviewControl();
-        m_camera.setAutoPictureReviewControl(getAutoPictureReviewControls());
+
         m_camera.withSupportedParameters(false);
         fireOnCameraOpen(true);
 
@@ -46,9 +49,7 @@ public class CameraInstance extends CameraInternalEventListner implements  Camer
 
     public void initParameters()
     {
-        parameters = m_camera.getNormalCamera().getParameters();
-        modifier = m_camera.createParametersModifier(parameters);
-        dumpParameter();
+        //dumpParameter();
     }
 
     /*public void setOptions(CameraSequence.Options paramOptions)
@@ -62,7 +63,7 @@ public class CameraInstance extends CameraInternalEventListner implements  Camer
     }*/
 
     private void dumpParameter() {
-        StringTokenizer localStringTokenizer = new StringTokenizer(((Camera.Parameters)parameters).flatten(), ";");
+        StringTokenizer localStringTokenizer = new StringTokenizer(((Camera.Parameters)getParameters()).flatten(), ";");
         while (localStringTokenizer.hasMoreElements())
             Log.d(TAG, localStringTokenizer.nextToken());
 

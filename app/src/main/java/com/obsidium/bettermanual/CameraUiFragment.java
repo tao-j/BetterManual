@@ -150,152 +150,25 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         activityInterface.getPreferences().setDialMode(lastDialView);
 
         clearUiItems();
-        if (activityInterface.getCamera().getAutoPictureReviewControls() != null)
-            activityInterface.getCamera().getAutoPictureReviewControls().setPictureReviewTime(m_pictureReviewTime);
     }
 
 
     private void loadUiItems() {
         final TimeLog timeLog = new TimeLog("loadUiItems");
-        exposureMode = new ExposureModeView(getContext());
-        exposureMode.setOnClickListener(this);
-        exposureMode.setActivity(activityInterface);
-        dialViews.add(exposureMode);
-        leftHolder.addView(exposureMode);
-
-        driveMode = new DriveMode(getContext());
-        driveMode.setOnClickListener(this);
-        driveMode.setActivity(activityInterface);
-        dialViews.add(driveMode);
-        leftHolder.addView(driveMode);
-
-        m_ivTimelapse = new BaseImageView(getContext()) {
-            @Override
-            public void updateImage() {
-
-            }
-
-            @Override
-            public void toggle() {
-                if (timelapse.isActive())
-                    timelapse.abort();
-                else {
-                    activityInterface.getDialHandler().setDialEventListner(timelapse);
-                    timelapse.onEnterKeyUp();
-                }
-            }
-
-            @Override
-            public void setIn_DecrementValue(int value) {
-
-            }
-
-            @Override
-            public String getNavigationString() {
-                return activityInterface.getResString(R.string.view_startBracket_Timelapse);
-            }
-        };
-        //noinspection ResourceType
-        m_ivTimelapse.setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_43_shoot_icon_setting_drivemode_invalid));
-        m_ivTimelapse.setOnClickListener(this);
-        dialViews.add(m_ivTimelapse);
-        leftHolder.addView(m_ivTimelapse);
-
-        m_ivBracket = new BaseImageView(getContext()) {
-            @Override
-            public void updateImage() {
-
-            }
-
-            @Override
-            public void toggle() {
-                if (bracket.isActive())
-                {
-                    bracket.abort();
-                }
-                else {
-                    activityInterface.getDialHandler().setDialEventListner(bracket);
-                    bracket.onEnterKeyUp();
-                }
-            }
-
-            @Override
-            public void setIn_DecrementValue(int value) {
-
-            }
-
-            @Override
-            public String getNavigationString() {
-                return activityInterface.getResString(R.string.view_startBracket_Timelapse);
-            }
-        };
-        //noinspection ResourceType
-        m_ivBracket.setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_contshot));
-        m_ivBracket.setOnClickListener(this);
-        dialViews.add(m_ivBracket);
-        leftHolder.addView(m_ivBracket);
+        activityInterface.getMainHandler().post(addExposureModeRunnable);
+        activityInterface.getMainHandler().post(addDriveModeRunnable);
+        activityInterface.getMainHandler().post(addTimelapseRunnable);
+        activityInterface.getMainHandler().post(addBracketRunnable);
 
         if (activityInterface.getCamera().isImageStabSupported()) {
-            imageStabView = new ImageStabView(getContext());
-            imageStabView.setActivity(activityInterface);
-            imageStabView.setOnClickListener(this);
-            dialViews.add(imageStabView);
-            leftHolder.addView(imageStabView);
+            activityInterface.getMainHandler().post(addImageStabRunnable);
         }
 
-        if (activityInterface.getCamera().isLongExposureNoiseReductionSupported())
-        {
-            longExpoNR = new LongExpoNR(getContext());
-            longExpoNR.setActivity(activityInterface);
-            longExpoNR.setOnClickListener(this);
-            dialViews.add(longExpoNR);
-            leftHolder.addView(longExpoNR);
+        if (activityInterface.getCamera().isLongExposureNoiseReductionSupported()) {
+            activityInterface.getMainHandler().post(addLongExpoNoiseReductionRunnable);
         }
 
-        final int margineright = (int)getResources().getDimension(R.dimen.bottomHolderChildMarginRight);
-        LinearLayout.LayoutParams params= new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.setMargins(0, 0, margineright, 0);
-        params.weight = 1;
-
-        m_tvShutter = new ShutterView(getContext());
-        m_tvShutter.setTextSize((int)getResources().getDimension(R.dimen.textSize));
-        m_tvShutter.setLayoutParams(params);
-        m_tvShutter.setOnTouchListener(m_tvShutter.getSwipeTouchListner());
-        m_tvShutter.setCameraUiInterface(this);
-        dialViews.add(m_tvShutter);
-        bottomHolder.addView(m_tvShutter);
-
-        aperture = new ApertureView(getContext());
-        aperture.setTextSize((int)getResources().getDimension(R.dimen.textSize));
-        aperture.setOnTouchListener(aperture.getSwipeTouchListner());
-        aperture.setCameraUiInterface(this);
-        aperture.setLayoutParams(params);
-        dialViews.add(aperture);
-        bottomHolder.addView(aperture);
-
-        iso = new IsoView(getContext());
-        iso.setTextSize((int)getResources().getDimension(R.dimen.textSize));
-        iso.setOnTouchListener(iso.getSwipeTouchListner());
-        iso.setCameraUiInterface(this);
-        iso.setLayoutParams(params);
-        dialViews.add(iso);
-        bottomHolder.addView(iso);
-
-        evCompensation = new EvView(getContext());
-        evCompensation.setTextSize((int)getResources().getDimension(R.dimen.textSize));
-        evCompensation.setOnTouchListener(evCompensation.getSwipeTouchListner());
-        evCompensation.setCameraUiInterface(this);
-        evCompensation.setLayoutParams(params);
-        dialViews.add(evCompensation);
-        bottomHolder.addView(evCompensation);
-
-        m_tvExposure = new TextView(getContext());
-        m_tvExposure.setTextSize((int)getResources().getDimension(R.dimen.textSize));
-        m_tvExposure.setLayoutParams(params);
-        //noinspection ResourceType
-        m_tvExposure.setCompoundDrawablesWithIntrinsicBounds(getResources().getInteger(R.integer.p_meteredmanualicon), 0, 0, 0);
-        bottomHolder.addView(m_tvExposure);
-        setDialMode(0);
+        activityInterface.getMainHandler().post(addBottomItems);
 
         timeLog.logTime();
     }
@@ -304,25 +177,11 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
 
         Log.d(TAG,"initUi");
         final TimeLog timeLog = new TimeLog("initUi");
-        // Disable picture review
-        m_pictureReviewTime = activityInterface.getCamera().getAutoPictureReviewControls().getPictureReviewTime();
-        activityInterface.getCamera().getAutoPictureReviewControls().setPictureReviewTime(0);
 
         m_vGrid.setVideoRect(activityInterface.getDisplayManager().getDisplayedVideoRect());
 
-        // Exposure compensation
-        evCompensation.init(activityInterface.getCamera());
-
         // Preview/Histogram
         activityInterface.getCamera().setPreviewAnalizeListener(this);
-
-
-        // ISO
-        activityInterface.getCamera().setAutoISOSensitivityListener(iso);
-        iso.init(activityInterface.getCamera());
-
-        // Shutter
-        activityInterface.getCamera().setShutterSpeedChangeListener(bracket);
 
         //returns when a capture is done, seems to replace the default android camera1 api CaptureCallback that get called with Camera.takePicture(shutter,raw, jpeg)
         //also it seems Camera.takePicture is nonfunctional/crash on a6000
@@ -330,33 +189,210 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
 
         //m_camera.setJpegListener(); maybe is used to get jpeg/raw data returned
 
-        // Aperture
-        activityInterface.getCamera().setApertureChangeListener(aperture);
-
-        // Exposure metering
-        activityInterface.getCamera().setProgramLineRangeOverListener(this);
-
-        aperture.setText(String.format("f%.1f", (float) activityInterface.getCamera().getAperture() / 100.0f));
-
-        Pair<Integer, Integer> sp = activityInterface.getCamera().getShutterSpeed();
-        m_tvShutter.updateShutterSpeed(sp.first, sp.second);
 
         activityInterface.getCamera().setFocusDriveListener(this);
 
         m_viewFlags = activityInterface.getPreferences().getViewFlags(VIEW_FLAG_GRID | VIEW_FLAG_HISTOGRAM);
-        setDialMode(activityInterface.getPreferences().getDialMode(0));
+        activityInterface.getMainHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                setDialMode(activityInterface.getPreferences().getDialMode(0));
+            }
+        });
 
-        driveMode.updateImage();
-        exposureMode.updateImage();
-        if (imageStabView != null)
-            imageStabView.updateImage();
-        if (longExpoNR != null)
-            longExpoNR.updateImage();
+
         updateViewVisibility();
 
         Log.d(TAG,"initUiEnd");
         timeLog.logTime();
     }
+
+    private Runnable addExposureModeRunnable = new Runnable() {
+        @Override
+        public void run() {
+            exposureMode = new ExposureModeView(getContext());
+            exposureMode.setOnClickListener(CameraUiFragment.this);
+            exposureMode.setActivity(activityInterface);
+            dialViews.add(exposureMode);
+            leftHolder.addView(exposureMode);
+            exposureMode.updateImage();
+        }
+    };
+
+    private Runnable addDriveModeRunnable = new Runnable() {
+        @Override
+        public void run() {
+            driveMode = new DriveMode(getContext());
+            driveMode.setOnClickListener(CameraUiFragment.this);
+            driveMode.setActivity(activityInterface);
+            dialViews.add(driveMode);
+            leftHolder.addView(driveMode);
+            driveMode.updateImage();
+        }
+    };
+
+    private Runnable addImageStabRunnable = new Runnable() {
+        @Override
+        public void run() {
+            imageStabView = new ImageStabView(getContext());
+            imageStabView.setActivity(activityInterface);
+            imageStabView.setOnClickListener(CameraUiFragment.this);
+            dialViews.add(imageStabView);
+            leftHolder.addView(imageStabView);
+            imageStabView.updateImage();
+        }
+    };
+
+    private Runnable addLongExpoNoiseReductionRunnable = new Runnable() {
+        @Override
+        public void run() {
+            longExpoNR = new LongExpoNR(getContext());
+            longExpoNR.setActivity(activityInterface);
+            longExpoNR.setOnClickListener(CameraUiFragment.this);
+            dialViews.add(longExpoNR);
+            leftHolder.addView(longExpoNR);
+            longExpoNR.updateImage();
+        }
+    };
+
+    private Runnable addTimelapseRunnable = new Runnable() {
+        @Override
+        public void run() {
+            m_ivTimelapse = new BaseImageView(getContext()) {
+                @Override
+                public void updateImage() {
+
+                }
+
+                @Override
+                public void toggle() {
+                    if (timelapse.isActive())
+                        timelapse.abort();
+                    else {
+                        activityInterface.getDialHandler().setDialEventListner(timelapse);
+                        timelapse.onEnterKeyUp();
+                    }
+                }
+
+                @Override
+                public void setIn_DecrementValue(int value) {
+
+                }
+
+                @Override
+                public String getNavigationString() {
+                    return activityInterface.getResString(R.string.view_startBracket_Timelapse);
+                }
+            };
+            //noinspection ResourceType
+            m_ivTimelapse.setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_43_shoot_icon_setting_drivemode_invalid));
+            m_ivTimelapse.setOnClickListener(CameraUiFragment.this);
+            dialViews.add(m_ivTimelapse);
+            leftHolder.addView(m_ivTimelapse);
+        }
+    };
+
+    private Runnable addBracketRunnable = new Runnable() {
+        @Override
+        public void run() {
+            m_ivBracket = new BaseImageView(getContext()) {
+                @Override
+                public void updateImage() {
+
+                }
+
+                @Override
+                public void toggle() {
+                    if (bracket.isActive())
+                    {
+                        bracket.abort();
+                    }
+                    else {
+                        activityInterface.getDialHandler().setDialEventListner(bracket);
+                        bracket.onEnterKeyUp();
+                    }
+                }
+
+                @Override
+                public void setIn_DecrementValue(int value) {
+
+                }
+
+                @Override
+                public String getNavigationString() {
+                    return activityInterface.getResString(R.string.view_startBracket_Timelapse);
+                }
+            };
+            //noinspection ResourceType
+            m_ivBracket.setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_contshot));
+            m_ivBracket.setOnClickListener(CameraUiFragment.this);
+            dialViews.add(m_ivBracket);
+            leftHolder.addView(m_ivBracket);
+            // Shutter
+            activityInterface.getCamera().setShutterSpeedChangeListener(bracket);
+        }
+    };
+
+    private Runnable addBottomItems = new Runnable() {
+        @Override
+        public void run() {
+            final int margineright = (int)getResources().getDimension(R.dimen.bottomHolderChildMarginRight);
+            LinearLayout.LayoutParams params= new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.setMargins(0, 0, margineright, 0);
+            params.weight = 1;
+
+            m_tvShutter = new ShutterView(getContext());
+            m_tvShutter.setTextSize((int)getResources().getDimension(R.dimen.textSize));
+            m_tvShutter.setLayoutParams(params);
+            m_tvShutter.setOnTouchListener(m_tvShutter.getSwipeTouchListner());
+            m_tvShutter.setCameraUiInterface(CameraUiFragment.this);
+            dialViews.add(m_tvShutter);
+            bottomHolder.addView(m_tvShutter);
+            Pair<Integer, Integer> sp = activityInterface.getCamera().getShutterSpeed();
+            m_tvShutter.updateShutterSpeed(sp.first, sp.second);
+
+            aperture = new ApertureView(getContext());
+            aperture.setTextSize((int)getResources().getDimension(R.dimen.textSize));
+            aperture.setOnTouchListener(aperture.getSwipeTouchListner());
+            aperture.setCameraUiInterface(CameraUiFragment.this);
+            aperture.setLayoutParams(params);
+            dialViews.add(aperture);
+            bottomHolder.addView(aperture);
+            // Aperture
+            activityInterface.getCamera().setApertureChangeListener(aperture);
+            aperture.setText(String.format("f%.1f", (float) activityInterface.getCamera().getAperture() / 100.0f));
+
+            iso = new IsoView(getContext());
+            iso.setTextSize((int)getResources().getDimension(R.dimen.textSize));
+            iso.setOnTouchListener(iso.getSwipeTouchListner());
+            iso.setCameraUiInterface(CameraUiFragment.this);
+            iso.setLayoutParams(params);
+            dialViews.add(iso);
+            bottomHolder.addView(iso);
+            // ISO
+            activityInterface.getCamera().setAutoISOSensitivityListener(iso);
+            iso.init(activityInterface.getCamera());
+
+            evCompensation = new EvView(getContext());
+            evCompensation.setTextSize((int)getResources().getDimension(R.dimen.textSize));
+            evCompensation.setOnTouchListener(evCompensation.getSwipeTouchListner());
+            evCompensation.setCameraUiInterface(CameraUiFragment.this);
+            evCompensation.setLayoutParams(params);
+            dialViews.add(evCompensation);
+            bottomHolder.addView(evCompensation);
+            evCompensation.init(activityInterface.getCamera());
+
+            m_tvExposure = new TextView(getContext());
+            m_tvExposure.setTextSize((int)getResources().getDimension(R.dimen.textSize));
+            m_tvExposure.setLayoutParams(params);
+            //noinspection ResourceType
+            m_tvExposure.setCompoundDrawablesWithIntrinsicBounds(getResources().getInteger(R.integer.p_meteredmanualicon), 0, 0, 0);
+            bottomHolder.addView(m_tvExposure);
+            // Exposure metering
+            activityInterface.getCamera().setProgramLineRangeOverListener(CameraUiFragment.this);
+            setDialMode(0);
+        }
+    };
 
     private void clearUiItems()
     {

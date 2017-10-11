@@ -20,7 +20,10 @@ public class ShutterView extends BaseTextView implements CaptureSession.CaptureD
 
     @Override
     public String getNavigationString() {
-        if (cameraUiInterface.getExposureMode().get() == ExposureModeView.ExposureModes.manual || cameraUiInterface.getExposureMode().get() == ExposureModeView.ExposureModes.shutter)
+        ExposureModeView view = cameraUiInterface.getExposureMode();
+        if (view == null)
+            return getResources().getString(R.string.view_shutter_navigation_disabled);
+        if (view.get() == ExposureModeView.ExposureModes.manual || view.get() == ExposureModeView.ExposureModes.shutter)
             return getResources().getString(R.string.view_shutter_navigation_enable);
         return getResources().getString(R.string.view_shutter_navigation_disabled);
     }

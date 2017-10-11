@@ -1,6 +1,7 @@
 package com.obsidium.bettermanual.camera;
 
 import android.hardware.Camera;
+import android.util.Log;
 import android.util.Pair;
 
 import com.sony.scalar.hardware.CameraEx;
@@ -15,9 +16,11 @@ public class CameraInternalEventListner extends BaseCamera implements CameraEx.A
         CameraEx.SettingChangedListener, CameraEx.EquipmentCallback, CameraEx.FlashChargingStateListener,CameraEx.FlashEmittingListener,CameraEx.ProgramLineListener,
         CameraEx.ErrorCallback,CameraEx.AutoSceneModeListener,CameraEx.FaceDetectionListener, CameraEx.FocalLengthChangeListener,
         CameraEx.PowerZoomListener, CameraEx.ZoomChangeListener, CameraEx.FocusAreaListener, CameraEx.PreviewMagnificationListener, CameraEx.AutoApscModeListener,
-        CameraEx.FocusDriveListener, CameraEx.ShutterListener
+        CameraEx.FocusDriveListener, CameraEx.ShutterListener, CameraEx.PreviewAnalizeListener
 {
 
+
+    private final String TAG = CameraInternalEventListner.class.getSimpleName();
 
     protected void initListners()
     {
@@ -36,7 +39,7 @@ public class CameraInternalEventListner extends BaseCamera implements CameraEx.A
         m_camera.setAutoSceneModeListener(this);
         m_camera.setFaceDetectionListener(this);
 
-        if (modifier.isSupportedFocalLengthNotify())
+        if (getModifier().isSupportedFocalLengthNotify())
             m_camera.setFocalLengthChangeListener(this);
         m_camera.setPowerZoomListener(this);
         m_camera.setZoomChangeListener(this);
@@ -46,6 +49,27 @@ public class CameraInternalEventListner extends BaseCamera implements CameraEx.A
         m_camera.setPreviewMagnificationListener(this);
         m_camera.setAutoApscModeListener(this);
         m_camera.setFocusDriveListener(this);
+        m_camera.setPreviewAnalizeListener(this);
+        //dont set it when shooting RAW only
+       /* try {
+            m_camera.setJpegListener(new CameraEx.JpegListener() {
+                @Override
+                public void onPictureTaken(byte[] bytes, CameraEx cameraEx) {
+                    Log.d(TAG,"onPictureTaken");
+                }
+            });
+        }
+        catch (NoClassDefFoundError ex)
+        {
+            Log.d(TAG,"JpegListner not found");
+            ex.printStackTrace();
+        }
+        catch (NoSuchMethodError ex)
+        {
+            Log.d(TAG,"setJpegListner not found");
+            ex.printStackTrace();
+        }*/
+
     }
 
     protected void removeListners()
@@ -65,7 +89,7 @@ public class CameraInternalEventListner extends BaseCamera implements CameraEx.A
         m_camera.setAutoSceneModeListener(null);
         m_camera.setFaceDetectionListener(null);
 
-        if (modifier.isSupportedFocalLengthNotify())
+        if (getModifier().isSupportedFocalLengthNotify())
             m_camera.setFocalLengthChangeListener(null);
         m_camera.setPowerZoomListener(null);
         m_camera.setZoomChangeListener(null);
@@ -201,5 +225,11 @@ public class CameraInternalEventListner extends BaseCamera implements CameraEx.A
     public void onShutter(int i, CameraEx cameraEx) {
         if (shutterListener != null)
             shutterListener.onShutter(i,cameraEx);
+    }
+
+    @Override
+    public void onAnalizedData(CameraEx.AnalizedData analizedData, CameraEx cameraEx) {
+        if (previewAnalizeListener != null)
+            previewAnalizeListener.onAnalizedData(analizedData,cameraEx);
     }
 }

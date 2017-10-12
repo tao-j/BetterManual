@@ -347,7 +347,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     public void onShutter(int i, CameraEx cameraEx2) {
         Log.d(TAG, "onShutter:" + logCaptureCode(i)+ " isBulb:" + isBulbCapture);
         Log.d(TAG, "RunMainThread: " + (Thread.currentThread() == Looper.getMainLooper().getThread()));
-        if (!isBulbCapture) {
+        if (!isBulbCapture()) {
 
             cameraInstance.cancleCapture();
             /*Caution.SetTrigger(131078, 1, false);

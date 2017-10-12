@@ -4,14 +4,17 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 
+import com.obsidium.bettermanual.CameraUiInterface;
 import com.obsidium.bettermanual.CameraUtil;
 import com.obsidium.bettermanual.MainActivity;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CaptureSession;
+import com.obsidium.bettermanual.capture.CaptureModeBulb;
 
 public class ShutterView extends BaseTextView implements CaptureSession.CaptureDoneEvent {
 
     private final String TAG = ShutterView.class.getSimpleName();
+    private CaptureModeBulb captureModeBulb;
 
     @Override
     public void setIn_DecrementValue(int value) {
@@ -44,6 +47,12 @@ public class ShutterView extends BaseTextView implements CaptureSession.CaptureD
     }
 
     @Override
+    public void setCameraUiInterface(CameraUiInterface cameraUiInterface) {
+        super.setCameraUiInterface(cameraUiInterface);
+        captureModeBulb = new CaptureModeBulb(cameraUiInterface);
+    }
+
+    @Override
     public void onScrolled(int distance) {
         if (distance > 0)
             cameraUiInterface.getActivityInterface().getCamera().decrementShutterSpeed();
@@ -62,12 +71,13 @@ public class ShutterView extends BaseTextView implements CaptureSession.CaptureD
         }
         else if (getText().equals("BULB")) {
             if (!cameraUiInterface.getActivityInterface().isBulbCapture()) {
-                startBulbCapture();
+                cameraUiInterface.getActivityInterface().getDialHandler().setDialEventListner(captureModeBulb);
+                captureModeBulb.prepare();
                 return false;
 
             } else if (cameraUiInterface.getActivityInterface().isBulbCapture()) {
-
                 stopBulbCapture();
+                captureModeBulb.abort();
                 return false;
             }
         }
@@ -81,6 +91,7 @@ public class ShutterView extends BaseTextView implements CaptureSession.CaptureD
 
     private void startBulbCapture()
     {
+        captureModeBulb.prepare();
         cameraUiInterface.getActivityInterface().setBulbCapture(true);
         cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(this);
         cameraUiInterface.getActivityInterface().getCamera().takePicture();

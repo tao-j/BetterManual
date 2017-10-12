@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.obsidium.bettermanual.capture.CaptureModeBracket;
+import com.obsidium.bettermanual.capture.CaptureModeBulb;
 import com.obsidium.bettermanual.capture.CaptureModeTimelapse;
 import com.obsidium.bettermanual.views.ApertureView;
 import com.obsidium.bettermanual.views.BaseImageView;
@@ -137,6 +138,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
 
         timelapse = new CaptureModeTimelapse(this);
         bracket = new CaptureModeBracket(this);
+
 
         loadUiItems();
         initUi();
@@ -446,7 +448,8 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
             @Override
             public void run() {
                 m_tvHint.setText(msg);
-                m_tvHint.setVisibility(View.VISIBLE);
+                if (m_tvHint.getVisibility() != VISIBLE)
+                    m_tvHint.setVisibility(View.VISIBLE);
             }
         });
 

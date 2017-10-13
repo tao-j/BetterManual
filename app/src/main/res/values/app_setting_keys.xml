@@ -6,5 +6,8 @@
     <string name="ask_minShutterSpeed" translatable="false">minShutterSpeed</string>
     <string name="ask_viewFlags" translatable="false">viewFlags</string>
     <string name="ask_dialMode" translatable="false">dialMode</string>
+    <string name="ask_bulbtime" translatable="false">bulbtime</string>
+    <string name="ask_showstaralign" translatable="false">showstaralign</string>
+    <string name="ask_showstaraligngrid" translatable="false">showstaraligngrid</string>
     <integer name="bla">1</integer>
 </resources>

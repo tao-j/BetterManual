@@ -15,6 +15,7 @@ import java.util.List;
 public class PreviewMagnificationFragment extends BaseLayout implements KeyEvents, CameraEx.PreviewMagnificationListener {
 
 
+    private final float STEP_MAG_SIZE = 100f;
 
     private class SurfaceSwipeTouchListener extends OnSwipeTouchListener
     {
@@ -57,10 +58,15 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
         magnification = (TextView) findViewById(R.id.tvMagnification);
         previewNavView = (PreviewNavView)findViewById(R.id.vPreviewNav);
         starDriftAlginView = (StarDriftAlginView)findViewById(R.id.stardriftalgin);
-        starDriftAlginView.setVisibility(GONE);
+        if (!activityInterface.getPreferences().showStarAlginView())
+            starDriftAlginView.setVisibility(GONE);
+        else
+            starDriftAlginView.enableGrid(activityInterface.getPreferences().showStarAlginViewGrid());
 
         activityInterface.setSurfaceViewOnTouchListner(new SurfaceSwipeTouchListener(getContext()));
         activityInterface.getCamera().setPreviewMagnificationListener(this);
+        m_curPreviewMagnification = 100;
+        activityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
     }
 
     @Override
@@ -139,58 +145,62 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
 
     @Override
     public boolean onUpKeyDown() {
+        if (m_curPreviewMagnification != 0)
+        {
+            movePreviewVertical((int)(-STEP_MAG_SIZE / m_curPreviewMagnificationFactor));
+            return true;
+        }
         return false;
     }
 
     @Override
     public boolean onUpKeyUp() {
-        if (m_curPreviewMagnification != 0)
-        {
-            movePreviewVertical((int)(-500.0f / m_curPreviewMagnificationFactor));
-            return true;
-        }
+
         return false;
     }
 
     @Override
     public boolean onDownKeyDown() {
+        if (m_curPreviewMagnification != 0) {
+            movePreviewVertical((int) (STEP_MAG_SIZE / m_curPreviewMagnificationFactor));
+            return true;
+        }
         return false;
     }
 
     @Override
     public boolean onDownKeyUp() {
-        if (m_curPreviewMagnification != 0)
-            movePreviewVertical((int)(500.0f / m_curPreviewMagnificationFactor));
+
         return false;
     }
 
     @Override
     public boolean onLeftKeyDown() {
+        if (m_curPreviewMagnification != 0)
+        {
+            movePreviewHorizontal((int)(-STEP_MAG_SIZE / m_curPreviewMagnificationFactor));
+            return true;
+        }
         return false;
     }
 
     @Override
     public boolean onLeftKeyUp() {
-        if (m_curPreviewMagnification != 0)
-        {
-            movePreviewHorizontal((int)(-500.0f / m_curPreviewMagnificationFactor));
-            return true;
-        }
         return false;
     }
 
     @Override
     public boolean onRightKeyDown() {
+        if (m_curPreviewMagnification != 0)
+        {
+            movePreviewHorizontal((int)(STEP_MAG_SIZE / m_curPreviewMagnificationFactor));
+            return true;
+        }
         return false;
     }
 
     @Override
     public boolean onRightKeyUp() {
-        if (m_curPreviewMagnification != 0)
-        {
-            movePreviewHorizontal((int)(500.0f / m_curPreviewMagnificationFactor));
-            return true;
-        }
         return false;
     }
 
@@ -201,12 +211,12 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
 
     @Override
     public boolean onEnterKeyUp() {
-        if (m_curPreviewMagnification == 200)
+        /*if (m_curPreviewMagnification == 200)
         {
             m_curPreviewMagnification = 0;
             m_curPreviewMagnificationPos = new Pair<Integer, Integer>(0, 0);
         }
-        else if (m_curPreviewMagnification == 0)
+        else*/ if (m_curPreviewMagnification == 200)
         {
             m_curPreviewMagnification = 100;
         }
@@ -224,8 +234,16 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
     @Override
     public boolean onFnKeyUp() {
 
-        if (starDriftAlginView.getVisibility() == VISIBLE)
-            starDriftAlginView.toggleDrawGrid();
+        if (starDriftAlginView.getVisibility() == VISIBLE) {
+            if (activityInterface.getPreferences().showStarAlginViewGrid()) {
+                activityInterface.getPreferences().setShowStarAlignGrid(false);
+                starDriftAlginView.enableGrid(false);
+            }
+            else {
+                activityInterface.getPreferences().setShowStarAlignGrid(true);
+                starDriftAlginView.enableGrid(true);
+            }
+        }
         return false;
     }
 
@@ -249,10 +267,14 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
 
     @Override
     public boolean onMenuKeyUp() {
-        if (starDriftAlginView.getVisibility() == GONE)
+        if (starDriftAlginView.getVisibility() == GONE) {
             starDriftAlginView.setVisibility(VISIBLE);
-        else
+            activityInterface.getPreferences().setShowStarAlign(true);
+        }
+        else {
             starDriftAlginView.setVisibility(GONE);
+            activityInterface.getPreferences().setShowStarAlign(false);
+        }
         return false;
     }
 

@@ -40,7 +40,7 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
             abort();
         currentdial = DIAL_STATE_BULBTIME;
         //cameraUiInterface.setDialMode(CameraUiFragment.DialMode.timelapseSetInterval);
-        bulbCaptureTime = 1000;
+        bulbCaptureTime = cameraUiInterface.getActivityInterface().getPreferences().getBulbTime();
         updateBulbTime();
         cameraUiInterface.showHintMessage(cameraUiInterface.getActivityInterface().getResString(R.string.icon_lowerDial) +
                 " to set Bulb Duration, "
@@ -51,6 +51,7 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
     @Override
     public void startShooting() {
         Log.d(TAG,"startShooting");
+        cameraUiInterface.getActivityInterface().getPreferences().setBulbTime(bulbCaptureTime);
         cameraUiInterface.hideHintMessage();
         cameraUiInterface.hideMessage();
 
@@ -81,12 +82,12 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
 
     @Override
     public void increment() {
-        if (bulbCaptureTime < 1000)
+        if (bulbCaptureTime < 1000) //ms
             bulbCaptureTime += 100;
-        else if(bulbCaptureTime > 1000 * 60)
+        else if(bulbCaptureTime > 1000 * 60)//min
             bulbCaptureTime += 1000*60;
         else
-            bulbCaptureTime += 1000;
+            bulbCaptureTime += 1000;//sec
         updateBulbTime();
     }
 
@@ -94,12 +95,12 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
     public void decrement() {
         if (bulbCaptureTime > 0)
         {
-            if (bulbCaptureTime <= 1000)
+            if (bulbCaptureTime <= 1000) //ms
                 bulbCaptureTime -= 100;
-            else if(bulbCaptureTime > 1000 * 60)
+            else if(bulbCaptureTime > 1000 * 60) //min
                 bulbCaptureTime -= 1000*60;
             else
-                bulbCaptureTime -= 1000;
+                bulbCaptureTime -= 1000; // sec
         }
         updateBulbTime();
     }
@@ -201,8 +202,10 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
     @Override
     public boolean onEnterKeyUp() {
         Log.d(TAG,"onEnterKeyDown" + currentdial);
-        if (isActive())
+        if (isActive() && currentdial == DIAL_STATE_NOTHING) {
             abort();
+            return false;
+        }
         if (currentdial == DIAL_STATE_NOTHING) {
             prepare();
             updateBulbTime();

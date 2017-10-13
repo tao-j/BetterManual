@@ -72,12 +72,9 @@ public class StarDriftAlginView extends View {
 
     }
 
-    public void toggleDrawGrid()
+    public void enableGrid(boolean enable)
     {
-        if (drawGrid)
-            drawGrid = false;
-        else
-            drawGrid = true;
+        this.drawGrid = enable;
         invalidate();
     }
 

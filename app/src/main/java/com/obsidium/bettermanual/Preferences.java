@@ -76,4 +76,34 @@ public class Preferences
     {
         m_prefs.edit().putInt(context.getString(R.string.ask_dialMode), flags).apply();
     }
+
+    public long getBulbTime()
+    {
+        return m_prefs.getLong(context.getString(R.string.ask_bulbtime), 1000);
+    }
+
+    public void setBulbTime(long time)
+    {
+        m_prefs.edit().putLong(context.getString(R.string.ask_bulbtime),time).commit();
+    }
+
+    public boolean showStarAlginView()
+    {
+        return m_prefs.getBoolean(context.getString(R.string.ask_showstaralign),false);
+    }
+
+    public boolean showStarAlginViewGrid()
+    {
+        return m_prefs.getBoolean(context.getString(R.string.ask_showstaraligngrid),false);
+    }
+
+    public void setShowStarAlign(boolean show)
+    {
+        m_prefs.edit().putBoolean(context.getString(R.string.ask_showstaralign),show).commit();
+    }
+
+    public void setShowStarAlignGrid(boolean show)
+    {
+        m_prefs.edit().putBoolean(context.getString(R.string.ask_showstaraligngrid),show).commit();
+    }
 }

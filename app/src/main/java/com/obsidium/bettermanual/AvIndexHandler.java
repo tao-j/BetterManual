@@ -76,14 +76,12 @@ public class AvIndexHandler extends BroadcastReceiver
 
     public void onResume(Context context)
     {
-        cursor = getCursorFromUri(mediaStorageUri);
-        cursor.moveToFirst();
         update();
     }
 
     private Cursor getCursorFromUri(Uri uri)
     {
-        return contentResolver.query(uri, AvindexStore.Images.Media.ALL_COLUMNS, null, null, null);
+        return contentResolver.query(uri, AvindexStore.Images.Media.ALL_COLUMNS, null, null,null);
     }
 
     public void onPause(Context context)
@@ -138,6 +136,8 @@ public class AvIndexHandler extends BroadcastReceiver
         MediaInfo info = AvindexStore.getMediaInfo(AvindexStore.getExternalMediaIds()[0]);
         String state = android.os.Environment.getExternalStorageState();
         int remaining = AvindexStore.Images.getAvailableCount(AvindexStore.getExternalMediaIds()[0]);
+        cursor = getCursorFromUri(mediaStorageUri);
+        cursor.moveToFirst();
     }
 
     public void moveToNext()
@@ -167,6 +167,7 @@ public class AvIndexHandler extends BroadcastReceiver
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG,intent.getAction());
+        update();
     }
 
 }

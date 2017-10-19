@@ -437,5 +437,12 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     }
 
 
-
+    //returns always [0,0,0] when used with mf, dont know if its works with af
+    /*public float[]getFocusDistances()
+    {
+        Camera.Parameters parameters = m_camera.getNormalCamera().getParameters();
+        float ar[] = new float[3];
+        parameters.getFocusDistances(ar);
+        return ar;
+    }*/
 }

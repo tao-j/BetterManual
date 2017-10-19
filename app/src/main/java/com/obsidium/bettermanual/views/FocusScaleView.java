@@ -63,6 +63,10 @@ public class FocusScaleView extends View
                 m_paint.setARGB(150, 255, 0, 0);
             m_paint.setStyle(Paint.Style.FILL);
             canvas.drawRect(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH + (float)m_cur / (float)m_max * w2, h - BORDER_WIDTH, m_paint);
+
+
+            canvas.drawText(m_cur+"",w/2,h/2,m_paint);
         }
     }
+
 }

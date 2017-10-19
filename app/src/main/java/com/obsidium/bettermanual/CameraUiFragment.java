@@ -524,6 +524,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
     {
         final int visibility = visible ? View.VISIBLE : View.GONE;
         leftHolder.setVisibility(visibility);
+        bottomHolder.setVisibility(visibility);
     }
 
     private void cycleVisibleViews()
@@ -547,21 +548,27 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
             bracket.prepare();
     }
 
-    private void setDialMode(int mode)
+    private void setDialMode(final int mode)
     {
-        DialViewInterface lastView = dialViews.get(lastDialView);
-        if (lastView == null)
-            return;
-        lastView.setColorToView(Color.WHITE);
-        lastDialView = lastDialView + mode;
-        if (lastDialView >= dialViews.size())
-            lastDialView = 0;
-        else if(lastDialView < 0)
-            lastDialView = dialViews.size()-1;
+        getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                DialViewInterface lastView = dialViews.get(lastDialView);
+                if (lastView == null)
+                    return;
+                lastView.setColorToView(Color.WHITE);
+                lastDialView = lastDialView + mode;
+                if (lastDialView >= dialViews.size())
+                    lastDialView = 0;
+                else if(lastDialView < 0)
+                    lastDialView = dialViews.size()-1;
 
-        lastView = dialViews.get(lastDialView);
-        lastView.setColorToView(Color.GREEN);
-        showHintMessage(lastView.getNavigationString());
+                lastView = dialViews.get(lastDialView);
+                lastView.setColorToView(Color.GREEN);
+                showHintMessage(lastView.getNavigationString());
+            }
+        });
+
     }
 
 

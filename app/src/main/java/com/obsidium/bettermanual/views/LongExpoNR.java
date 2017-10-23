@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 
 import com.obsidium.bettermanual.R;
+import com.obsidium.bettermanual.camera.CameraInstance;
 
 
 public class LongExpoNR extends BaseImageView {
@@ -31,7 +32,7 @@ public class LongExpoNR extends BaseImageView {
 
     @Override
     public void updateImage() {
-        if (activity.getCamera().getLongeExposureNR()) {
+        if (CameraInstance.GET().getLongeExposureNR()) {
             setImageResource(R.drawable.lnr_on);
         }
         else
@@ -40,11 +41,11 @@ public class LongExpoNR extends BaseImageView {
 
     @Override
     public void toggle() {
-        if (activity.getCamera().getLongeExposureNR()) {
-            activity.getCamera().setLongExposureNoiseReduction(false);
+        if (CameraInstance.GET().getLongeExposureNR()) {
+            CameraInstance.GET().setLongExposureNoiseReduction(false);
         }
         else
-            activity.getCamera().setLongExposureNoiseReduction(true);
+            CameraInstance.GET().setLongExposureNoiseReduction(true);
         updateImage();
     }
 }

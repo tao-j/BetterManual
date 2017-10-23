@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 
 import com.obsidium.bettermanual.R;
+import com.obsidium.bettermanual.camera.CameraInstance;
 import com.sony.scalar.hardware.CameraEx;
 
 public class DriveMode extends BaseImageView
@@ -22,7 +23,7 @@ public class DriveMode extends BaseImageView
 
     @Override
     public void updateImage() {
-        final String driveMode = activity.getCamera().getDriveMode();
+        final String driveMode = CameraInstance.GET().getDriveMode();
         if (driveMode.equals(CameraEx.ParametersModifier.DRIVE_MODE_SINGLE))
         {
             //noinspection ResourceType
@@ -30,7 +31,7 @@ public class DriveMode extends BaseImageView
         }
         else if (driveMode.equals(CameraEx.ParametersModifier.DRIVE_MODE_BURST))
         {
-            final String burstDriveSpeed = activity.getCamera().getBurstDriveSpeed();
+            final String burstDriveSpeed = CameraInstance.GET().getBurstDriveSpeed();
             if (burstDriveSpeed.equals(CameraEx.ParametersModifier.BURST_DRIVE_SPEED_LOW))
             {
                 //noinspection ResourceType
@@ -52,7 +53,7 @@ public class DriveMode extends BaseImageView
 
     @Override
     public void toggle() {
-        final String driveMode = activity.getCamera().getDriveMode();
+        final String driveMode = CameraInstance.GET().getDriveMode();
         final String newMode;
         final String newBurstSpeed;
         if (driveMode.equals(CameraEx.ParametersModifier.DRIVE_MODE_SINGLE))
@@ -62,7 +63,7 @@ public class DriveMode extends BaseImageView
         }
         else if (driveMode.equals(CameraEx.ParametersModifier.DRIVE_MODE_BURST))
         {
-            final String burstDriveSpeed = activity.getCamera().getBurstDriveSpeed();
+            final String burstDriveSpeed = CameraInstance.GET().getBurstDriveSpeed();
             if (burstDriveSpeed.equals(CameraEx.ParametersModifier.BURST_DRIVE_SPEED_LOW))
             {
                 newMode = CameraEx.ParametersModifier.DRIVE_MODE_SINGLE;
@@ -81,8 +82,8 @@ public class DriveMode extends BaseImageView
             newBurstSpeed = CameraEx.ParametersModifier.BURST_DRIVE_SPEED_HIGH;
         }
 
-        activity.getCamera().setDriveMode(newMode);
-        activity.getCamera().setBurstDriveSpeed(newBurstSpeed);
+        CameraInstance.GET().setDriveMode(newMode);
+        CameraInstance.GET().setBurstDriveSpeed(newBurstSpeed);
 
         updateImage();
     }

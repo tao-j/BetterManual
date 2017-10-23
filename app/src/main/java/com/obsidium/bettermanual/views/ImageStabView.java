@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 
 import com.obsidium.bettermanual.R;
+import com.obsidium.bettermanual.camera.CameraInstance;
 
 /**
  * Created by KillerInk on 31.08.2017.
@@ -37,7 +38,7 @@ public class ImageStabView extends BaseImageView {
     //onetime
     @Override
     public void updateImage() {
-        final String stabilisationMode= activity.getCamera().getImageStabilisationMode();
+        final String stabilisationMode= CameraInstance.GET().getImageStabilisationMode();
         if (stabilisationMode.equals("onetime"))
             setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_fn_1_5_layer_sel_steadyshot_on));
         else
@@ -46,11 +47,11 @@ public class ImageStabView extends BaseImageView {
 
     @Override
     public void toggle() {
-        final String stabilisationMode= activity.getCamera().getImageStabilisationMode();
+        final String stabilisationMode= CameraInstance.GET().getImageStabilisationMode();
         if(stabilisationMode.equals("onetime"))
-            activity.getCamera().setImageStabilisation("off");
+            CameraInstance.GET().setImageStabilisation("off");
         else
-            activity.getCamera().setImageStabilisation("onetime");
+            CameraInstance.GET().setImageStabilisation("onetime");
         updateImage();
     }
 }

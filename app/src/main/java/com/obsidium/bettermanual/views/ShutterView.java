@@ -8,6 +8,7 @@ import com.obsidium.bettermanual.CameraUiInterface;
 import com.obsidium.bettermanual.CameraUtil;
 import com.obsidium.bettermanual.MainActivity;
 import com.obsidium.bettermanual.R;
+import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
 import com.obsidium.bettermanual.capture.CaptureModeBulb;
 
@@ -55,9 +56,9 @@ public class ShutterView extends BaseTextView implements CaptureSession.CaptureD
     @Override
     public void onScrolled(int distance) {
         if (distance > 0)
-            cameraUiInterface.getActivityInterface().getCamera().decrementShutterSpeed();
+            CameraInstance.GET().decrementShutterSpeed();
         else
-            cameraUiInterface.getActivityInterface().getCamera().incrementShutterSpeed();
+            CameraInstance.GET().incrementShutterSpeed();
         //cameraUiInterface.getActivityInterface().getBackHandler().post(new ShutterSetRunner(distance));
     }
 
@@ -94,7 +95,7 @@ public class ShutterView extends BaseTextView implements CaptureSession.CaptureD
         captureModeBulb.prepare();
         cameraUiInterface.getActivityInterface().setBulbCapture(true);
         cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(this);
-        cameraUiInterface.getActivityInterface().getCamera().takePicture();
+        CameraInstance.GET().takePicture();
         Log.d(TAG, "Start BULB");
     }
 

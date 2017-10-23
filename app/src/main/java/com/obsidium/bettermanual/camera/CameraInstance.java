@@ -17,14 +17,21 @@ public class CameraInstance extends CameraInternalEventListner implements  Camer
 
 //    public CameraSequence cameraSequence;
 
+    private static CameraInstance INSTANCE = new CameraInstance();
+
     private SurfaceHolder surfaceHolder;
 
-    public CameraInstance() {
+    private CameraInstance() {
         super();
     }
 
+    public static CameraInstance GET()
+    {
+        return INSTANCE;
+    }
 
-    public void startCamera(CameraEx.ShutterListener shutterListener) {
+
+    public void startCamera() {
         CameraEx.OpenOptions options = new CameraEx.OpenOptions();
         options.setPreview(true);
         Log.d(TAG, "Open Cam");

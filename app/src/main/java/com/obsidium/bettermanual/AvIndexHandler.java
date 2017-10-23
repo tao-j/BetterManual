@@ -120,7 +120,7 @@ public class AvIndexHandler extends BroadcastReceiver
             I/_InfraScalarMprWrapper_: InfraScalarMprWrapper::cancelWaitAndUpdateDatabase# return ret = true
          */
         //AvindexStore.Images.cancelWaitAndUpdateDatabase(contentResolver, AvindexStore.getExternalMediaIds()[0]);
-       /* AvindexDatabaseManager avindexDatabaseManager = AvindexDatabaseManager.getInstance();
+       /* AvindexDatabaseManager avindexDatabaseManager = AvindexDatabaseManager.GET();
         AvindexDatabase[] avindexDatabases = avindexDatabaseManager.getAllDatabase();
         for (AvindexDatabase database : avindexDatabases)
             database.updateDatabase();

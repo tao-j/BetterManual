@@ -3,19 +3,39 @@ package com.obsidium.bettermanual;
 import android.content.Context;
 import android.util.Log;
 import android.util.Pair;
+import android.view.View;
 import android.widget.TextView;
 
+import com.obsidium.bettermanual.camera.CameraInstance;
+import com.obsidium.bettermanual.views.FocusScaleView;
 import com.obsidium.bettermanual.views.PreviewNavView;
 import com.obsidium.bettermanual.views.StarDriftAlginView;
 import com.sony.scalar.hardware.CameraEx;
 
-import java.util.List;
 
-
-public class PreviewMagnificationFragment extends BaseLayout implements KeyEvents, CameraEx.PreviewMagnificationListener {
+public class PreviewMagnificationFragment extends BaseLayout implements KeyEvents, CameraEx.PreviewMagnificationListener, CameraEx.FocusDriveListener {
 
 
     private final float STEP_MAG_SIZE = 100f;
+
+    @Override
+    public void onChanged(CameraEx.FocusPosition focusPosition, CameraEx cameraEx) {
+        m_lFocusScale.setVisibility(View.VISIBLE);
+        m_focusScaleView.setMaxPosition(focusPosition.maxPosition);
+        m_focusScaleView.setCurPosition(focusPosition.currentPosition);
+        activityInterface.getMainHandler().removeCallbacks(m_hideFocusScaleRunnable);
+        activityInterface.getMainHandler().postDelayed(m_hideFocusScaleRunnable, 2000);
+    }
+
+
+    private final Runnable m_hideFocusScaleRunnable = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            m_lFocusScale.setVisibility(View.GONE);
+        }
+    };
 
     private class SurfaceSwipeTouchListener extends OnSwipeTouchListener
     {
@@ -31,7 +51,7 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
             {
                 m_curPreviewMagnificationPos = new Pair<Integer, Integer>(Math.max(Math.min(m_curPreviewMagnificationMaxPos, m_curPreviewMagnificationPos.first + (int)distanceX), -m_curPreviewMagnificationMaxPos),
                         Math.max(Math.min(m_curPreviewMagnificationMaxPos, m_curPreviewMagnificationPos.second + (int)distanceY), -m_curPreviewMagnificationMaxPos));
-                activityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+                CameraInstance.GET().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
                 return true;
             }
             return false;
@@ -49,6 +69,8 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
     private float           m_curPreviewMagnificationFactor;
     private Pair<Integer, Integer> m_curPreviewMagnificationPos = new Pair<Integer, Integer>(0, 0);
     private int             m_curPreviewMagnificationMaxPos;
+    private FocusScaleView m_focusScaleView;
+    private View            m_lFocusScale;
 
     private StarDriftAlginView starDriftAlginView;
 
@@ -58,15 +80,20 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
         magnification = (TextView) findViewById(R.id.tvMagnification);
         previewNavView = (PreviewNavView)findViewById(R.id.vPreviewNav);
         starDriftAlginView = (StarDriftAlginView)findViewById(R.id.stardriftalgin);
+        m_focusScaleView = (FocusScaleView)findViewById(R.id.vFocusScale);
+
+        m_lFocusScale = findViewById(R.id.lFocusScale);
+        m_lFocusScale.setVisibility(View.GONE);
         if (!activityInterface.getPreferences().showStarAlginView())
             starDriftAlginView.setVisibility(GONE);
         else
             starDriftAlginView.enableGrid(activityInterface.getPreferences().showStarAlginViewGrid());
 
         activityInterface.setSurfaceViewOnTouchListner(new SurfaceSwipeTouchListener(getContext()));
-        activityInterface.getCamera().setPreviewMagnificationListener(this);
+        CameraInstance.GET().setPreviewMagnificationListener(this);
         m_curPreviewMagnification = 100;
-        activityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+        CameraInstance.GET().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+        CameraInstance.GET().setFocusDriveListener(this);
     }
 
     @Override
@@ -111,7 +138,7 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
         else if (newY < -m_curPreviewMagnificationMaxPos)
             newY = -m_curPreviewMagnificationMaxPos;
         m_curPreviewMagnificationPos = new Pair<Integer, Integer>(m_curPreviewMagnificationPos.first, newY);
-        activityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+        CameraInstance.GET().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
     }
 
     private void movePreviewHorizontal(int delta)
@@ -122,7 +149,7 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
         else if (newX < -m_curPreviewMagnificationMaxPos)
             newX = -m_curPreviewMagnificationMaxPos;
         m_curPreviewMagnificationPos = new Pair<Integer, Integer>(newX, m_curPreviewMagnificationPos.second);
-        activityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+        CameraInstance.GET().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
     }
 
     @Override
@@ -222,7 +249,7 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
         }
         else if (m_curPreviewMagnification == 100)
             m_curPreviewMagnification = 200;
-        activityInterface.getCamera().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
+        CameraInstance.GET().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
         return false;
     }
 
@@ -255,7 +282,7 @@ public class PreviewMagnificationFragment extends BaseLayout implements KeyEvent
     @Override
     public boolean onAelKeyUp() {
         activityInterface.getDialHandler().setDefaultListner();
-        activityInterface.getCamera().stopPreviewMagnification();
+        CameraInstance.GET().stopPreviewMagnification();
         activityInterface.loadFragment(MainActivity.FRAGMENT_CAMERA_UI);
         return true;
     }

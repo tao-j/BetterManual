@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.obsidium.bettermanual.camera.CameraInstance;
 import com.sony.scalar.hardware.CameraEx;
 
 public class MinShutterFragment extends BaseLayout implements SeekBar.OnSeekBarChangeListener, KeyEvents
@@ -32,12 +33,12 @@ public class MinShutterFragment extends BaseLayout implements SeekBar.OnSeekBarC
             }
         });
 
-        CameraEx.ShutterSpeedInfo info = activityInterface.getCamera().getShutterSpeedInfo();
+        CameraEx.ShutterSpeedInfo info = CameraInstance.GET().getShutterSpeedInfo();
         if (info != null) {
             setShutterSpeedToUi(info, true);
 
         }
-        activityInterface.getCamera().setShutterSpeedChangeListener(new CameraEx.ShutterSpeedChangeListener()
+        CameraInstance.GET().setShutterSpeedChangeListener(new CameraEx.ShutterSpeedChangeListener()
         {
             @Override
             public void onShutterSpeedChange(final CameraEx.ShutterSpeedInfo shutterSpeedInfo, CameraEx cameraEx)
@@ -50,7 +51,7 @@ public class MinShutterFragment extends BaseLayout implements SeekBar.OnSeekBarC
     @Override
     public void Destroy() {
         // Save minimum shutter speed
-        activityInterface.getPreferences().setMinShutterSpeed(activityInterface.getCamera().getAutoShutterSpeedLowLimit());
+        activityInterface.getPreferences().setMinShutterSpeed(CameraInstance.GET().getAutoShutterSpeedLowLimit());
     }
 
     private void setShutterSpeedToUi(CameraEx.ShutterSpeedInfo shutterSpeedInfo, boolean updateSeekbarProgress) {
@@ -209,7 +210,7 @@ public class MinShutterFragment extends BaseLayout implements SeekBar.OnSeekBarC
     public boolean onLowerDialChanged(int value) {
         m_sbShutter.incrementProgressBy(value);
         int speed = CameraUtil.SHUTTER_SPEED_VALUES[m_sbShutter.getProgress()].getMillisecond();
-        activityInterface.getCamera().setAutoShutterSpeedLowLimit(speed);
+        CameraInstance.GET().setAutoShutterSpeedLowLimit(speed);
         return false;
     }
 
@@ -258,7 +259,7 @@ public class MinShutterFragment extends BaseLayout implements SeekBar.OnSeekBarC
     {
         if (fromUser)
         {
-            activityInterface.getCamera().setAutoShutterSpeedLowLimit(CameraUtil.SHUTTER_SPEED_VALUES[progress].getMillisecond());
+            CameraInstance.GET().setAutoShutterSpeedLowLimit(CameraUtil.SHUTTER_SPEED_VALUES[progress].getMillisecond());
         }
     }
     public void onStartTrackingTouch(SeekBar var1)

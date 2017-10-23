@@ -5,8 +5,8 @@ import android.util.Log;
 import com.obsidium.bettermanual.CameraUiInterface;
 import com.obsidium.bettermanual.KeyEvents;
 import com.obsidium.bettermanual.R;
+import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
-import com.sony.scalar.sysutil.didep.Settings;
 
 /**
  * Created by KillerInk on 11.10.2017.
@@ -57,7 +57,7 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
 
         cameraUiInterface.getActivityInterface().setBulbCapture(true);
         cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(this);
-        cameraUiInterface.getActivityInterface().getCamera().takePicture();
+        CameraInstance.GET().takePicture();
         if (bulbCaptureTime > 0);
             cameraUiInterface.getActivityInterface().getMainHandler().postDelayed(cancelPictureRunner,bulbCaptureTime);
     }
@@ -76,8 +76,8 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
         isActive = false;
         cameraUiInterface.getActivityInterface().getMainHandler().removeCallbacks(m_countDownRunnable);
         cameraUiInterface.showMessageDelayed("Bulb finished");
-        cameraUiInterface.getActivityInterface().getCamera().enableHwShutterButton();
-        cameraUiInterface.getActivityInterface().getCamera().startPreview();
+        CameraInstance.GET().enableHwShutterButton();
+        CameraInstance.GET().startPreview();
     }
 
     @Override

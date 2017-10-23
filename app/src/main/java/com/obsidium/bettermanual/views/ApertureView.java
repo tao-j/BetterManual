@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.obsidium.bettermanual.R;
+import com.obsidium.bettermanual.camera.CameraInstance;
 import com.sony.scalar.hardware.CameraEx;
 
 /**
@@ -57,9 +58,9 @@ public class ApertureView extends BaseTextView implements CameraEx.ApertureChang
     public void onScrolled(int distance) {
         m_notifyOnNextApertureChange = true;
         if (distance > 0)
-            cameraUiInterface.getActivityInterface().getCamera().decrementAperture();
+            CameraInstance.GET().decrementAperture();
         else
-            cameraUiInterface.getActivityInterface().getCamera().incrementAperture();
+            CameraInstance.GET().incrementAperture();
     }
 
 

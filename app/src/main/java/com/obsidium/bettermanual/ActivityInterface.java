@@ -15,7 +15,6 @@ public interface ActivityInterface {
     boolean hasTouchScreen();
     Preferences getPreferences();
     KeyEventHandler getDialHandler();
-    CameraInstance getCamera();
     Handler getMainHandler();
     DisplayManager getDisplayManager();
     void closeApp();

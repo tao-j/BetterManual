@@ -5,6 +5,7 @@ import android.util.Log;
 import com.obsidium.bettermanual.CameraUiInterface;
 import com.obsidium.bettermanual.KeyEvents;
 import com.obsidium.bettermanual.R;
+import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
 import com.sony.scalar.sysutil.didep.Settings;
 
@@ -79,7 +80,7 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, Capt
         }
         cameraUiInterface.getActivityInterface().setBulbCapture(false);
         cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(this);
-        cameraUiInterface.getActivityInterface().getCamera().takePicture();
+        CameraInstance.GET().takePicture();
     }
 
     @Override
@@ -88,8 +89,8 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, Capt
         cameraUiInterface.getActivityInterface().getMainHandler().removeCallbacks(m_timelapseRunnable);
         isActive = false;
         cameraUiInterface.showMessageDelayed("Timelapse finished");
-        cameraUiInterface.getActivityInterface().getCamera().enableHwShutterButton();
-        cameraUiInterface.getActivityInterface().getCamera().startPreview();
+        CameraInstance.GET().enableHwShutterButton();
+        CameraInstance.GET().startPreview();
 
             // Update controls
         cameraUiInterface.getActivityInterface().getMainHandler().post(new Runnable() {

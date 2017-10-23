@@ -9,8 +9,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.capture.CaptureModeBracket;
-import com.obsidium.bettermanual.capture.CaptureModeBulb;
 import com.obsidium.bettermanual.capture.CaptureModeTimelapse;
 import com.obsidium.bettermanual.views.ApertureView;
 import com.obsidium.bettermanual.views.BaseImageView;
@@ -162,11 +162,11 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         activityInterface.getMainHandler().post(addTimelapseRunnable);
         activityInterface.getMainHandler().post(addBracketRunnable);
 
-        if (activityInterface.getCamera().isImageStabSupported()) {
+        if (CameraInstance.GET().isImageStabSupported()) {
             activityInterface.getMainHandler().post(addImageStabRunnable);
         }
 
-        if (activityInterface.getCamera().isLongExposureNoiseReductionSupported()) {
+        if (CameraInstance.GET().isLongExposureNoiseReductionSupported()) {
             activityInterface.getMainHandler().post(addLongExpoNoiseReductionRunnable);
         }
 
@@ -183,7 +183,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         m_vGrid.setVideoRect(activityInterface.getDisplayManager().getDisplayedVideoRect());
 
         // Preview/Histogram
-        activityInterface.getCamera().setPreviewAnalizeListener(this);
+        CameraInstance.GET().setPreviewAnalizeListener(this);
 
         //returns when a capture is done, seems to replace the default android camera1 api CaptureCallback that get called with Camera.takePicture(shutter,raw, jpeg)
         //also it seems Camera.takePicture is nonfunctional/crash on a6000
@@ -192,7 +192,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         //m_camera.setJpegListener(); maybe is used to get jpeg/raw data returned
 
 
-        activityInterface.getCamera().setFocusDriveListener(this);
+        CameraInstance.GET().setFocusDriveListener(this);
 
         m_viewFlags = activityInterface.getPreferences().getViewFlags(VIEW_FLAG_GRID | VIEW_FLAG_HISTOGRAM);
         activityInterface.getMainHandler().post(new Runnable() {
@@ -331,7 +331,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
             dialViews.add(m_ivBracket);
             leftHolder.addView(m_ivBracket);
             // Shutter
-            activityInterface.getCamera().setShutterSpeedChangeListener(bracket);
+            CameraInstance.GET().setShutterSpeedChangeListener(bracket);
         }
     };
 
@@ -350,7 +350,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
             m_tvShutter.setCameraUiInterface(CameraUiFragment.this);
             dialViews.add(m_tvShutter);
             bottomHolder.addView(m_tvShutter);
-            Pair<Integer, Integer> sp = activityInterface.getCamera().getShutterSpeed();
+            Pair<Integer, Integer> sp = CameraInstance.GET().getShutterSpeed();
             m_tvShutter.updateShutterSpeed(sp.first, sp.second);
 
             aperture = new ApertureView(getContext());
@@ -361,8 +361,8 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
             dialViews.add(aperture);
             bottomHolder.addView(aperture);
             // Aperture
-            activityInterface.getCamera().setApertureChangeListener(aperture);
-            aperture.setText(String.format("f%.1f", (float) activityInterface.getCamera().getAperture() / 100.0f));
+            CameraInstance.GET().setApertureChangeListener(aperture);
+            aperture.setText(String.format("f%.1f", (float) CameraInstance.GET().getAperture() / 100.0f));
 
             iso = new IsoView(getContext());
             iso.setTextSize((int)getResources().getDimension(R.dimen.textSize));
@@ -372,8 +372,8 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
             dialViews.add(iso);
             bottomHolder.addView(iso);
             // ISO
-            activityInterface.getCamera().setAutoISOSensitivityListener(iso);
-            iso.init(activityInterface.getCamera());
+            CameraInstance.GET().setAutoISOSensitivityListener(iso);
+            iso.init(CameraInstance.GET());
 
             evCompensation = new EvView(getContext());
             evCompensation.setTextSize((int)getResources().getDimension(R.dimen.textSize));
@@ -382,7 +382,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
             evCompensation.setLayoutParams(params);
             dialViews.add(evCompensation);
             bottomHolder.addView(evCompensation);
-            evCompensation.init(activityInterface.getCamera());
+            evCompensation.init(CameraInstance.GET());
 
             m_tvExposure = new TextView(getContext());
             m_tvExposure.setTextSize((int)getResources().getDimension(R.dimen.textSize));
@@ -391,7 +391,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
             m_tvExposure.setCompoundDrawablesWithIntrinsicBounds(getResources().getInteger(R.integer.p_meteredmanualicon), 0, 0, 0);
             bottomHolder.addView(m_tvExposure);
             // Exposure metering
-            activityInterface.getCamera().setProgramLineRangeOverListener(CameraUiFragment.this);
+            CameraInstance.GET().setProgramLineRangeOverListener(CameraUiFragment.this);
             setDialMode(0);
         }
     };
@@ -615,7 +615,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
 
     @Override
     public boolean onFnKeyUp() {
-        activityInterface.getCamera().cancleCapture();
+        CameraInstance.GET().cancleCapture();
 
         return false;
     }

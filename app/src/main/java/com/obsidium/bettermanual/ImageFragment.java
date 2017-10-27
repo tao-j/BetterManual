@@ -5,18 +5,16 @@ import android.database.Cursor;
 import android.graphics.Point;
 import android.net.Uri;
 import android.util.Log;
-import android.view.SurfaceHolder;
 import android.widget.FrameLayout;
 
 import com.sony.scalar.graphics.OptimizedImage;
 import com.sony.scalar.graphics.OptimizedImageFactory;
-import com.sony.scalar.hardware.CameraEx;
 import com.sony.scalar.media.AvindexContentInfo;
 import com.sony.scalar.provider.AvindexStore;
 import com.sony.scalar.widget.OptimizedImageView;
 
 
-public class ImageFragment extends BaseLayout implements KeyEvents {
+public class ImageFragment extends BaseLayout {
 
 
 

@@ -33,7 +33,7 @@ import java.util.List;
 
 
 public class CameraUiFragment extends BaseLayout implements View.OnClickListener,
-        CameraUiInterface, KeyEvents, CameraEx.PreviewAnalizeListener,CameraEx.ProgramLineRangeOverListener,
+        CameraUiInterface, CameraEx.PreviewAnalizeListener,CameraEx.ProgramLineRangeOverListener,
         CameraEx.FocusDriveListener
 {
 
@@ -550,25 +550,19 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
 
     private void setDialMode(final int mode)
     {
-        getHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                DialViewInterface lastView = dialViews.get(lastDialView);
-                if (lastView == null)
-                    return;
-                lastView.setColorToView(Color.WHITE);
-                lastDialView = lastDialView + mode;
-                if (lastDialView >= dialViews.size())
-                    lastDialView = 0;
-                else if(lastDialView < 0)
-                    lastDialView = dialViews.size()-1;
+        DialViewInterface lastView = dialViews.get(lastDialView);
+        if (lastView == null)
+            return;
+        lastView.setColorToView(Color.WHITE);
+        lastDialView = lastDialView + mode;
+        if (lastDialView >= dialViews.size())
+            lastDialView = 0;
+        else if(lastDialView < 0)
+            lastDialView = dialViews.size()-1;
 
-                lastView = dialViews.get(lastDialView);
-                lastView.setColorToView(Color.GREEN);
-                showHintMessage(lastView.getNavigationString());
-            }
-        });
-
+        lastView = dialViews.get(lastDialView);
+        lastView.setColorToView(Color.GREEN);
+        showHintMessage(lastView.getNavigationString());
     }
 
 
@@ -615,7 +609,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
 
     @Override
     public boolean onFnKeyUp() {
-        CameraInstance.GET().cancleCapture();
+        CameraInstance.GET().cancelCapture();
 
         return false;
     }

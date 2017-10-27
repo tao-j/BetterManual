@@ -27,7 +27,16 @@ interface CameraParameterInterface
     int STOP_DISPLAY = 14;
     int CAPTURE_IMAGE = 15;
     int CANCEL_CAPTURE = 16;
-    
+    int MSG_INIT_CAMERA = 17;
+    int MSG_SET_LONGEXPONR = 18;
+    int MSG_SET_FOCUSMODE = 19;
+    int MSG_SET_SCENEMODE = 20;
+    int MSG_SET_DRIVEMODE = 21;
+    int MSG_SET_IMAGEASPECTRATIO = 22;
+    int MSG_SET_BURSTDRIVESPEED = 23;
+    int MSG_SET_IMAGEQUALITY = 24;
+    int MSG_SET_IMAGESTABILISATION = 25;
+
     //ExposureCompensation
     int getExposureCompensation();
     void setExposureCompensation(int value);

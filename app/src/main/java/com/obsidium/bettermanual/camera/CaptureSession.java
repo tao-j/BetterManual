@@ -78,7 +78,7 @@ public class CaptureSession implements Runnable, CameraEx.ShutterListener {
         Log.d(TAG, "onShutter:" + logCaptureCode(i)+ " isBulb:" + isBulbCapture);
         Log.d(TAG, "RunMainThread: " + (Thread.currentThread() == Looper.getMainLooper().getThread()));
         if (!isBulbCapture) {
-            cameraInstance.cancleCapture();
+            cameraInstance.cancelCapture();
             //this.cameraEx.startDirectShutter();
             isCaptureInProgress = false;
             if (eventListner != null)

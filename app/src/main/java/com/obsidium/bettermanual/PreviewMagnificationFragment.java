@@ -13,7 +13,7 @@ import com.obsidium.bettermanual.views.StarDriftAlginView;
 import com.sony.scalar.hardware.CameraEx;
 
 
-public class PreviewMagnificationFragment extends BaseLayout implements KeyEvents, CameraEx.PreviewMagnificationListener, CameraEx.FocusDriveListener {
+public class PreviewMagnificationFragment extends BaseLayout implements CameraEx.PreviewMagnificationListener, CameraEx.FocusDriveListener {
 
 
     private final float STEP_MAG_SIZE = 100f;

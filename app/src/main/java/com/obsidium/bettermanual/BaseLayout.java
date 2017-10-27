@@ -8,7 +8,7 @@ import android.widget.RelativeLayout;
  * Created by KillerInk on 27.09.2017.
  */
 
-public abstract class BaseLayout extends RelativeLayout
+public abstract class BaseLayout extends RelativeLayout implements KeyEvents
 {
     protected ActivityInterface activityInterface;
     protected Context context;

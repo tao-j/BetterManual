@@ -3,6 +3,7 @@ package com.obsidium.bettermanual;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -15,6 +16,7 @@ import com.github.ma1co.pmcademo.app.BaseActivity;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
 import com.sony.scalar.hardware.CameraEx;
+
 
 /**
  * Created by KillerInk on 27.08.2017.
@@ -34,6 +36,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     public final static int FRAGMENT_WAITFORCAMERARDY = 4;
 
     private Handler   m_handler;
+    private HandlerThread cameraThread;
 
     private SurfaceHolder m_surfaceHolder;
     SurfaceView surfaceView;
@@ -48,7 +51,29 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     private BaseLayout currentLayout;
 
     private AvIndexHandler avIndexHandler;
+
     //Caution caution;
+
+    public void startBackgroundThread(){
+        cameraThread = new HandlerThread("HandlerThread");
+        cameraThread.start();
+    }
+
+    private void stopBackgroundThread()
+    {
+        Log.d(TAG,"stopBackgroundThread");
+        if(cameraThread == null)
+            return;
+
+        cameraThread.quit();
+        try {
+            cameraThread.join();
+            cameraThread = null;
+            cameraThread = null;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +81,10 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         super.onCreate(savedInstanceState);
         if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler))
             Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());
+        startBackgroundThread();
         m_handler = new Handler();
         setContentView(R.layout.main_activity);
+        CameraInstance.GET().initHandler(cameraThread.getLooper());
 
         surfaceViewHolder = (FrameLayout) findViewById(R.id.surfaceView);
         //surfaceView.setOnTouchListener(new CameraUiFragment.SurfaceSwipeTouchListener(getContext()));
@@ -65,6 +92,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
 
         layoutHolder = (LinearLayout)findViewById(R.id.fragment_holder);
         preferences = new Preferences(getApplicationContext());
+
     }
 
     @Override
@@ -78,20 +106,14 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
                 Log.d(TAG, "onCautionCallback");
             }
         });*/
-        m_handler.post(onResumeRunner);
+        registerReceiver(avIndexHandler, avIndexHandler.AVAILABLE_SIZE_INTENTS);
+        registerReceiver(avIndexHandler, avIndexHandler.MEDIA_INTENTS);
+        avIndexHandler.onResume(getApplicationContext());
+        addSurfaceView();
+
+        CameraInstance.GET().setCameraEventsListner(MainActivity.this);
+
     }
-
-    private Runnable onResumeRunner =new Runnable() {
-        @Override
-        public void run() {
-            registerReceiver(avIndexHandler, avIndexHandler.AVAILABLE_SIZE_INTENTS);
-            registerReceiver(avIndexHandler, avIndexHandler.MEDIA_INTENTS);
-            avIndexHandler.onResume(getApplicationContext());
-            addSurfaceView();
-
-            CameraInstance.GET().setCameraEventsListner(MainActivity.this);
-        }
-    };
 
     @Override
     protected void onPause() {
@@ -104,6 +126,12 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
 
         saveDefaults();
         CameraInstance.GET().closeCamera();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopBackgroundThread();
     }
 
     private void saveDefaults()
@@ -234,7 +262,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     public void cancelBulbCapture()
     {
         isBulbCapture = false;
-        CameraInstance.GET().cancleCapture();
+        CameraInstance.GET().cancelCapture();
     }
 
     @Override
@@ -252,39 +280,33 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
 
     private void loadDefaults()
     {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final TimeLog timeLog = new TimeLog("loadDefaults");
-                //Log.d(TAG,"Parameters: " + params.flatten());
-                // Focus mode
-                CameraInstance.GET().setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
-                // Scene mode
-                final String sceneMode = getPreferences().getSceneMode();
-                CameraInstance.GET().setSceneMode(sceneMode);
-                // Drive mode and burst speed
-                CameraInstance.GET().setDriveMode(getPreferences().getDriveMode());
-                CameraInstance.GET().setBurstDriveSpeed(getPreferences().getBurstDriveSpeed());
-                // Minimum shutter speed
-                if(CameraInstance.GET().isAutoShutterSpeedLowLimitSupported()) {
-                    if (sceneMode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
-                        CameraInstance.GET().setAutoShutterSpeedLowLimit(-1);
-                    else
-                        CameraInstance.GET().setAutoShutterSpeedLowLimit(getPreferences().getMinShutterSpeed());
-                }
-                // Disable self timer
-                CameraInstance.GET().setSelfTimer(0);
-                // Force aspect ratio to 3:2
-                CameraInstance.GET().setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
-                CameraInstance.GET().setImageQuality(CameraEx.ParametersModifier.PICTURE_STORAGE_FMT_RAW);
-                // View visibility
+        final TimeLog timeLog = new TimeLog("loadDefaults");
+        //Log.d(TAG,"Parameters: " + params.flatten());
+        // Focus mode
+        CameraInstance.GET().setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
+        // Scene mode
+        final String sceneMode = getPreferences().getSceneMode();
+        CameraInstance.GET().setSceneMode(sceneMode);
+        // Drive mode and burst speed
+        CameraInstance.GET().setDriveMode(getPreferences().getDriveMode());
+        CameraInstance.GET().setBurstDriveSpeed(getPreferences().getBurstDriveSpeed());
+        // Minimum shutter speed
+        if(CameraInstance.GET().isAutoShutterSpeedLowLimitSupported()) {
+            if (sceneMode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
+                CameraInstance.GET().setAutoShutterSpeedLowLimit(-1);
+            else
+                CameraInstance.GET().setAutoShutterSpeedLowLimit(getPreferences().getMinShutterSpeed());
+        }
+        // Disable self timer
+        CameraInstance.GET().setSelfTimer(0);
+        // Force aspect ratio to 3:2
+        CameraInstance.GET().setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
+        CameraInstance.GET().setImageQuality(CameraEx.ParametersModifier.PICTURE_STORAGE_FMT_RAW);
+        // View visibility
 
-                /*if (getCamera().isLongExposureNoiseReductionSupported())
-                    getCamera().setLongExposureNoiseReduction(getP);*/
-                timeLog.logTime();
-            }
-        }).start();
-
+        /*if (getCamera().isLongExposureNoiseReductionSupported())
+            getCamera().setLongExposureNoiseReduction(getP);*/
+        timeLog.logTime();
 
     }
 
@@ -338,7 +360,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         Log.d(TAG, "RunMainThread: " + (Thread.currentThread() == Looper.getMainLooper().getThread()));
         if (!isBulbCapture()) {
 
-            CameraInstance.GET().cancleCapture();
+            CameraInstance.GET().cancelCapture();
             /*Caution.SetTrigger(131078, 1, false);
             avIndexHandler.update();
             Caution.SetMode(2, AvindexStore.getExternalMediaIds());

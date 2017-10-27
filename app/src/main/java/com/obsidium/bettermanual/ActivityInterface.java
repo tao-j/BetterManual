@@ -3,7 +3,6 @@ package com.obsidium.bettermanual;
 import android.os.Handler;
 import android.view.View;
 
-import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
 import com.sony.scalar.hardware.avio.DisplayManager;
 

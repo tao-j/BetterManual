@@ -11,9 +11,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
 
-import com.github.ma1co.openmemories.framework.ImageInfo;
-import com.sony.scalar.database.avindex.AvindexDatabase;
-import com.sony.scalar.database.avindex.AvindexDatabaseManager;
 import com.sony.scalar.media.AvindexContentInfo;
 import com.sony.scalar.media.MediaInfo;
 import com.sony.scalar.provider.AvindexStore;

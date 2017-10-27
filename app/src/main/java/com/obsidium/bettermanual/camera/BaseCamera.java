@@ -19,6 +19,9 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
         void onCameraOpen(boolean isOpen);
     }
 
+    protected CameraInstance.CameraHandler cameraHandler;
+
+
     CameraEx.AutoPictureReviewControl autoPictureReviewControl;
     CameraEvents cameraEventsListner;
     CameraEx.ShutterSpeedInfo shutterSpeedInfo;
@@ -154,14 +157,14 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     }
 
 
-    private Camera.Parameters getEmptyParameters()
+    protected Camera.Parameters getEmptyParameters()
     {
         return m_camera.createEmptyParameters();
     }
 
 
 
-    void setParameters(Camera.Parameters parameters)
+    protected void setParameters(Camera.Parameters parameters)
     {
         m_camera.getNormalCamera().setParameters(parameters);
     }
@@ -171,9 +174,7 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     }
 
     public void setExposureCompensation(int value) {
-        Camera.Parameters parameters = getEmptyParameters();
-        parameters.setExposureCompensation(value);
-        setParameters(parameters);
+        cameraHandler.sendMessage(cameraHandler.obtainMessage(CameraInstance.SET_EV,value,0));
     }
 
     public int getMaxExposureCompensation() {
@@ -211,10 +212,7 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
 
     public void setLongExposureNoiseReduction(boolean enable)
     {
-        Camera.Parameters parameters = getEmptyParameters();
-        CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
-        modifier.setLongExposureNR(enable);
-        setParameters(parameters);
+        cameraHandler.sendMessage(cameraHandler.obtainMessage(MSG_SET_LONGEXPONR,enable));
     }
 
     @Override
@@ -224,16 +222,12 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
 
     public void setFocusMode(String value)
     {
-        Camera.Parameters parameters = getEmptyParameters();
-        parameters.setFocusMode(value);
-        setParameters(parameters);
+        cameraHandler.sendMessage(cameraHandler.obtainMessage(MSG_SET_FOCUSMODE,value));
     }
 
     public void setSceneMode(String value)
     {
-        Camera.Parameters parameters = getEmptyParameters();
-        parameters.setSceneMode(value);
-        setParameters(parameters);
+        cameraHandler.sendMessage(cameraHandler.obtainMessage(MSG_SET_SCENEMODE,value));
     }
 
     public String getSceneMode()
@@ -243,10 +237,7 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
 
     public void setDriveMode(String value)
     {
-        Camera.Parameters parameters = getEmptyParameters();
-        CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
-        modifier.setDriveMode(value);
-        setParameters(parameters);
+        cameraHandler.sendMessage(cameraHandler.obtainMessage(MSG_SET_DRIVEMODE,value));
     }
 
     public String getDriveMode()
@@ -256,26 +247,18 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
 
     public void setImageAspectRatio(String value)
     {
-        Camera.Parameters parameters = getEmptyParameters();
-        CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
-        modifier.setImageAspectRatio(value);
-        setParameters(parameters);
+        cameraHandler.sendMessage(cameraHandler.obtainMessage(MSG_SET_IMAGEASPECTRATIO,value));
+
     }
 
     public void setImageQuality(String value)
     {
-        Camera.Parameters parameters = getEmptyParameters();
-        CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
-        modifier.setPictureStorageFormat(value);
-        setParameters(parameters);
+        cameraHandler.sendMessage(cameraHandler.obtainMessage(MSG_SET_IMAGEQUALITY,value));
     }
 
     public void setBurstDriveSpeed(String value)
     {
-        Camera.Parameters parameters = getEmptyParameters();
-        CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
-        modifier.setBurstDriveSpeed(value);
-        setParameters(parameters);
+        cameraHandler.sendMessage(cameraHandler.obtainMessage(MSG_SET_BURSTDRIVESPEED,value));
     }
 
     public String getBurstDriveSpeed()
@@ -290,10 +273,7 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
 
     public void setAutoShutterSpeedLowLimit(int value)
     {
-        Camera.Parameters parameters = getEmptyParameters();
-        CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
-        modifier.setAutoShutterSpeedLowLimit(value);
-        setParameters(parameters);
+        cameraHandler.sendMessage(cameraHandler.obtainMessage(SET_AUTO_SHUTTER_SPEED_LOW_LIMIT,value,0));
     }
 
     public int getAutoShutterSpeedLowLimit()
@@ -303,10 +283,7 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
 
     public void setSelfTimer(int value)
     {
-        Camera.Parameters parameters = getEmptyParameters();
-        CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
-        modifier.setSelfTimer(value);
-        setParameters(parameters);
+        cameraHandler.sendMessage(cameraHandler.obtainMessage(SET_SELF_TIMER,value,0));
     }
 
     public List<Integer> getSupportedISOSensitivities()
@@ -321,10 +298,7 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
 
     public void setISOSensitivity(int value)
     {
-        Camera.Parameters parameters = getEmptyParameters();
-        CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
-        modifier.setISOSensitivity(value);
-        setParameters(parameters);
+        cameraHandler.sendMessage(cameraHandler.obtainMessage(SET_ISO,value,0));
     }
 
     public void setPreviewMagnification(int factor, Pair position)
@@ -342,19 +316,19 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     }
 
     public void decrementShutterSpeed(){
-        m_camera.decrementShutterSpeed();
+        cameraHandler.sendMessage(cameraHandler.obtainMessage(DECREASE_SHUTTER));
     }
     public void incrementShutterSpeed()
     {
-        m_camera.incrementShutterSpeed();
+        cameraHandler.sendMessage(cameraHandler.obtainMessage(INCREASE_SHUTTER));
     }
 
     public void decrementAperture(){
-        m_camera.decrementAperture();
+        cameraHandler.sendMessage(cameraHandler.obtainMessage(DECREASE_APERTURE));
     }
 
     public void incrementAperture(){
-        m_camera.incrementAperture();
+        cameraHandler.sendMessage(cameraHandler.obtainMessage(INCREASE_APERTURE));
     }
 
 
@@ -382,10 +356,7 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
 
     @Override
     public void setImageStabilisation(String enable) {
-        Camera.Parameters parameters = getEmptyParameters();
-        CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
-        modifier.setAntiHandBlurMode(enable);
-        setParameters(parameters);
+        cameraHandler.sendMessage(cameraHandler.obtainMessage(MSG_SET_IMAGESTABILISATION,enable));
     }
 
     @Override

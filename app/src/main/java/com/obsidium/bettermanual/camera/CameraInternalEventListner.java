@@ -1,7 +1,6 @@
 package com.obsidium.bettermanual.camera;
 
 import android.hardware.Camera;
-import android.util.Log;
 import android.util.Pair;
 
 import com.sony.scalar.hardware.CameraEx;
@@ -75,11 +74,17 @@ public class CameraInternalEventListner extends BaseCamera implements CameraEx.A
     protected void removeListners()
     {
         m_camera.setApertureChangeListener(null);
+        this.apertureChangeListener = null;
         m_camera.setShutterSpeedChangeListener(null);
+        this.shutterSpeedChangeListener = null;
         m_camera.setProgramLineRangeOverListener(null);
+        this.programLineRangeOverListener = null;
         m_camera.setFocusLightStateListener(null);
+        this.focusLightStateListener = null;
         m_camera.setAutoISOSensitivityListener(null);
+        this.autoISOSensitivityListener = null;
         m_camera.setSettingChangedListener(null);
+        this.settingChangedListener = null;
 
         m_camera.setEquipmentCallback(null);
         m_camera.setFlashChargingStateListener(null);
@@ -94,11 +99,14 @@ public class CameraInternalEventListner extends BaseCamera implements CameraEx.A
         m_camera.setPowerZoomListener(null);
         m_camera.setZoomChangeListener(null);
         m_camera.setShutterListener(null);
+        this.shutterListener = null;
 
         m_camera.setFocusAreaListener(null);
         m_camera.setPreviewMagnificationListener(null);
+        this.previewMagnificationListener = null;
         m_camera.setAutoApscModeListener(null);
         m_camera.setFocusDriveListener(null);
+        this.focusDriveListener = null;
     }
 
     @Override

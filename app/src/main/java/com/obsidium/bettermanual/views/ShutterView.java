@@ -4,13 +4,13 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 
-import com.obsidium.bettermanual.CameraUiInterface;
 import com.obsidium.bettermanual.CameraUtil;
 import com.obsidium.bettermanual.MainActivity;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
 import com.obsidium.bettermanual.capture.CaptureModeBulb;
+import com.obsidium.bettermanual.layout.CameraUiInterface;
 
 public class ShutterView extends BaseTextView implements CaptureSession.CaptureDoneEvent {
 

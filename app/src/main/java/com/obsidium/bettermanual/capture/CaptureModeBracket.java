@@ -3,13 +3,13 @@ package com.obsidium.bettermanual.capture;
 import android.util.Log;
 import android.util.Pair;
 
-import com.obsidium.bettermanual.CameraUiInterface;
 import com.obsidium.bettermanual.CameraUtil;
 import com.obsidium.bettermanual.KeyEvents;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
 import com.obsidium.bettermanual.camera.ShutterSpeedValue;
+import com.obsidium.bettermanual.layout.CameraUiInterface;
 import com.obsidium.bettermanual.views.ExposureModeView;
 import com.sony.scalar.hardware.CameraEx;
 
@@ -182,6 +182,8 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
     @Override
     public void onShutterSpeedChange(CameraEx.ShutterSpeedInfo shutterSpeedInfo, CameraEx cameraEx)
     {
+        if (cameraUiInterface.getShutter() == null)
+            return;
         Log.d(TAG, "onShutterSpeedChange");
         cameraUiInterface.getShutter().updateShutterSpeed(shutterSpeedInfo.currentShutterSpeed_n, shutterSpeedInfo.currentShutterSpeed_d);
         if (m_bracketPicCount > 0) {

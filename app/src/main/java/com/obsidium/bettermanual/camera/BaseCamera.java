@@ -19,7 +19,7 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
         void onCameraOpen(boolean isOpen);
     }
 
-    protected CameraInstance.CameraHandler cameraHandler;
+    protected CameraHandler cameraHandler;
 
 
     CameraEx.AutoPictureReviewControl autoPictureReviewControl;
@@ -40,6 +40,11 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     CameraEx.ShutterListener shutterListener;
     CameraEx.FocusLightStateListener focusLightStateListener;
     CameraEx.SettingChangedListener settingChangedListener;
+
+    public CameraEx getCameraEx()
+    {
+        return m_camera;
+    }
 
 
     public CameraEx.AutoPictureReviewControl getAutoPictureReviewControls()

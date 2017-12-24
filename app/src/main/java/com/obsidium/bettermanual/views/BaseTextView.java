@@ -5,8 +5,8 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.obsidium.bettermanual.CameraUiInterface;
 import com.obsidium.bettermanual.OnSwipeTouchListener;
+import com.obsidium.bettermanual.layout.CameraUiInterface;
 
 public abstract class BaseTextView extends TextView implements DialViewInterface
 {

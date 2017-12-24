@@ -1,4 +1,4 @@
-package com.obsidium.bettermanual;
+package com.obsidium.bettermanual.layout;
 
 import android.content.Context;
 import android.view.View;
@@ -6,6 +6,11 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.obsidium.bettermanual.ActivityInterface;
+import com.obsidium.bettermanual.CameraUtil;
+import com.obsidium.bettermanual.KeyEvents;
+import com.obsidium.bettermanual.MainActivity;
+import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.sony.scalar.hardware.CameraEx;
 

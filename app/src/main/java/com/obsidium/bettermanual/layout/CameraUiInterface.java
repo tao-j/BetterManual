@@ -1,5 +1,6 @@
-package com.obsidium.bettermanual;
+package com.obsidium.bettermanual.layout;
 
+import com.obsidium.bettermanual.ActivityInterface;
 import com.obsidium.bettermanual.views.ApertureView;
 import com.obsidium.bettermanual.views.DriveMode;
 import com.obsidium.bettermanual.views.ExposureModeView;

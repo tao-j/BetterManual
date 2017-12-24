@@ -1,4 +1,4 @@
-package com.obsidium.bettermanual;
+package com.obsidium.bettermanual.layout;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -9,6 +9,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.obsidium.bettermanual.ActivityInterface;
+import com.obsidium.bettermanual.MainActivity;
+import com.obsidium.bettermanual.R;
+import com.obsidium.bettermanual.TimeLog;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.capture.CaptureModeBracket;
 import com.obsidium.bettermanual.capture.CaptureModeTimelapse;

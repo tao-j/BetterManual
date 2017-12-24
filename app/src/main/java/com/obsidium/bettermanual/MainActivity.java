@@ -15,6 +15,11 @@ import android.widget.LinearLayout;
 import com.github.ma1co.pmcademo.app.BaseActivity;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
+import com.obsidium.bettermanual.layout.BaseLayout;
+import com.obsidium.bettermanual.layout.CameraUiFragment;
+import com.obsidium.bettermanual.layout.ImageFragment;
+import com.obsidium.bettermanual.layout.MinShutterFragment;
+import com.obsidium.bettermanual.layout.PreviewMagnificationFragment;
 import com.sony.scalar.hardware.CameraEx;
 
 
@@ -50,7 +55,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
 
     private BaseLayout currentLayout;
 
-    private AvIndexHandler avIndexHandler;
+    private AvIndexManager avIndexManager;
 
     //Caution caution;
 
@@ -88,7 +93,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
 
         surfaceViewHolder = (FrameLayout) findViewById(R.id.surfaceView);
         //surfaceView.setOnTouchListener(new CameraUiFragment.SurfaceSwipeTouchListener(getContext()));
-        avIndexHandler = new AvIndexHandler(getContentResolver());
+        avIndexManager = new AvIndexManager(getContentResolver());
 
         layoutHolder = (LinearLayout)findViewById(R.id.fragment_holder);
         preferences = new Preferences(getApplicationContext());
@@ -99,16 +104,10 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     protected void onResume() {
         Log.d(TAG,"onResume");
         super.onResume();
-        /*caution = new Caution();
-        caution.setCallback(new Caution.CautionCallback() {
-            @Override
-            public void onCallback(int[] ints) {
-                Log.d(TAG, "onCautionCallback");
-            }
-        });*/
-        registerReceiver(avIndexHandler, avIndexHandler.AVAILABLE_SIZE_INTENTS);
-        registerReceiver(avIndexHandler, avIndexHandler.MEDIA_INTENTS);
-        avIndexHandler.onResume(getApplicationContext());
+
+        registerReceiver(avIndexManager, avIndexManager.AVAILABLE_SIZE_INTENTS);
+        registerReceiver(avIndexManager, avIndexManager.MEDIA_INTENTS);
+        avIndexManager.onResume(getApplicationContext());
         addSurfaceView();
 
         CameraInstance.GET().setCameraEventsListner(MainActivity.this);
@@ -120,9 +119,8 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         Log.d(TAG,"onPause");
         removeSurfaceView();
         super.onPause();
-        /*caution.setCallback(null);*/
-        unregisterReceiver(avIndexHandler);
-        avIndexHandler.onPause(getApplicationContext());
+        unregisterReceiver(avIndexManager);
+        avIndexManager.onPause(getApplicationContext());
 
         saveDefaults();
         CameraInstance.GET().closeCamera();
@@ -240,8 +238,8 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     }
 
     @Override
-    public AvIndexHandler getAvIndexHandler() {
-        return avIndexHandler;
+    public AvIndexManager getAvIndexManager() {
+        return avIndexManager;
     }
 
     public void setCaptureDoneEventListner(CaptureSession.CaptureDoneEvent eventListner)

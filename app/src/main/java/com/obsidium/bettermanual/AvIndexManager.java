@@ -5,14 +5,11 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Handler;
 import android.util.Log;
 
 import com.sony.scalar.media.AvindexContentInfo;
-import com.sony.scalar.media.MediaInfo;
 import com.sony.scalar.provider.AvindexStore;
 
 /**
@@ -32,9 +29,9 @@ import com.sony.scalar.provider.AvindexStore;
         Nothing to log
      */
 
-public class AvIndexHandler extends BroadcastReceiver
+public class AvIndexManager extends BroadcastReceiver
 {
-    private final String TAG = AvIndexHandler.class.getSimpleName();
+    private final String TAG = AvIndexManager.class.getSimpleName();
 
     private ContentResolver contentResolver;
     private Cursor cursor;
@@ -48,27 +45,10 @@ public class AvIndexHandler extends BroadcastReceiver
     public IntentFilter MEDIA_INTENTS = new IntentFilter();
     public IntentFilter AVAILABLE_SIZE_INTENTS = new IntentFilter("com.sony.scalar.providers.avindex.action.AVINDEX_MEDIA_AVAILABLE_SIZE_CHANGED");
 
-    private ContentObserver contentObserver = new ContentObserver(new Handler()) {
-        @Override
-        public void onChange(boolean selfChange) {
-            super.onChange(selfChange);
-        }
-    };
-
-    public AvIndexHandler(ContentResolver contentResolver)
+    public AvIndexManager(ContentResolver contentResolver)
     {
         this.contentResolver = contentResolver;
         mediaStorageUri = AvindexStore.Images.Media.getContentUri(AvindexStore.getExternalMediaIds()[0]);
-        MEDIA_INTENTS.addAction("android.intent.action.MEDIA_CHECKING");
-        MEDIA_INTENTS.addAction("android.intent.action.MEDIA_MOUNTED");
-        MEDIA_INTENTS.addAction("android.intent.action.MEDIA_NOFS");
-        MEDIA_INTENTS.addAction("android.intent.action.MEDIA_UNMOUNTABLE");
-        MEDIA_INTENTS.addAction("android.intent.action.MEDIA_UNMOUNTED");
-        MEDIA_INTENTS.addAction("android.intent.action.MEDIA_REMOVED");
-        MEDIA_INTENTS.addDataScheme("file");
-         /*AvindexStore.loadMedia(AvindexStore.getExternalMediaIds()[0], AvindexStore.CONTENT_TYPE_LOAD_STILL);
-        AvindexStore.Images.waitAndUpdateDatabase(getContext().getContentResolver(), AvindexStore.getExternalMediaIds()[0]);*/
-
     }
 
     public void onResume(Context context)
@@ -78,7 +58,7 @@ public class AvIndexHandler extends BroadcastReceiver
 
     private Cursor getCursorFromUri(Uri uri)
     {
-        return contentResolver.query(uri, AvindexStore.Images.Media.ALL_COLUMNS, null, null,null);
+        return contentResolver.query(uri, CONTENTS_QUERY_PROJECTION, null, null,"content_created_utc_date_time DESC");
     }
 
     public void onPause(Context context)
@@ -90,6 +70,22 @@ public class AvIndexHandler extends BroadcastReceiver
     public String getData()
     {
         return cursor.getString(cursor.getColumnIndexOrThrow("_data"));
+    }
+
+    public boolean existsJpeg()
+    {
+        if (Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow("exist_jpeg")))> 0)
+            return true;
+        else
+            return false;
+    }
+
+    public boolean existsRaw()
+    {
+        if (Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow("exist_raw")))> 0)
+            return true;
+        else
+            return false;
     }
 
     public String getId()
@@ -125,14 +121,14 @@ public class AvIndexHandler extends BroadcastReceiver
         if (cursor != null && cursor.isClosed())
             cursor.close();
         cursor = getCursorFromUri(mediaStorageUri);*/
-        AvindexStore.Images.waitAndUpdateDatabase(contentResolver, AvindexStore.getExternalMediaIds()[0]);
+        /*AvindexStore.Images.waitAndUpdateDatabase(contentResolver, AvindexStore.getExternalMediaIds()[0]);
         AvindexStore.loadMedia(AvindexStore.getExternalMediaIds()[0], 1);
         AvindexStore.Images.waitAndUpdateDatabase(contentResolver, AvindexStore.getExternalMediaIds()[0]);
         AvindexStore.waitLoadMediaComplete(AvindexStore.getExternalMediaIds()[0]);
         AvindexStore.cancelWaitLoadMediaComplete(AvindexStore.getExternalMediaIds()[0]);
         MediaInfo info = AvindexStore.getMediaInfo(AvindexStore.getExternalMediaIds()[0]);
         String state = android.os.Environment.getExternalStorageState();
-        int remaining = AvindexStore.Images.getAvailableCount(AvindexStore.getExternalMediaIds()[0]);
+        int remaining = AvindexStore.Images.getAvailableCount(AvindexStore.getExternalMediaIds()[0]);*/
         cursor = getCursorFromUri(mediaStorageUri);
         cursor.moveToFirst();
     }

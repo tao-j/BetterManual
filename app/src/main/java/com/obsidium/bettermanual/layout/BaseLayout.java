@@ -1,8 +1,11 @@
-package com.obsidium.bettermanual;
+package com.obsidium.bettermanual.layout;
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.widget.RelativeLayout;
+
+import com.obsidium.bettermanual.ActivityInterface;
+import com.obsidium.bettermanual.KeyEvents;
 
 /**
  * Created by KillerInk on 27.09.2017.

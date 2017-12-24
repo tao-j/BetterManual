@@ -1,8 +1,8 @@
 package com.obsidium.bettermanual.capture;
 
-import com.obsidium.bettermanual.CameraUiInterface;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
+import com.obsidium.bettermanual.layout.CameraUiInterface;
 
 
 public abstract class CaptureMode implements CaptureModeInterface

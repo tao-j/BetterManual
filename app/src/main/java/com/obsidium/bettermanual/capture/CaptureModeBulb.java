@@ -2,11 +2,11 @@ package com.obsidium.bettermanual.capture;
 
 import android.util.Log;
 
-import com.obsidium.bettermanual.CameraUiInterface;
 import com.obsidium.bettermanual.KeyEvents;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
+import com.obsidium.bettermanual.layout.CameraUiInterface;
 
 /**
  * Created by KillerInk on 11.10.2017.

@@ -1,4 +1,4 @@
-package com.obsidium.bettermanual;
+package com.obsidium.bettermanual.layout;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -7,6 +7,9 @@ import android.net.Uri;
 import android.util.Log;
 import android.widget.FrameLayout;
 
+import com.obsidium.bettermanual.ActivityInterface;
+import com.obsidium.bettermanual.MainActivity;
+import com.obsidium.bettermanual.R;
 import com.sony.scalar.graphics.OptimizedImage;
 import com.sony.scalar.graphics.OptimizedImageFactory;
 import com.sony.scalar.media.AvindexContentInfo;
@@ -27,16 +30,14 @@ public class ImageFragment extends BaseLayout {
     private final float scaleStep = 0.2f;
     private final float maxScaleFactor = 8;
 
-
-
     public ImageFragment(Context context,ActivityInterface activityInterface) {
         super(context,activityInterface);
         inflateLayout(R.layout.image_fragment);
-
         surfaceViewParent = (FrameLayout) findViewById(R.id.surfaceParentView);
         imageView = new OptimizedImageView(getContext());
         surfaceViewParent.addView(imageView);
         imageView.setDisplayPosition(new Point(0,0), OptimizedImageView.PositionType.POS_TYPE_NONE);
+        Log.d(TAG, "ImageCount:" + activityInterface.getAvIndexManager().getCount());
         loadOptimizedImg();
 
     }
@@ -57,17 +58,18 @@ public class ImageFragment extends BaseLayout {
 
     private void loadOptimizedImg()
     {
-        if (activityInterface.getAvIndexHandler().getPosition() > -1 && activityInterface.getAvIndexHandler().getCount() > 0)
+
+        if (activityInterface.getAvIndexManager().getPosition() > -1 && activityInterface.getAvIndexManager().getCount() > 0)
         {
             Log.d(TAG,"MEDIA");
 
-            //logCursor(mediaCursor);
-            String data = activityInterface.getAvIndexHandler().getData();
-            String id = activityInterface.getAvIndexHandler().getId();
+            String data = activityInterface.getAvIndexManager().getData();
+            boolean israw = activityInterface.getAvIndexManager().existsRaw();
+            boolean isjpeg = activityInterface.getAvIndexManager().existsJpeg();
 
             closeImageInfo();
 
-            info = activityInterface.getAvIndexHandler().getContentInfo();
+            info = activityInterface.getAvIndexManager().getContentInfo();
 
             OptimizedImageFactory.Options options = new OptimizedImageFactory.Options();
             options.bBasicInfo = false;
@@ -189,7 +191,7 @@ public class ImageFragment extends BaseLayout {
 
     @Override
     public boolean onLeftKeyUp() {
-        activityInterface.getAvIndexHandler().moveToPrevious();
+        activityInterface.getAvIndexManager().moveToPrevious();
         loadOptimizedImg();
         return false;
     }
@@ -201,7 +203,7 @@ public class ImageFragment extends BaseLayout {
 
     @Override
     public boolean onRightKeyUp() {
-        activityInterface.getAvIndexHandler().moveToNext();
+        activityInterface.getAvIndexManager().moveToNext();
         loadOptimizedImg();
         return false;
     }

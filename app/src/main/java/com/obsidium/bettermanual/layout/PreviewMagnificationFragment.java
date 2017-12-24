@@ -1,4 +1,4 @@
-package com.obsidium.bettermanual;
+package com.obsidium.bettermanual.layout;
 
 import android.content.Context;
 import android.util.Log;
@@ -6,6 +6,10 @@ import android.util.Pair;
 import android.view.View;
 import android.widget.TextView;
 
+import com.obsidium.bettermanual.ActivityInterface;
+import com.obsidium.bettermanual.MainActivity;
+import com.obsidium.bettermanual.OnSwipeTouchListener;
+import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.views.FocusScaleView;
 import com.obsidium.bettermanual.views.PreviewNavView;

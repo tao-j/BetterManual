@@ -25,19 +25,6 @@ public class ApertureView extends BaseTextView implements CameraEx.ApertureChang
         return getResources().getString(R.string.view_aperture_navigation);
     }
 
-    private class ApertureSetRunner implements Runnable
-    {
-        private int direction;
-        public ApertureSetRunner(int direction)
-        {
-            this.direction = direction;
-        }
-        @Override
-        public void run() {
-
-        }
-    }
-
     // Aperture
     private boolean         m_notifyOnNextApertureChange;
     private boolean         m_haveApertureControl;

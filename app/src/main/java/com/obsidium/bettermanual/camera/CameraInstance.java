@@ -1,9 +1,7 @@
 package com.obsidium.bettermanual.camera;
 
 import android.hardware.Camera;
-import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -35,10 +33,8 @@ public class CameraInstance extends CameraInternalEventListner implements  Camer
 
     public void initHandler(Looper looper)
     {
-        cameraHandler = new CameraHandler(looper);
+        cameraHandler = new CameraHandler(looper,this);
     }
-
-
 
 
     public void startCamera() {
@@ -121,128 +117,7 @@ public class CameraInstance extends CameraInternalEventListner implements  Camer
     }*/
 
 
-    class CameraHandler extends Handler
-    {
-
-        public CameraHandler(Looper looper)
-        {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what)
-            {
-                case MSG_INIT_CAMERA:
-                    initCamera();
-                    break;
-                case CAPTURE_IMAGE:
-                    //hw shutter button must get stopped else burstableTakePicture does not trigger
-                    m_camera.stopDirectShutter(new CameraEx.DirectShutterStoppedCallback() {
-                        @Override
-                        public void onShutterStopped(CameraEx cameraEx) {
-                            m_camera.burstableTakePicture();
-                        }
-                    });
-                    break;
-                case CANCEL_CAPTURE:
-                    m_camera.cancelTakePicture();
-                    break;
-                case START_PREVIEW:
-                    m_camera.getNormalCamera().startPreview();
-                    break;
-                case STOP_PREVIEW:
-                    m_camera.getNormalCamera().stopPreview();
-                    break;
-                case SET_EV:
-                    Camera.Parameters parameters = getEmptyParameters();
-                    parameters.setExposureCompensation(msg.arg1);
-                    setParameters(parameters);
-                    break;
-                case MSG_SET_LONGEXPONR:
-                    parameters = getEmptyParameters();
-                    CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
-                    modifier.setLongExposureNR((Boolean) msg.obj);
-                    setParameters(parameters);
-                    break;
-                case MSG_SET_FOCUSMODE:
-                    parameters = getEmptyParameters();
-                    parameters.setFocusMode((String)msg.obj);
-                    setParameters(parameters);
-                    break;
-                case MSG_SET_SCENEMODE:
-                    parameters = getEmptyParameters();
-                    parameters.setSceneMode((String)msg.obj);
-                    setParameters(parameters);
-                    break;
-                case MSG_SET_DRIVEMODE:
-                    parameters = getEmptyParameters();
-                    modifier = m_camera.createParametersModifier(parameters);
-                    modifier.setDriveMode((String)msg.obj);
-                    setParameters(parameters);
-                    break;
-                case MSG_SET_IMAGEASPECTRATIO:
-                    parameters = getEmptyParameters();
-                    modifier = m_camera.createParametersModifier(parameters);
-                    modifier.setImageAspectRatio((String)msg.obj);
-                    setParameters(parameters);
-                    break;
-                case MSG_SET_IMAGEQUALITY:
-                    parameters = getEmptyParameters();
-                    modifier = m_camera.createParametersModifier(parameters);
-                    modifier.setPictureStorageFormat((String)msg.obj);
-                    setParameters(parameters);
-                    break;
-                case MSG_SET_BURSTDRIVESPEED:
-                    parameters = getEmptyParameters();
-                    modifier = m_camera.createParametersModifier(parameters);
-                    modifier.setBurstDriveSpeed((String)msg.obj);
-                    setParameters(parameters);
-                    break;
-                case SET_AUTO_SHUTTER_SPEED_LOW_LIMIT:
-                    parameters = getEmptyParameters();
-                    modifier = m_camera.createParametersModifier(parameters);
-                    modifier.setAutoShutterSpeedLowLimit(msg.arg1);
-                    setParameters(parameters);
-                    break;
-                case SET_SELF_TIMER:
-                    parameters = getEmptyParameters();
-                    modifier = m_camera.createParametersModifier(parameters);
-                    modifier.setSelfTimer(msg.arg1);
-                    setParameters(parameters);
-                    break;
-                case SET_ISO:
-                    parameters = getEmptyParameters();
-                    modifier = m_camera.createParametersModifier(parameters);
-                    modifier.setISOSensitivity(msg.arg1);
-                    setParameters(parameters);
-                    break;
-                case INCREASE_SHUTTER:
-                        m_camera.incrementShutterSpeed();
-                    break;
-                case DECREASE_SHUTTER:
-                    m_camera.decrementShutterSpeed();
-                    break;
-                case INCREASE_APERTURE:
-                    m_camera.incrementAperture();
-                    break;
-                case DECREASE_APERTURE:
-                    m_camera.decrementAperture();
-                    break;
-                case MSG_SET_IMAGESTABILISATION:
-                    parameters = getEmptyParameters();
-                    modifier = m_camera.createParametersModifier(parameters);
-                    modifier.setAntiHandBlurMode((String) msg.obj);
-                    setParameters(parameters);
-                    break;
-
-                default:
-                    super.handleMessage(msg);
-            }
-        }
-    }
-
-    private void initCamera()
+    public void initCamera()
     {
         autoPictureReviewControl = new CameraEx.AutoPictureReviewControl();
         m_camera.setAutoPictureReviewControl(getAutoPictureReviewControls());

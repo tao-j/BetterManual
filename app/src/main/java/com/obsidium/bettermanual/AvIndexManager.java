@@ -31,7 +31,22 @@ import com.sony.scalar.provider.AvindexStore;
 
 public class AvIndexManager extends BroadcastReceiver
 {
-    private final String TAG = AvIndexManager.class.getSimpleName();
+
+    public static boolean isSupported()
+    {
+        try
+        {
+            Class avindex =  Class.forName("com.sony.scalar.provider.AvindexStore");
+            return true;
+        }
+        catch (ClassNotFoundException ex)
+        {
+            Log.e(TAG, ex.getMessage());
+            return false;
+        }
+    }
+
+    private static final String TAG = AvIndexManager.class.getSimpleName();
 
     private ContentResolver contentResolver;
     private Cursor cursor;

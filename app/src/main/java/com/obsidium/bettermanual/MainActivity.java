@@ -93,7 +93,8 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
 
         surfaceViewHolder = (FrameLayout) findViewById(R.id.surfaceView);
         //surfaceView.setOnTouchListener(new CameraUiFragment.SurfaceSwipeTouchListener(getContext()));
-        avIndexManager = new AvIndexManager(getContentResolver());
+        if (AvIndexManager.isSupported())
+            avIndexManager = new AvIndexManager(getContentResolver());
 
         layoutHolder = (LinearLayout)findViewById(R.id.fragment_holder);
         preferences = new Preferences(getApplicationContext());
@@ -105,9 +106,11 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         Log.d(TAG,"onResume");
         super.onResume();
 
-        registerReceiver(avIndexManager, avIndexManager.AVAILABLE_SIZE_INTENTS);
-        registerReceiver(avIndexManager, avIndexManager.MEDIA_INTENTS);
-        avIndexManager.onResume(getApplicationContext());
+        if (avIndexManager != null) {
+            registerReceiver(avIndexManager, avIndexManager.AVAILABLE_SIZE_INTENTS);
+            registerReceiver(avIndexManager, avIndexManager.MEDIA_INTENTS);
+            avIndexManager.onResume(getApplicationContext());
+        }
         addSurfaceView();
 
         CameraInstance.GET().setCameraEventsListner(MainActivity.this);
@@ -119,8 +122,10 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         Log.d(TAG,"onPause");
         removeSurfaceView();
         super.onPause();
-        unregisterReceiver(avIndexManager);
-        avIndexManager.onPause(getApplicationContext());
+        if (avIndexManager != null) {
+            unregisterReceiver(avIndexManager);
+            avIndexManager.onPause(getApplicationContext());
+        }
 
         saveDefaults();
         CameraInstance.GET().closeCamera();
@@ -181,6 +186,8 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
 
     @Override
     public void loadFragment(int fragment) {
+        if (fragment == FRAGMENT_IMAGEVIEW && avIndexManager == null)
+            return;
         if (currentLayout != null) {
             currentLayout.Destroy();
             layoutHolder.removeAllViews();

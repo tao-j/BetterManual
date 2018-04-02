@@ -3,6 +3,7 @@ package com.obsidium.bettermanual.views;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 
 import com.obsidium.bettermanual.CameraUtil;
 import com.obsidium.bettermanual.MainActivity;
@@ -59,7 +60,6 @@ public class ShutterView extends BaseTextView implements CaptureSession.CaptureD
             CameraInstance.GET().decrementShutterSpeed();
         else
             CameraInstance.GET().incrementShutterSpeed();
-        //cameraUiInterface.getActivityInterface().getBackHandler().post(new ShutterSetRunner(distance));
     }
 
     @Override
@@ -88,15 +88,6 @@ public class ShutterView extends BaseTextView implements CaptureSession.CaptureD
     private void stopBulbCapture() {
         cameraUiInterface.getActivityInterface().cancelBulbCapture();
         Log.d(TAG, "Stop BULB");
-    }
-
-    private void startBulbCapture()
-    {
-        captureModeBulb.prepare();
-        cameraUiInterface.getActivityInterface().setBulbCapture(true);
-        cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(this);
-        CameraInstance.GET().takePicture();
-        Log.d(TAG, "Start BULB");
     }
 
 

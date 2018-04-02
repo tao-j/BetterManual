@@ -350,7 +350,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
             m_tvShutter = new ShutterView(getContext());
             m_tvShutter.setTextSize((int)getResources().getDimension(R.dimen.textSize));
             m_tvShutter.setLayoutParams(params);
-            m_tvShutter.setOnTouchListener(m_tvShutter.getSwipeTouchListner());
+            m_tvShutter.setOnTouchListener(m_tvShutter.getSwipeTouchListner(CameraUiFragment.this.getContext()));
             m_tvShutter.setCameraUiInterface(CameraUiFragment.this);
             dialViews.add(m_tvShutter);
             bottomHolder.addView(m_tvShutter);
@@ -359,7 +359,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
 
             aperture = new ApertureView(getContext());
             aperture.setTextSize((int)getResources().getDimension(R.dimen.textSize));
-            aperture.setOnTouchListener(aperture.getSwipeTouchListner());
+            aperture.setOnTouchListener(aperture.getSwipeTouchListner(CameraUiFragment.this.getContext()));
             aperture.setCameraUiInterface(CameraUiFragment.this);
             aperture.setLayoutParams(params);
             dialViews.add(aperture);
@@ -370,7 +370,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
 
             iso = new IsoView(getContext());
             iso.setTextSize((int)getResources().getDimension(R.dimen.textSize));
-            iso.setOnTouchListener(iso.getSwipeTouchListner());
+            iso.setOnTouchListener(iso.getSwipeTouchListner(CameraUiFragment.this.getContext()));
             iso.setCameraUiInterface(CameraUiFragment.this);
             iso.setLayoutParams(params);
             dialViews.add(iso);
@@ -381,7 +381,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
 
             evCompensation = new EvView(getContext());
             evCompensation.setTextSize((int)getResources().getDimension(R.dimen.textSize));
-            evCompensation.setOnTouchListener(evCompensation.getSwipeTouchListner());
+            evCompensation.setOnTouchListener(evCompensation.getSwipeTouchListner(CameraUiFragment.this.getContext()));
             evCompensation.setCameraUiInterface(CameraUiFragment.this);
             evCompensation.setLayoutParams(params);
             dialViews.add(evCompensation);

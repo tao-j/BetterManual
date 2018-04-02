@@ -25,9 +25,9 @@ public abstract class BaseTextView extends TextView implements DialViewInterface
         super(context, attrs, defStyle);
     }
 
-    public SwipeTouchListener getSwipeTouchListner()
+    public SwipeTouchListener getSwipeTouchListner(Context context)
     {
-        return new SwipeTouchListener(getContext());
+        return new SwipeTouchListener(context);
     }
 
     public void setCameraUiInterface(CameraUiInterface cameraUiInterface)

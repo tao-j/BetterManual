@@ -48,6 +48,6 @@ android.applicationVariants.all { variant ->
 }
 
 dependencies {
-    provided 'com.github.ma1co.OpenMemories-Framework:stubs:-SNAPSHOT'
-    compile 'com.github.ma1co.OpenMemories-Framework:framework:-SNAPSHOT'
+    compileOnly 'com.github.ma1co.OpenMemories-Framework:stubs:-SNAPSHOT'
+    implementation 'com.github.ma1co.OpenMemories-Framework:framework:-SNAPSHOT'
 }

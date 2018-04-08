@@ -678,6 +678,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
     @Override
     public boolean onDownKeyUp()
     {
+        setDialMode(1);
         return true;
     }
 

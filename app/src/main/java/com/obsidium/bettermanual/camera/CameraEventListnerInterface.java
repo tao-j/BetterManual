@@ -12,9 +12,6 @@ interface CameraEventListnerInterface
     CameraEx.ShutterSpeedInfo getShutterSpeedInfo();
 
     void setPreviewAnalizeListener(CameraEx.PreviewAnalizeListener previewAnalizeListener);
-    void setAutoISOSensitivityListener(CameraEx.AutoISOSensitivityListener autoISOSensitivityListener);
-    void setShutterSpeedChangeListener(CameraEx.ShutterSpeedChangeListener shutterSpeedChangeListener);
-    void setApertureChangeListener(CameraEx.ApertureChangeListener apertureChangeListener);
     void setProgramLineRangeOverListener(CameraEx.ProgramLineRangeOverListener programLineRangeOverListener);
     void setFocusDriveListener(CameraEx.FocusDriveListener focusDriveListener);
     void setPreviewMagnificationListener(CameraEx.PreviewMagnificationListener previewMagnificationListener);

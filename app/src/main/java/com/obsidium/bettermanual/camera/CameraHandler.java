@@ -13,7 +13,7 @@ import java.lang.ref.WeakReference;
  * Created by KillerInk on 23.12.2017.
  */
 
-class CameraHandler extends Handler
+public class CameraHandler extends Handler
 {
 
     WeakReference<CameraInstance> cameraInstanceWeakReference;

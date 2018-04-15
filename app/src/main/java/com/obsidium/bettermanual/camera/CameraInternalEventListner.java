@@ -10,8 +10,8 @@ import com.sony.scalar.meta.FaceInfo;
  * Created by KillerInk on 29.09.2017.
  */
 
-public class CameraInternalEventListner extends BaseCamera implements CameraEx.ApertureChangeListener, CameraEx.ShutterSpeedChangeListener,
-        CameraEx.ProgramLineRangeOverListener, CameraEx.FocusLightStateListener, CameraEx.AutoISOSensitivityListener,
+public class CameraInternalEventListner extends BaseCamera implements
+        CameraEx.ProgramLineRangeOverListener, CameraEx.FocusLightStateListener,
         CameraEx.SettingChangedListener, CameraEx.EquipmentCallback, CameraEx.FlashChargingStateListener,CameraEx.FlashEmittingListener,CameraEx.ProgramLineListener,
         CameraEx.ErrorCallback,CameraEx.AutoSceneModeListener,CameraEx.FaceDetectionListener, CameraEx.FocalLengthChangeListener,
         CameraEx.PowerZoomListener, CameraEx.ZoomChangeListener, CameraEx.FocusAreaListener, CameraEx.PreviewMagnificationListener, CameraEx.AutoApscModeListener,
@@ -23,11 +23,8 @@ public class CameraInternalEventListner extends BaseCamera implements CameraEx.A
 
     protected void initListners()
     {
-        m_camera.setApertureChangeListener(this);
-        m_camera.setShutterSpeedChangeListener(this);
         m_camera.setProgramLineRangeOverListener(this);
         m_camera.setFocusLightStateListener(this);
-        m_camera.setAutoISOSensitivityListener(this);
         m_camera.setSettingChangedListener(this);
 
         m_camera.setEquipmentCallback(this);
@@ -75,8 +72,6 @@ public class CameraInternalEventListner extends BaseCamera implements CameraEx.A
     {
         m_camera.setApertureChangeListener(null);
         this.apertureChangeListener = null;
-        m_camera.setShutterSpeedChangeListener(null);
-        this.shutterSpeedChangeListener = null;
         m_camera.setProgramLineRangeOverListener(null);
         this.programLineRangeOverListener = null;
         m_camera.setFocusLightStateListener(null);
@@ -110,19 +105,6 @@ public class CameraInternalEventListner extends BaseCamera implements CameraEx.A
     }
 
     @Override
-    public void onApertureChange(CameraEx.ApertureInfo apertureInfo, CameraEx cameraEx) {
-        if (apertureChangeListener != null)
-            apertureChangeListener.onApertureChange(apertureInfo,cameraEx);
-    }
-
-    @Override
-    public void onShutterSpeedChange(CameraEx.ShutterSpeedInfo shutterSpeedInfo, CameraEx cameraEx) {
-        this.shutterSpeedInfo = shutterSpeedInfo;
-        if (shutterSpeedChangeListener != null)
-            shutterSpeedChangeListener.onShutterSpeedChange(shutterSpeedInfo,cameraEx);
-    }
-
-    @Override
     public void onAERange(boolean b, boolean b1, boolean b2, CameraEx cameraEx) {
         if (programLineRangeOverListener != null)
             programLineRangeOverListener.onAERange(b,b1,b2,cameraEx);
@@ -144,12 +126,6 @@ public class CameraInternalEventListner extends BaseCamera implements CameraEx.A
     public void onChanged(boolean b, boolean b1, CameraEx cameraEx) {
         if (focusLightStateListener != null)
             focusLightStateListener.onChanged(b,b1,cameraEx);
-    }
-
-    @Override
-    public void onChanged(int i, CameraEx cameraEx) {
-        if (autoISOSensitivityListener != null)
-            autoISOSensitivityListener.onChanged(i,cameraEx);
     }
 
     @Override
@@ -239,5 +215,10 @@ public class CameraInternalEventListner extends BaseCamera implements CameraEx.A
     public void onAnalizedData(CameraEx.AnalizedData analizedData, CameraEx cameraEx) {
         if (previewAnalizeListener != null)
             previewAnalizeListener.onAnalizedData(analizedData,cameraEx);
+    }
+
+    @Override
+    public void onChanged(int i, CameraEx cameraEx) {
+
     }
 }

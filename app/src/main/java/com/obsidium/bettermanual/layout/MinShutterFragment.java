@@ -12,6 +12,7 @@ import com.obsidium.bettermanual.KeyEvents;
 import com.obsidium.bettermanual.MainActivity;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
+import com.obsidium.bettermanual.controller.ShutterController;
 import com.sony.scalar.hardware.CameraEx;
 
 public class MinShutterFragment extends BaseLayout implements SeekBar.OnSeekBarChangeListener, KeyEvents
@@ -38,25 +39,25 @@ public class MinShutterFragment extends BaseLayout implements SeekBar.OnSeekBarC
             }
         });
 
-        CameraEx.ShutterSpeedInfo info = CameraInstance.GET().getShutterSpeedInfo();
+        CameraEx.ShutterSpeedInfo info = ShutterController.GetInstance().getShutterSpeedInfo();
         if (info != null) {
             setShutterSpeedToUi(info, true);
 
         }
-        CameraInstance.GET().setShutterSpeedChangeListener(new CameraEx.ShutterSpeedChangeListener()
-        {
+        ShutterController.GetInstance().setShutterSpeedEventListner(new ShutterController.ShutterSpeedEvent() {
             @Override
-            public void onShutterSpeedChange(final CameraEx.ShutterSpeedInfo shutterSpeedInfo, CameraEx cameraEx)
-            {
-                setShutterSpeedToUi(shutterSpeedInfo,false);
+            public void onChanged() {
+                setShutterSpeedToUi(ShutterController.GetInstance().getShutterSpeedInfo(),false);
             }
         });
+
     }
 
     @Override
     public void Destroy() {
         // Save minimum shutter speed
         activityInterface.getPreferences().setMinShutterSpeed(CameraInstance.GET().getAutoShutterSpeedLowLimit());
+        ShutterController.GetInstance().setShutterSpeedEventListner(null);
     }
 
     private void setShutterSpeedToUi(CameraEx.ShutterSpeedInfo shutterSpeedInfo, boolean updateSeekbarProgress) {

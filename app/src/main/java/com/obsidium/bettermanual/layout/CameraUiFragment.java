@@ -3,7 +3,6 @@ package com.obsidium.bettermanual.layout;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
-import android.util.Pair;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -16,7 +15,10 @@ import com.obsidium.bettermanual.TimeLog;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.capture.CaptureModeBracket;
 import com.obsidium.bettermanual.capture.CaptureModeTimelapse;
-import com.obsidium.bettermanual.views.ApertureView;
+import com.obsidium.bettermanual.controller.ApertureController;
+import com.obsidium.bettermanual.controller.ExposureCompensationController;
+import com.obsidium.bettermanual.controller.IsoController;
+import com.obsidium.bettermanual.controller.ShutterController;
 import com.obsidium.bettermanual.views.BaseImageView;
 import com.obsidium.bettermanual.views.BaseTextView;
 import com.obsidium.bettermanual.views.DialViewInterface;
@@ -27,9 +29,7 @@ import com.obsidium.bettermanual.views.FocusScaleView;
 import com.obsidium.bettermanual.views.GridView;
 import com.obsidium.bettermanual.views.HistogramView;
 import com.obsidium.bettermanual.views.ImageStabView;
-import com.obsidium.bettermanual.views.IsoView;
 import com.obsidium.bettermanual.views.LongExpoNR;
-import com.obsidium.bettermanual.views.ShutterView;
 import com.sony.scalar.hardware.CameraEx;
 
 import java.util.ArrayList;
@@ -49,10 +49,10 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
 
     private int             m_pictureReviewTime;
 
-    private ShutterView        m_tvShutter;
-    private ApertureView aperture;
-    private IsoView     iso;
-    private EvView evCompensation;
+    private TextView        m_tvShutter;
+    private TextView aperture;
+    private TextView     iso;
+    private TextView evCompensation;
     private TextView        m_tvExposure;
     private TextView        m_tvLog;
     private TextView        m_tvMsg;
@@ -146,7 +146,20 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
 
         loadUiItems();
         initUi();
-        //then set the key event listner to avoid nullpointer
+
+        aperture = (TextView)findViewById(R.id.aperture_txt);
+        ApertureController.GetInstance().bindView(aperture);
+
+        m_tvShutter = (TextView)findViewById(R.id.shutter_txt);
+        ShutterController.GetInstance().bindView(m_tvShutter);
+
+        iso = (TextView)findViewById(R.id.iso_txt);
+        IsoController.GetInstance().bindView(iso);
+
+        evCompensation = (TextView)findViewById(R.id.evcopmensation_txt);
+        ExposureCompensationController.GetInstance().bindView(evCompensation);
+
+                //then set the key event listner to avoid nullpointer
         activityInterface.getDialHandler().setDialEventListner(CameraUiFragment.this);
     }
 
@@ -156,6 +169,10 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         activityInterface.getPreferences().setDialMode(lastDialView);
 
         clearUiItems();
+
+        ApertureController.GetInstance().bindView(null);
+        ShutterController.GetInstance().bindView(null);
+        IsoController.GetInstance().bindView(null);
     }
 
 
@@ -335,7 +352,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
             dialViews.add(m_ivBracket);
             leftHolder.addView(m_ivBracket);
             // Shutter
-            CameraInstance.GET().setShutterSpeedChangeListener(bracket);
+            ShutterController.GetInstance().setShutterSpeedEventListner(bracket);
         }
     };
 
@@ -346,38 +363,6 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
             LinearLayout.LayoutParams params= new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.setMargins(0, 0, margineright, 0);
             params.weight = 1;
-
-            m_tvShutter = new ShutterView(getContext());
-            m_tvShutter.setTextSize((int)getResources().getDimension(R.dimen.textSize));
-            m_tvShutter.setLayoutParams(params);
-            m_tvShutter.setOnTouchListener(m_tvShutter.getSwipeTouchListner(CameraUiFragment.this.getContext()));
-            m_tvShutter.setCameraUiInterface(CameraUiFragment.this);
-            dialViews.add(m_tvShutter);
-            bottomHolder.addView(m_tvShutter);
-            Pair<Integer, Integer> sp = CameraInstance.GET().getShutterSpeed();
-            m_tvShutter.updateShutterSpeed(sp.first, sp.second);
-
-            aperture = new ApertureView(getContext());
-            aperture.setTextSize((int)getResources().getDimension(R.dimen.textSize));
-            aperture.setOnTouchListener(aperture.getSwipeTouchListner(CameraUiFragment.this.getContext()));
-            aperture.setCameraUiInterface(CameraUiFragment.this);
-            aperture.setLayoutParams(params);
-            dialViews.add(aperture);
-            bottomHolder.addView(aperture);
-            // Aperture
-            CameraInstance.GET().setApertureChangeListener(aperture);
-            aperture.setText(String.format("f%.1f", (float) CameraInstance.GET().getAperture() / 100.0f));
-
-            iso = new IsoView(getContext());
-            iso.setTextSize((int)getResources().getDimension(R.dimen.textSize));
-            iso.setOnTouchListener(iso.getSwipeTouchListner(CameraUiFragment.this.getContext()));
-            iso.setCameraUiInterface(CameraUiFragment.this);
-            iso.setLayoutParams(params);
-            dialViews.add(iso);
-            bottomHolder.addView(iso);
-            // ISO
-            CameraInstance.GET().setAutoISOSensitivityListener(iso);
-            iso.init(CameraInstance.GET());
 
             evCompensation = new EvView(getContext());
             evCompensation.setTextSize((int)getResources().getDimension(R.dimen.textSize));
@@ -504,24 +489,10 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
     }
 
     @Override
-    public IsoView getIso() {
-        return iso;
-    }
-
-    @Override
-    public ShutterView getShutter() {
-        return m_tvShutter;
-    }
-
-    @Override
     public DriveMode getDriveMode() {
         return driveMode;
     }
 
-    @Override
-    public ApertureView getAperture() {
-        return aperture;
-    }
 
     @Override
     public void setLeftViewVisibility(boolean visible)

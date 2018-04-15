@@ -9,11 +9,13 @@ import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
 import com.obsidium.bettermanual.camera.ShutterSpeedValue;
+import com.obsidium.bettermanual.controller.IsoController;
+import com.obsidium.bettermanual.controller.ShutterController;
 import com.obsidium.bettermanual.layout.CameraUiInterface;
 import com.obsidium.bettermanual.views.ExposureModeView;
 import com.sony.scalar.hardware.CameraEx;
 
-public class CaptureModeBracket extends CaptureMode implements  CameraEx.ShutterSpeedChangeListener, KeyEvents, CaptureSession.CaptureDoneEvent {
+public class CaptureModeBracket extends CaptureMode implements  ShutterController.ShutterSpeedEvent, KeyEvents, CaptureSession.CaptureDoneEvent {
 
     private final String TAG = CaptureModeBracket.class.getSimpleName();
     // Bracketing
@@ -54,7 +56,7 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
                 cameraUiInterface.showMessageDelayed("Scene mode must be set to manual");
                 return;
             }
-            if (cameraUiInterface.getIso().getCurrentIso() == 0)
+            if (IsoController.GetInstance().getCurrentIso() == 0)
             {
                 cameraUiInterface.showMessageDelayed("ISO must be set to manual");
                 return;
@@ -176,38 +178,6 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
     protected void updateBracketPicCount()
     {
         cameraUiInterface.showMessage(String.format("%d pictures", m_bracketPicCount));
-    }
-
-
-    @Override
-    public void onShutterSpeedChange(CameraEx.ShutterSpeedInfo shutterSpeedInfo, CameraEx cameraEx)
-    {
-        if (cameraUiInterface.getShutter() == null)
-            return;
-        Log.d(TAG, "onShutterSpeedChange");
-        cameraUiInterface.getShutter().updateShutterSpeed(shutterSpeedInfo.currentShutterSpeed_n, shutterSpeedInfo.currentShutterSpeed_d);
-        if (m_bracketPicCount > 0) {
-
-            if (m_bracketNextShutterSpeed != null) {
-                Log.d(TAG, "currentshutterspeed:" + shutterSpeedInfo.currentShutterSpeed_n + "/" + shutterSpeedInfo.currentShutterSpeed_d);
-                Log.d(TAG, "bracketNextShutterSpeed:" + m_bracketNextShutterSpeed.first + "/" + m_bracketNextShutterSpeed.second);
-
-                if (shutterSpeedInfo.currentShutterSpeed_n == m_bracketNextShutterSpeed.first &&
-                        shutterSpeedInfo.currentShutterSpeed_d == m_bracketNextShutterSpeed.second) {
-                    Log.d(TAG, "shutterspeed match start capture");
-                    // Shutter speed adjusted, take next picture
-                    startShooting();
-                } else {
-                    retryCount++;
-                    Log.d(TAG, "shutterspeed does not match wait for next callback");
-                    if (retryCount < MAX_RETRYS)
-                        CameraInstance.GET().adjustShutterSpeed(m_bracketShutterDelta);
-                    else //capture anyway
-                        startShooting();
-                }
-            } else
-                Log.d(TAG, "m_bracketNextShutterSpeed null");
-        }
     }
 
     @Override
@@ -471,5 +441,33 @@ public class CaptureModeBracket extends CaptureMode implements  CameraEx.Shutter
             }
         }
 
+    }
+
+    @Override
+    public void onChanged() {
+        Log.d(TAG, "onShutterSpeedChange");
+        CameraEx.ShutterSpeedInfo shutterSpeedInfo = ShutterController.GetInstance().getShutterSpeedInfo();
+        if (m_bracketPicCount > 0) {
+
+            if (m_bracketNextShutterSpeed != null) {
+                Log.d(TAG, "currentshutterspeed:" + shutterSpeedInfo.currentShutterSpeed_n + "/" + shutterSpeedInfo.currentShutterSpeed_d);
+                Log.d(TAG, "bracketNextShutterSpeed:" + m_bracketNextShutterSpeed.first + "/" + m_bracketNextShutterSpeed.second);
+
+                if (shutterSpeedInfo.currentShutterSpeed_n == m_bracketNextShutterSpeed.first &&
+                        shutterSpeedInfo.currentShutterSpeed_d == m_bracketNextShutterSpeed.second) {
+                    Log.d(TAG, "shutterspeed match start capture");
+                    // Shutter speed adjusted, take next picture
+                    startShooting();
+                } else {
+                    retryCount++;
+                    Log.d(TAG, "shutterspeed does not match wait for next callback");
+                    if (retryCount < MAX_RETRYS)
+                        CameraInstance.GET().adjustShutterSpeed(m_bracketShutterDelta);
+                    else //capture anyway
+                        startShooting();
+                }
+            } else
+                Log.d(TAG, "m_bracketNextShutterSpeed null");
+        }
     }
 }

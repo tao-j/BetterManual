@@ -5,6 +5,12 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+import com.obsidium.bettermanual.controller.ApertureController;
+import com.obsidium.bettermanual.controller.IsoController;
+import com.obsidium.bettermanual.controller.ShutterController;
+import com.obsidium.bettermanual.model.ApertureModel;
+import com.obsidium.bettermanual.model.IsoModel;
+import com.obsidium.bettermanual.model.ShutterModel;
 import com.sony.scalar.hardware.CameraEx;
 import com.sony.scalar.hardware.CameraSequence;
 
@@ -20,6 +26,9 @@ public class CameraInstance extends CameraInternalEventListner implements  Camer
     final int SETSURFACE = 0;
     private static CameraInstance INSTANCE = new CameraInstance();
     private SurfaceHolder surfaceHolder;
+    private ApertureModel apertureModel;
+    private ShutterModel shutterModel;
+    private IsoModel isoModel;
 
 
     private CameraInstance() {
@@ -56,6 +65,15 @@ public class CameraInstance extends CameraInternalEventListner implements  Camer
         cameraIsOpen = false;
         Log.d(TAG, "closeCamera");
         removeListners();
+        ApertureController.GetInstance().bindModel(null);
+        m_camera.setApertureChangeListener(null);
+        apertureModel = null;
+        ShutterController.GetInstance().bindModel(null);
+        m_camera.setShutterSpeedChangeListener(null);
+        shutterModel = null;
+        IsoController.GetInstance().bindModel(null);
+        m_camera.setAutoISOSensitivityListener(null);
+        isoModel = null;
         /*cameraSequence.setShutterSequenceCallback(null);
         cameraSequence.release();*/
         m_camera.getNormalCamera().stopPreview();
@@ -133,6 +151,12 @@ public class CameraInstance extends CameraInternalEventListner implements  Camer
 
     public void initParameters()
     {
+        apertureModel = new ApertureModel();
+        m_camera.setApertureChangeListener(apertureModel);
+        shutterModel = new ShutterModel();
+        m_camera.setShutterSpeedChangeListener(shutterModel);
+        isoModel = new IsoModel();
+        m_camera.setAutoISOSensitivityListener(isoModel);
         //dumpParameter();
     }
 

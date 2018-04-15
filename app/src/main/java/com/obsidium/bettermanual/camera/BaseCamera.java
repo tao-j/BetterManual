@@ -58,24 +58,6 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
         this.previewAnalizeListener = previewAnalizeListener;
     }
 
-    @Override
-    public void setAutoISOSensitivityListener(CameraEx.AutoISOSensitivityListener autoISOSensitivityListener)
-    {
-        this.autoISOSensitivityListener = autoISOSensitivityListener;
-    }
-
-    @Override
-    public void setShutterSpeedChangeListener(CameraEx.ShutterSpeedChangeListener shutterSpeedChangeListener)
-    {
-        this.shutterSpeedChangeListener = shutterSpeedChangeListener;
-    }
-
-
-    @Override
-    public void setApertureChangeListener(CameraEx.ApertureChangeListener apertureChangeListener)
-    {
-        this.apertureChangeListener = apertureChangeListener;
-    }
 
     @Override
     public void setProgramLineRangeOverListener(CameraEx.ProgramLineRangeOverListener programLineRangeOverListener)

@@ -1,11 +1,8 @@
 package com.obsidium.bettermanual.layout;
 
 import com.obsidium.bettermanual.ActivityInterface;
-import com.obsidium.bettermanual.views.ApertureView;
 import com.obsidium.bettermanual.views.DriveMode;
 import com.obsidium.bettermanual.views.ExposureModeView;
-import com.obsidium.bettermanual.views.IsoView;
-import com.obsidium.bettermanual.views.ShutterView;
 
 public interface CameraUiInterface
 {
@@ -21,10 +18,7 @@ public interface CameraUiInterface
 
     void updateViewVisibility();
     void setLeftViewVisibility(boolean state);
-    ShutterView getShutter();
     DriveMode getDriveMode();
-    ApertureView getAperture();
-    IsoView getIso();
 
     ActivityInterface getActivityInterface();
 

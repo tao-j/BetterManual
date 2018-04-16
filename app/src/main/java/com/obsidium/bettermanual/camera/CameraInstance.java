@@ -6,10 +6,22 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 
 import com.obsidium.bettermanual.controller.ApertureController;
+import com.obsidium.bettermanual.controller.DriveModeController;
+import com.obsidium.bettermanual.controller.ExposureCompensationController;
+import com.obsidium.bettermanual.controller.ExposureHintController;
+import com.obsidium.bettermanual.controller.ExposureModeController;
+import com.obsidium.bettermanual.controller.ImageStabilisationController;
 import com.obsidium.bettermanual.controller.IsoController;
+import com.obsidium.bettermanual.controller.LongExposureNoiseReductionController;
 import com.obsidium.bettermanual.controller.ShutterController;
 import com.obsidium.bettermanual.model.ApertureModel;
+import com.obsidium.bettermanual.model.DriveModeModel;
+import com.obsidium.bettermanual.model.ExposureCompensationModel;
+import com.obsidium.bettermanual.model.ExposureHintModel;
+import com.obsidium.bettermanual.model.ExposureModeModel;
+import com.obsidium.bettermanual.model.ImageStabilisationModel;
 import com.obsidium.bettermanual.model.IsoModel;
+import com.obsidium.bettermanual.model.LongExposureNoiseReductionModel;
 import com.obsidium.bettermanual.model.ShutterModel;
 import com.sony.scalar.hardware.CameraEx;
 import com.sony.scalar.hardware.CameraSequence;
@@ -18,7 +30,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 
-public class CameraInstance extends CameraInternalEventListner implements  CameraSequence.ShutterSequenceCallback   {
+public class CameraInstance extends BaseCamera implements  CameraSequence.ShutterSequenceCallback   {
     private final String TAG = CameraInstance.class.getSimpleName();
 
 //    public CameraSequence cameraSequence;
@@ -29,6 +41,12 @@ public class CameraInstance extends CameraInternalEventListner implements  Camer
     private ApertureModel apertureModel;
     private ShutterModel shutterModel;
     private IsoModel isoModel;
+    private ExposureCompensationModel exposureCompensationModel;
+    private ExposureHintModel exposureHintModel;
+    private ExposureModeModel exposureModeModel;
+    private DriveModeModel driveModeModel;
+    private ImageStabilisationModel imageStabilisationModel;
+    private LongExposureNoiseReductionModel longExposureNoiseReductionModel;
 
 
     private CameraInstance() {
@@ -61,19 +79,76 @@ public class CameraInstance extends CameraInternalEventListner implements  Camer
 
     }
 
+    public void initParameters()
+    {
+        apertureModel = new ApertureModel(this);
+        m_camera.setApertureChangeListener(apertureModel);
+        ApertureController.GetInstance().bindModel(apertureModel);
+
+        shutterModel = new ShutterModel(this);
+        m_camera.setShutterSpeedChangeListener(shutterModel);
+        ShutterController.GetInstance().bindModel(shutterModel);
+
+        isoModel = new IsoModel(this);
+        m_camera.setAutoISOSensitivityListener(isoModel);
+        IsoController.GetInstance().bindModel(isoModel);
+
+        exposureCompensationModel = new ExposureCompensationModel(this);
+        ExposureCompensationController.GetInstance().bindModel(exposureCompensationModel);
+
+        exposureHintModel = new ExposureHintModel(this);
+        m_camera.setProgramLineRangeOverListener(exposureHintModel);
+        ExposureHintController.GetInstance().bindModel(exposureHintModel);
+
+        exposureModeModel = new ExposureModeModel(this);
+        ExposureModeController.GetInstance().bindModel(exposureModeModel);
+
+        driveModeModel = new DriveModeModel(this);
+        DriveModeController.GetInstance().bindModel(driveModeModel);
+
+        if (isImageStabSupported()) {
+            imageStabilisationModel = new ImageStabilisationModel(this);
+            ImageStabilisationController.GetInstance().bindModel(imageStabilisationModel);
+        }
+
+        if (isLongExposureNoiseReductionSupported())
+        {
+            longExposureNoiseReductionModel = new LongExposureNoiseReductionModel(this);
+            LongExposureNoiseReductionController.GetIntance().bindModel(longExposureNoiseReductionModel);
+        }
+
+
+        //dumpParameter();
+    }
+
     public void closeCamera() {
         cameraIsOpen = false;
         Log.d(TAG, "closeCamera");
-        removeListners();
+
         ApertureController.GetInstance().bindModel(null);
         m_camera.setApertureChangeListener(null);
         apertureModel = null;
+
         ShutterController.GetInstance().bindModel(null);
         m_camera.setShutterSpeedChangeListener(null);
         shutterModel = null;
+
         IsoController.GetInstance().bindModel(null);
         m_camera.setAutoISOSensitivityListener(null);
         isoModel = null;
+
+        ExposureCompensationController.GetInstance().bindModel(null);
+        exposureCompensationModel = null;
+
+        ExposureHintController.GetInstance().bindModel(null);
+        exposureHintModel = null;
+
+        ExposureModeController.GetInstance().bindModel(null);
+        exposureModeModel = null;
+
+        DriveModeController.GetInstance().bindModel(null);
+        driveModeModel = null;
+
         /*cameraSequence.setShutterSequenceCallback(null);
         cameraSequence.release();*/
         m_camera.getNormalCamera().stopPreview();
@@ -143,22 +218,12 @@ public class CameraInstance extends CameraInternalEventListner implements  Camer
         autoPictureReviewControl.cancelAutoPictureReview();
 
         initParameters();
-        initListners();
 
         //when false cameraparameters contains only the active parameters, but supported stuff is missing
         m_camera.withSupportedParameters(true);
     }
 
-    public void initParameters()
-    {
-        apertureModel = new ApertureModel();
-        m_camera.setApertureChangeListener(apertureModel);
-        shutterModel = new ShutterModel();
-        m_camera.setShutterSpeedChangeListener(shutterModel);
-        isoModel = new IsoModel();
-        m_camera.setAutoISOSensitivityListener(isoModel);
-        //dumpParameter();
-    }
+
 
     /*public void setOptions(CameraSequence.Options paramOptions)
     {

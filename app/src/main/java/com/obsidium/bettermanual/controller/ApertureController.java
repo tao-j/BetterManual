@@ -3,7 +3,10 @@ package com.obsidium.bettermanual.controller;
 import android.view.View;
 import android.widget.TextView;
 
-public class ApertureController extends AbstractController {
+import com.obsidium.bettermanual.R;
+import com.obsidium.bettermanual.model.Model;
+
+public class ApertureController extends TextViewController<Model<String>> {
 
     private static ApertureController apertureController = new ApertureController();
 
@@ -12,10 +15,21 @@ public class ApertureController extends AbstractController {
         return apertureController;
     }
 
+
     @Override
-    public void bindView(View v) {
+    public void bindView(TextView v) {
         super.bindView(v);
         setText();
+    }
+
+    @Override
+    public void toggle() {
+
+    }
+
+    @Override
+    public int getNavigationHelpID() {
+        return R.string.view_aperture_navigation;
     }
 
     @Override
@@ -23,9 +37,11 @@ public class ApertureController extends AbstractController {
         setText();
     }
 
-    private void setText()
+    @Override
+    protected void setText()
     {
-        if (model!= null)
-            ((TextView)view).setText(model.getValue());
+        if (model!= null && view != null){
+            view.setText(model.getValue());
+        }
     }
 }

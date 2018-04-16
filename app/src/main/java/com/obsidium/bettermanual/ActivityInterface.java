@@ -12,7 +12,6 @@ import com.sony.scalar.hardware.avio.DisplayManager;
 
 public interface ActivityInterface {
     boolean hasTouchScreen();
-    Preferences getPreferences();
     KeyEventHandler getDialHandler();
     Handler getMainHandler();
     DisplayManager getDisplayManager();

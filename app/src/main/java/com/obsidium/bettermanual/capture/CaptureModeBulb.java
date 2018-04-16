@@ -3,6 +3,7 @@ package com.obsidium.bettermanual.capture;
 import android.util.Log;
 
 import com.obsidium.bettermanual.KeyEvents;
+import com.obsidium.bettermanual.Preferences;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
@@ -25,6 +26,8 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
         super(cameraUiInterface);
     }
 
+
+
     @Override
     public void reset() {
         Log.d(TAG,"reset");
@@ -40,7 +43,7 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
             abort();
         currentdial = DIAL_STATE_BULBTIME;
         //cameraUiInterface.setDialMode(CameraUiFragment.DialMode.timelapseSetInterval);
-        bulbCaptureTime = cameraUiInterface.getActivityInterface().getPreferences().getBulbTime();
+        bulbCaptureTime = Preferences.GET().getBulbTime();
         updateBulbTime();
         cameraUiInterface.showHintMessage(cameraUiInterface.getActivityInterface().getResString(R.string.icon_lowerDial) +
                 " to set Bulb Duration, "
@@ -51,7 +54,7 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
     @Override
     public void startShooting() {
         Log.d(TAG,"startShooting");
-        cameraUiInterface.getActivityInterface().getPreferences().setBulbTime(bulbCaptureTime);
+        Preferences.GET().setBulbTime(bulbCaptureTime);
         cameraUiInterface.hideHintMessage();
         cameraUiInterface.hideMessage();
 
@@ -339,5 +342,27 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
     @Override
     public boolean onDeleteKeyUp() {
         return false;
+    }
+
+    @Override
+    public void toggle() {
+        if (isActive())
+        {
+            abort();
+        }
+        else {
+            cameraUiInterface.getActivityInterface().getDialHandler().setDialEventListner(this);
+            onEnterKeyUp();
+        }
+    }
+
+    @Override
+    public void setColorToView(Integer color) {
+
+    }
+
+    @Override
+    public int getNavigationHelpID() {
+        return 0;
     }
 }

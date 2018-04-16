@@ -10,6 +10,7 @@ import com.obsidium.bettermanual.ActivityInterface;
 import com.obsidium.bettermanual.CameraUtil;
 import com.obsidium.bettermanual.KeyEvents;
 import com.obsidium.bettermanual.MainActivity;
+import com.obsidium.bettermanual.Preferences;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.controller.ShutterController;
@@ -56,7 +57,7 @@ public class MinShutterFragment extends BaseLayout implements SeekBar.OnSeekBarC
     @Override
     public void Destroy() {
         // Save minimum shutter speed
-        activityInterface.getPreferences().setMinShutterSpeed(CameraInstance.GET().getAutoShutterSpeedLowLimit());
+        Preferences.GET().setMinShutterSpeed(CameraInstance.GET().getAutoShutterSpeedLowLimit());
         ShutterController.GetInstance().setShutterSpeedEventListner(null);
     }
 

@@ -2,17 +2,22 @@ package com.obsidium.bettermanual.capture;
 
 import android.util.Log;
 import android.util.Pair;
+import android.view.View;
 
 import com.obsidium.bettermanual.CameraUtil;
 import com.obsidium.bettermanual.KeyEvents;
+import com.obsidium.bettermanual.Preferences;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
 import com.obsidium.bettermanual.camera.ShutterSpeedValue;
+import com.obsidium.bettermanual.controller.DriveModeController;
+import com.obsidium.bettermanual.controller.ExposureModeController;
 import com.obsidium.bettermanual.controller.IsoController;
 import com.obsidium.bettermanual.controller.ShutterController;
 import com.obsidium.bettermanual.layout.CameraUiInterface;
-import com.obsidium.bettermanual.views.ExposureModeView;
+import com.obsidium.bettermanual.model.ExposureModeModel;
+import com.obsidium.bettermanual.model.Model;
 import com.sony.scalar.hardware.CameraEx;
 
 public class CaptureModeBracket extends CaptureMode implements  ShutterController.ShutterSpeedEvent, KeyEvents, CaptureSession.CaptureDoneEvent {
@@ -40,6 +45,25 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
     }
 
     @Override
+    public void toggle() {
+        if (isActive())
+        {
+            abort();
+        }
+        else {
+            cameraUiInterface.getActivityInterface().getDialHandler().setDialEventListner(this);
+            onEnterKeyUp();
+        }
+    }
+
+
+
+    @Override
+    public int getNavigationHelpID() {
+        return 0;
+    }
+
+    @Override
     public void reset() {
         calcMaxBracketPicCount();
         updateBracketPicCount();
@@ -51,7 +75,7 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
             abort();
         else
         {
-            if (cameraUiInterface.getExposureMode().get() != ExposureModeView.ExposureModes.manual)
+            if (ExposureModeController.GetInstance().getExposureMode() != ExposureModeModel.ExposureModes.manual)
             {
                 cameraUiInterface.showMessageDelayed("Scene mode must be set to manual");
                 return;
@@ -95,10 +119,10 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
         // Update controls
         cameraUiInterface.hideHintMessage();
         cameraUiInterface.setLeftViewVisibility(true);
-        cameraUiInterface.getExposureMode().updateImage();
-        cameraUiInterface.getDriveMode().updateImage();
+        ExposureModeController.GetInstance().onValueChanged();
+        DriveModeController.GetInstance().onValueChanged();
 
-        cameraUiInterface.setActiveViewFlag(cameraUiInterface.getActivityInterface().getPreferences().getViewFlags(cameraUiInterface.getActiveViewsFlag()));
+        cameraUiInterface.setActiveViewFlag(Preferences.GET().getViewFlags(cameraUiInterface.getActiveViewsFlag()));
         cameraUiInterface.updateViewVisibility();
 
         // Reset to previous shutter speed
@@ -470,4 +494,6 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
                 Log.d(TAG, "m_bracketNextShutterSpeed null");
         }
     }
+
+
 }

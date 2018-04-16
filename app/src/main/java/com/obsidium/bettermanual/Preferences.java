@@ -8,13 +8,43 @@ import com.sony.scalar.hardware.CameraEx;
 
 public class Preferences
 {
-    private final SharedPreferences m_prefs;
-    private final Context context;
 
-    public Preferences(Context context)
+    private static Preferences preferences;
+
+    public static Preferences GET()
+    {
+        return preferences;
+    }
+
+    public static void CREATE(Context context)
+    {
+        preferences = new Preferences(context);
+    }
+
+    public static void CLEAR()
+    {
+        if(preferences != null)
+        {
+            preferences.clear();
+            preferences = null;
+        }
+    }
+
+    private SharedPreferences m_prefs;
+    private Context context;
+
+
+
+    private Preferences(Context context)
     {
         this.context = context;
         m_prefs = PreferenceManager.getDefaultSharedPreferences(context);
+    }
+
+    private void clear()
+    {
+        this.context = null;
+        this.m_prefs = null;
     }
 
     public String getSceneMode()

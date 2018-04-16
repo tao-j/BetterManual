@@ -1,15 +1,42 @@
 package com.obsidium.bettermanual.model;
 
-public abstract class AbstractModel implements Model {
+import android.os.Handler;
+import android.os.Looper;
 
-    protected Events eventsListner;
+import com.obsidium.bettermanual.camera.CameraInstance;
+import com.sony.scalar.hardware.CameraEx;
+
+
+
+public abstract class AbstractModel<T> implements Model<T> {
+
+    private Events eventsListner;
     protected boolean supported;
-    protected String value;
-    protected String[] values;
+    protected T value;
+    protected T[] values;
     protected int value_int;
+    protected CameraInstance camera;
+    private Handler handler = new Handler(Looper.getMainLooper());
+
+    public AbstractModel(CameraInstance camera)
+    {
+        this.camera = camera;
+    }
 
     @Override
     public void setListner(Events events) {
         this.eventsListner = events;
+    }
+
+    protected void fireOnValueChanged()
+    {
+        if (eventsListner != null)
+            handler.post(()-> eventsListner.onValueChanged());
+    }
+
+    protected void fireOnSupportedChanged()
+    {
+        if (eventsListner != null)
+            handler.post(()-> eventsListner.onIsSupportedChanged());
     }
 }

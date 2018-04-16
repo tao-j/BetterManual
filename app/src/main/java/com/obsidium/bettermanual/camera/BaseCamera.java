@@ -13,8 +13,6 @@ import java.util.List;
 
 public class BaseCamera implements CameraEventListnerInterface, CameraParameterInterface {
 
-
-
     public interface CameraEvents{
         void onCameraOpen(boolean isOpen);
     }
@@ -29,14 +27,9 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     protected boolean cameraIsOpen = false;
 
     CameraEx.PreviewAnalizeListener previewAnalizeListener;
-    CameraEx.AutoISOSensitivityListener autoISOSensitivityListener;
-    CameraEx.ShutterSpeedChangeListener shutterSpeedChangeListener;
-    CameraEx.ApertureChangeListener apertureChangeListener;
-    CameraEx.ProgramLineRangeOverListener programLineRangeOverListener;
+
     CameraEx.FocusDriveListener focusDriveListener;
     CameraEx.PreviewMagnificationListener previewMagnificationListener;
-    CameraEx.AutoFocusStartListener autoFocusStartListener;
-    CameraEx.AutoFocusDoneListener autoFocusDoneListener;
     CameraEx.ShutterListener shutterListener;
     CameraEx.FocusLightStateListener focusLightStateListener;
     CameraEx.SettingChangedListener settingChangedListener;
@@ -58,13 +51,6 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
         this.previewAnalizeListener = previewAnalizeListener;
     }
 
-
-    @Override
-    public void setProgramLineRangeOverListener(CameraEx.ProgramLineRangeOverListener programLineRangeOverListener)
-    {
-       this.programLineRangeOverListener = programLineRangeOverListener;
-    }
-
     @Override
     public void setFocusDriveListener(CameraEx.FocusDriveListener focusDriveListener)
     {
@@ -77,17 +63,6 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
         this.previewMagnificationListener = previewMagnificationListener;
     }
 
-    @Override
-    public void setAutoFocusStartListener(CameraEx.AutoFocusStartListener autoFocusStartListener)
-    {
-        this.autoFocusStartListener = autoFocusStartListener;
-    }
-
-    @Override
-    public void setAutoFocusDoneListener(CameraEx.AutoFocusDoneListener autoFocusDoneListener)
-    {
-        this.autoFocusDoneListener = autoFocusDoneListener;
-    }
 
     @Override
     public void setCameraEventsListner(CameraEvents eventsListner)
@@ -107,16 +82,6 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     @Override
     public void setShutterListener(CameraEx.ShutterListener shutterListener) {
         this.shutterListener = shutterListener;
-    }
-
-    @Override
-    public void setFocusLightStateListner(CameraEx.FocusLightStateListener focusLightStateListner) {
-        this.focusLightStateListener = focusLightStateListner;
-    }
-
-    @Override
-    public void setSettingsChangedListner(CameraEx.SettingChangedListener settingsChangedListner) {
-        this.settingChangedListener = settingsChangedListner;
     }
 
     @Override

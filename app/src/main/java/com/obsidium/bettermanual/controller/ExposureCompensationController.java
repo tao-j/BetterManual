@@ -1,10 +1,22 @@
 package com.obsidium.bettermanual.controller;
 
-public class ExposureCompensationController extends ApertureController {
+import com.obsidium.bettermanual.model.ExposureCompensationModel;
+
+public class ExposureCompensationController extends TextViewController<ExposureCompensationModel> {
     private static ExposureCompensationController exposureCompensationController = new ExposureCompensationController();
 
     public static ExposureCompensationController GetInstance()
     {
         return exposureCompensationController;
+    }
+
+    @Override
+    public void toggle() {
+
+    }
+
+    @Override
+    public int getNavigationHelpID() {
+        return 0;
     }
 }

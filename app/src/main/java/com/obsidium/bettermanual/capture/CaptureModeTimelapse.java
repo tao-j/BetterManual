@@ -3,9 +3,12 @@ package com.obsidium.bettermanual.capture;
 import android.util.Log;
 
 import com.obsidium.bettermanual.KeyEvents;
+import com.obsidium.bettermanual.Preferences;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
+import com.obsidium.bettermanual.controller.DriveModeController;
+import com.obsidium.bettermanual.controller.ExposureModeController;
 import com.obsidium.bettermanual.layout.CameraUiInterface;
 import com.sony.scalar.sysutil.didep.Settings;
 
@@ -28,6 +31,23 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, Capt
     public CaptureModeTimelapse(CameraUiInterface manualActivity)
     {
         super(manualActivity);
+    }
+
+    @Override
+    public void toggle() {
+        if (isActive())
+        {
+            abort();
+        }
+        else {
+            cameraUiInterface.getActivityInterface().getDialHandler().setDialEventListner(this);
+            onEnterKeyUp();
+        }
+    }
+
+    @Override
+    public int getNavigationHelpID() {
+        return R.string.view_startBracket_Timelapse;
     }
 
     public void reset()
@@ -98,10 +118,10 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, Capt
             public void run() {
                 cameraUiInterface.hideHintMessage();
                 cameraUiInterface.setLeftViewVisibility(true);
-                cameraUiInterface.getExposureMode().updateImage();
-                cameraUiInterface.getDriveMode().updateImage();
+                ExposureModeController.GetInstance().onValueChanged();
+                DriveModeController.GetInstance().onValueChanged();
 
-                cameraUiInterface.setActiveViewFlag(cameraUiInterface.getActivityInterface().getPreferences().getViewFlags(cameraUiInterface.getActiveViewsFlag()));
+                cameraUiInterface.setActiveViewFlag(Preferences.GET().getViewFlags(cameraUiInterface.getActiveViewsFlag()));
                 cameraUiInterface.updateViewVisibility();
             }
         });

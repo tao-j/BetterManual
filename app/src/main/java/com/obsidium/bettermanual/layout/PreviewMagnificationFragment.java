@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.obsidium.bettermanual.ActivityInterface;
 import com.obsidium.bettermanual.MainActivity;
 import com.obsidium.bettermanual.OnSwipeTouchListener;
+import com.obsidium.bettermanual.Preferences;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.views.FocusScaleView;
@@ -88,10 +89,10 @@ public class PreviewMagnificationFragment extends BaseLayout implements CameraEx
 
         m_lFocusScale = findViewById(R.id.lFocusScale);
         m_lFocusScale.setVisibility(View.GONE);
-        if (!activityInterface.getPreferences().showStarAlginView())
+        if (!Preferences.GET().showStarAlginView())
             starDriftAlginView.setVisibility(GONE);
         else
-            starDriftAlginView.enableGrid(activityInterface.getPreferences().showStarAlginViewGrid());
+            starDriftAlginView.enableGrid(Preferences.GET().showStarAlginViewGrid());
 
         activityInterface.setSurfaceViewOnTouchListner(new SurfaceSwipeTouchListener(getContext()));
         CameraInstance.GET().setPreviewMagnificationListener(this);
@@ -266,12 +267,12 @@ public class PreviewMagnificationFragment extends BaseLayout implements CameraEx
     public boolean onFnKeyUp() {
 
         if (starDriftAlginView.getVisibility() == VISIBLE) {
-            if (activityInterface.getPreferences().showStarAlginViewGrid()) {
-                activityInterface.getPreferences().setShowStarAlignGrid(false);
+            if (Preferences.GET().showStarAlginViewGrid()) {
+                Preferences.GET().setShowStarAlignGrid(false);
                 starDriftAlginView.enableGrid(false);
             }
             else {
-                activityInterface.getPreferences().setShowStarAlignGrid(true);
+                Preferences.GET().setShowStarAlignGrid(true);
                 starDriftAlginView.enableGrid(true);
             }
         }
@@ -300,11 +301,11 @@ public class PreviewMagnificationFragment extends BaseLayout implements CameraEx
     public boolean onMenuKeyUp() {
         if (starDriftAlginView.getVisibility() == GONE) {
             starDriftAlginView.setVisibility(VISIBLE);
-            activityInterface.getPreferences().setShowStarAlign(true);
+            Preferences.GET().setShowStarAlign(true);
         }
         else {
             starDriftAlginView.setVisibility(GONE);
-            activityInterface.getPreferences().setShowStarAlign(false);
+            Preferences.GET().setShowStarAlign(false);
         }
         return false;
     }

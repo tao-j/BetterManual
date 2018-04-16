@@ -1,28 +1,38 @@
 package com.obsidium.bettermanual.controller;
 
+import android.widget.TextView;
+
+import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.model.IsoModel;
 import com.obsidium.bettermanual.model.Model;
 
-public class IsoController extends ApertureController {
+public class IsoController extends TextViewController<IsoModel>{
 
     private static IsoController isoController = new IsoController();
 
-    private IsoModel isoModel;
 
     @Override
-    public void bindModel(Model model) {
-        super.bindModel(model);
-        isoModel = (IsoModel) model;
+    public void toggle() {
+        model.toggle();
     }
 
     public static IsoController GetInstance() {
         return isoController;
     }
 
+    @Override
+    public int getNavigationHelpID() {
+        if (model.getCurrentIso() == 0)
+            return R.string.view_iso_navigation_auto;
+        return R.string.view_iso_navigation_manual;
+    }
+
     public int getCurrentIso()
     {
-        if (isoModel != null)
-            return isoModel.getCurrentIso();
+        if (model != null)
+            return model.getCurrentIso();
         return 0;
     }
+
+
 }

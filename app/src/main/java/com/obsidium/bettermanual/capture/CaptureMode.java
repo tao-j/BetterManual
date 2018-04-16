@@ -1,17 +1,23 @@
 package com.obsidium.bettermanual.capture;
 
+import android.view.View;
+
+import com.obsidium.bettermanual.Preferences;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
+import com.obsidium.bettermanual.controller.ImageViewController;
 import com.obsidium.bettermanual.layout.CameraUiInterface;
+import com.obsidium.bettermanual.model.Model;
 
 
-public abstract class CaptureMode implements CaptureModeInterface
+public abstract class CaptureMode extends ImageViewController implements CaptureModeInterface
 {
-
     public static final int COUNTDOWN_SECONDS = 5;
 
     protected CameraUiInterface cameraUiInterface;
     protected boolean isActive = false;
+
+
     protected int             m_countdown;
 
     public CaptureMode(CameraUiInterface cameraUiInterface)
@@ -51,7 +57,7 @@ public abstract class CaptureMode implements CaptureModeInterface
         CameraInstance.GET().stopPreview();
 
         // Hide some bottom views
-        cameraUiInterface.getActivityInterface().getPreferences().setViewFlags(cameraUiInterface.getActiveViewsFlag());
+        Preferences.GET().setViewFlags(cameraUiInterface.getActiveViewsFlag());
         cameraUiInterface.setActiveViewFlag(0);
         cameraUiInterface.updateViewVisibility();
 
@@ -60,4 +66,10 @@ public abstract class CaptureMode implements CaptureModeInterface
         cameraUiInterface.showMessage(String.format("Starting in %d...", m_countdown));
         cameraUiInterface.getActivityInterface().getMainHandler().postDelayed(m_countDownRunnable, 1000);
     }
+
+    @Override
+    protected void updateImage() {
+
+    }
+
 }

@@ -5,21 +5,22 @@ import android.widget.TextView;
 
 import com.obsidium.bettermanual.model.Model;
 
-public abstract class AbstractController implements Controller, Model.Events {
+public abstract class AbstractController<V  extends View, M extends Model> implements Controller<V,M>, Model.Events {
 
 
-    protected View view;
-    protected Model model;
+    protected V view;
+    protected M model;
 
     @Override
-    public void bindView(View v) {
+    public void bindView(V v) {
         this.view = v;
     }
 
     @Override
-    public void bindModel(Model model) {
+    public void bindModel(M model) {
         this.model = model;
-        model.setListner(this);
+        if (model != null)
+            model.setListner(this);
     }
 
     @Override

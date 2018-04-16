@@ -30,7 +30,6 @@ import com.sony.scalar.hardware.CameraEx;
 public class MainActivity extends BaseActivity implements ActivityInterface, CameraInstance.CameraEvents, SurfaceHolder.Callback,CameraEx.ShutterListener {
 
     private final String TAG = MainActivity.class.getSimpleName();
-    private Preferences preferences;
 
     //private CameraInstance cameraInstance;
 
@@ -97,7 +96,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
             avIndexManager = new AvIndexManager(getContentResolver());
 
         layoutHolder = (LinearLayout)findViewById(R.id.fragment_holder);
-        preferences = new Preferences(getApplicationContext());
+        Preferences.CREATE(getApplicationContext());
 
     }
 
@@ -135,26 +134,22 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     protected void onDestroy() {
         super.onDestroy();
         stopBackgroundThread();
+        Preferences.CLEAR();
     }
 
     private void saveDefaults()
     {
         // Scene mode
-        getPreferences().setSceneMode(CameraInstance.GET().getSceneMode());
+        Preferences.GET().setSceneMode(CameraInstance.GET().getSceneMode());
         // Drive mode and burst speed
-        getPreferences().setDriveMode(CameraInstance.GET().getDriveMode());
-        getPreferences().setBurstDriveSpeed(CameraInstance.GET().getBurstDriveSpeed());
+        Preferences.GET().setDriveMode(CameraInstance.GET().getDriveMode());
+        Preferences.GET().setBurstDriveSpeed(CameraInstance.GET().getBurstDriveSpeed());
     }
 
 
     @Override
     public boolean hasTouchScreen() {
         return getDeviceInfo().getModel().compareTo("ILCE-5100") == 0;
-    }
-
-    @Override
-    public Preferences getPreferences() {
-        return preferences;
     }
 
     @Override
@@ -290,17 +285,17 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         // Focus mode
         CameraInstance.GET().setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
         // Scene mode
-        final String sceneMode = getPreferences().getSceneMode();
+        final String sceneMode = Preferences.GET().getSceneMode();
         CameraInstance.GET().setSceneMode(sceneMode);
         // Drive mode and burst speed
-        CameraInstance.GET().setDriveMode(getPreferences().getDriveMode());
-        CameraInstance.GET().setBurstDriveSpeed(getPreferences().getBurstDriveSpeed());
+        CameraInstance.GET().setDriveMode(Preferences.GET().getDriveMode());
+        CameraInstance.GET().setBurstDriveSpeed(Preferences.GET().getBurstDriveSpeed());
         // Minimum shutter speed
         if(CameraInstance.GET().isAutoShutterSpeedLowLimitSupported()) {
             if (sceneMode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
                 CameraInstance.GET().setAutoShutterSpeedLowLimit(-1);
             else
-                CameraInstance.GET().setAutoShutterSpeedLowLimit(getPreferences().getMinShutterSpeed());
+                CameraInstance.GET().setAutoShutterSpeedLowLimit(Preferences.GET().getMinShutterSpeed());
         }
         // Disable self timer
         CameraInstance.GET().setSelfTimer(0);

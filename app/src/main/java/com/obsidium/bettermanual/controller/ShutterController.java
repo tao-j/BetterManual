@@ -4,7 +4,7 @@ import com.obsidium.bettermanual.model.Model;
 import com.obsidium.bettermanual.model.ShutterModel;
 import com.sony.scalar.hardware.CameraEx;
 
-public class ShutterController extends ApertureController {
+public class ShutterController extends TextViewController<ShutterModel> {
 
     public interface ShutterSpeedEvent
     {
@@ -18,19 +18,23 @@ public class ShutterController extends ApertureController {
         return shutterController;
     }
 
-    private ShutterModel shutterModel;
     private ShutterSpeedEvent shutterSpeedEventListner;
 
+
     @Override
-    public void bindModel(Model model) {
-        super.bindModel(model);
-        this.shutterModel = (ShutterModel)model;
+    public void toggle() {
+
+    }
+
+    @Override
+    public int getNavigationHelpID() {
+        return 0;
     }
 
     public CameraEx.ShutterSpeedInfo getShutterSpeedInfo()
     {
-        if (shutterModel != null)
-            return shutterModel.getShutterSpeedInfo();
+        if (model != null)
+            return model.getShutterSpeedInfo();
         return null;
     }
 

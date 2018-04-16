@@ -4,7 +4,7 @@ import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.controller.ExposureCompensationController;
 
-public class ExposureCompensationModel extends AbstractModel {
+public class ExposureCompensationModel extends AbstractModel<String> {
 
     private int             m_maxExposureCompensation;
     private int             m_minExposureCompensation;
@@ -12,54 +12,54 @@ public class ExposureCompensationModel extends AbstractModel {
     private float           m_exposureCompensationStep;
 
 
-    public ExposureCompensationModel()
+    public ExposureCompensationModel(CameraInstance cameraInstance)
     {
-        m_maxExposureCompensation = CameraInstance.GET().getMaxExposureCompensation();
-        m_minExposureCompensation = CameraInstance.GET().getMinExposureCompensation();
-        m_exposureCompensationStep = CameraInstance.GET().getExposureCompensationStep();
-        m_curExposureCompensation = CameraInstance.GET().getExposureCompensation();
-        ExposureCompensationController.GetInstance().bindModel(this);
+        super(cameraInstance);
+        m_maxExposureCompensation = camera.getMaxExposureCompensation();
+        m_minExposureCompensation = camera.getMinExposureCompensation();
+        m_exposureCompensationStep = camera.getExposureCompensationStep();
+        m_curExposureCompensation = camera.getExposureCompensation();
+        setEvValue();
+        fireOnValueChanged();
     }
 
     @Override
     public void setValue(int i) {
         if (i > 0)
-            decrementExposureCompensation(true);
+            decrementExposureCompensation();
         else
-            incrementExposureCompensation(true);
+            incrementExposureCompensation();
     }
 
     @Override
     public String getValue() {
-        return null;
+        return value;
     }
 
     @Override
     public boolean isSupported() {
-        return false;
+        return true;
     }
 
-    private void decrementExposureCompensation(boolean notify)
+    private void decrementExposureCompensation()
     {
         if (m_curExposureCompensation > m_minExposureCompensation)
         {
             --m_curExposureCompensation;
-            CameraInstance.GET().setExposureCompensation(m_curExposureCompensation);
+            camera.setExposureCompensation(m_curExposureCompensation);
             setEvValue();
-            if (eventsListner != null)
-                eventsListner.onValueChanged();
+            fireOnValueChanged();
         }
     }
 
-    private void incrementExposureCompensation(boolean notify)
+    private void incrementExposureCompensation()
     {
         if (m_curExposureCompensation < m_maxExposureCompensation)
         {
             ++m_curExposureCompensation;
-            CameraInstance.GET().setExposureCompensation(m_curExposureCompensation);
+            camera.setExposureCompensation(m_curExposureCompensation);
             setEvValue();
-            if (eventsListner != null)
-                eventsListner.onValueChanged();
+            fireOnValueChanged();
         }
     }
 

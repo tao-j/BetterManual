@@ -4,8 +4,11 @@ import android.view.View;
 
 import com.obsidium.bettermanual.model.Model;
 
-public interface Controller<T extends View> {
-    void bindView(T v);
-    void bindModel(Model model);
+public interface Controller<V extends View,M extends Model> {
+    void bindView(V v);
+    void bindModel(M model);
     void setValue(int i);
+    void toggle();
+    void setColorToView(Integer color);
+    int getNavigationHelpID();
 }

@@ -1,5 +1,9 @@
 package com.obsidium.bettermanual.controller;
 
+import com.obsidium.bettermanual.ActivityInterface;
+import com.obsidium.bettermanual.MainActivity;
+import com.obsidium.bettermanual.capture.CaptureModeBulb;
+import com.obsidium.bettermanual.model.ExposureModeModel;
 import com.obsidium.bettermanual.model.Model;
 import com.obsidium.bettermanual.model.ShutterModel;
 import com.sony.scalar.hardware.CameraEx;
@@ -19,10 +23,20 @@ public class ShutterController extends TextViewController<ShutterModel> {
     }
 
     private ShutterSpeedEvent shutterSpeedEventListner;
+    private ActivityInterface activityInterface;
+
+    public void bindActivityInterface(ActivityInterface activityInterface)
+    {
+        this.activityInterface = activityInterface;
+    }
 
 
     @Override
     public void toggle() {
+        if (ExposureModeController.GetInstance().getExposureMode() == ExposureModeModel.ExposureModes.aperture && !model.getValue().equals("BULB") && activityInterface != null)
+            activityInterface.loadFragment(MainActivity.FRAGMENT_MIN_SHUTTER);
+        else if (model.getValue().equals("BULB") && CaptureModeBulb.GetInstance() != null)
+            CaptureModeBulb.GetInstance().toggle();
 
     }
 

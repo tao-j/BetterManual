@@ -15,6 +15,23 @@ import com.obsidium.bettermanual.layout.CameraUiInterface;
 
 public class CaptureModeBulb extends CaptureMode implements CaptureSession.CaptureDoneEvent, KeyEvents {
 
+    private static CaptureModeBulb captureModeBulb;
+
+    public static CaptureModeBulb GetInstance()
+    {
+        return captureModeBulb;
+    }
+
+    public static void CREATE(CameraUiInterface cameraUiInterface)
+    {
+        captureModeBulb = new CaptureModeBulb(cameraUiInterface);
+    }
+
+    public static void CLEAR()
+    {
+        captureModeBulb = null;
+    }
+
     private final String TAG = CaptureModeBulb.class.getSimpleName();
     private long bulbCaptureTime = 0;
 
@@ -22,7 +39,9 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
     private final int DIAL_STATE_BULBTIME = 1;
     private int currentdial = DIAL_STATE_NOTHING;
 
-    public CaptureModeBulb(CameraUiInterface cameraUiInterface) {
+
+
+    private CaptureModeBulb(CameraUiInterface cameraUiInterface) {
         super(cameraUiInterface);
     }
 

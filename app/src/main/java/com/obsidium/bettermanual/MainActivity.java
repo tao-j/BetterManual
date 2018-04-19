@@ -15,6 +15,8 @@ import android.widget.LinearLayout;
 import com.github.ma1co.pmcademo.app.BaseActivity;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
+import com.obsidium.bettermanual.controller.FocusDriveController;
+import com.obsidium.bettermanual.controller.ShutterController;
 import com.obsidium.bettermanual.layout.BaseLayout;
 import com.obsidium.bettermanual.layout.CameraUiFragment;
 import com.obsidium.bettermanual.layout.ImageFragment;
@@ -30,8 +32,6 @@ import com.sony.scalar.hardware.CameraEx;
 public class MainActivity extends BaseActivity implements ActivityInterface, CameraInstance.CameraEvents, SurfaceHolder.Callback,CameraEx.ShutterListener {
 
     private final String TAG = MainActivity.class.getSimpleName();
-
-    //private CameraInstance cameraInstance;
 
     public final static int FRAGMENT_CAMERA_UI = 0;
     public final static int FRAGMENT_MIN_SHUTTER = 1;
@@ -89,6 +89,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         m_handler = new Handler();
         setContentView(R.layout.main_activity);
         CameraInstance.GET().initHandler(cameraThread.getLooper());
+        ShutterController.GetInstance().bindActivityInterface(this);
 
         surfaceViewHolder = (FrameLayout) findViewById(R.id.surfaceView);
         //surfaceView.setOnTouchListener(new CameraUiFragment.SurfaceSwipeTouchListener(getContext()));
@@ -126,7 +127,6 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
             avIndexManager.onPause(getApplicationContext());
         }
 
-        saveDefaults();
         CameraInstance.GET().closeCamera();
     }
 
@@ -135,16 +135,9 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         super.onDestroy();
         stopBackgroundThread();
         Preferences.CLEAR();
+        ShutterController.GetInstance().bindActivityInterface(null);
     }
 
-    private void saveDefaults()
-    {
-        // Scene mode
-        Preferences.GET().setSceneMode(CameraInstance.GET().getSceneMode());
-        // Drive mode and burst speed
-        Preferences.GET().setDriveMode(CameraInstance.GET().getDriveMode());
-        Preferences.GET().setBurstDriveSpeed(CameraInstance.GET().getBurstDriveSpeed());
-    }
 
 
     @Override
@@ -275,40 +268,8 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
 
 
         loadFragment(FRAGMENT_CAMERA_UI);
-        loadDefaults();
     }
 
-    private void loadDefaults()
-    {
-        final TimeLog timeLog = new TimeLog("loadDefaults");
-        //Log.d(TAG,"Parameters: " + params.flatten());
-        // Focus mode
-        CameraInstance.GET().setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
-        // Scene mode
-        final String sceneMode = Preferences.GET().getSceneMode();
-        CameraInstance.GET().setSceneMode(sceneMode);
-        // Drive mode and burst speed
-        CameraInstance.GET().setDriveMode(Preferences.GET().getDriveMode());
-        CameraInstance.GET().setBurstDriveSpeed(Preferences.GET().getBurstDriveSpeed());
-        // Minimum shutter speed
-        if(CameraInstance.GET().isAutoShutterSpeedLowLimitSupported()) {
-            if (sceneMode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
-                CameraInstance.GET().setAutoShutterSpeedLowLimit(-1);
-            else
-                CameraInstance.GET().setAutoShutterSpeedLowLimit(Preferences.GET().getMinShutterSpeed());
-        }
-        // Disable self timer
-        CameraInstance.GET().setSelfTimer(0);
-        // Force aspect ratio to 3:2
-        CameraInstance.GET().setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
-        CameraInstance.GET().setImageQuality(CameraEx.ParametersModifier.PICTURE_STORAGE_FMT_RAW);
-        // View visibility
-
-        /*if (getCamera().isLongExposureNoiseReductionSupported())
-            getCamera().setLongExposureNoiseReduction(getP);*/
-        timeLog.logTime();
-
-    }
 
     private void addSurfaceView() {
         surfaceView = new SurfaceView(getApplicationContext());

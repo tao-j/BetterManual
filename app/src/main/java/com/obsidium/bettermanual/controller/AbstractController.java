@@ -34,7 +34,7 @@ public abstract class AbstractController<V  extends View, M extends Model> imple
     }
 
     @Override
-    public void setValue(int i) {
+    public void set_In_De_crase(int i) {
         if (model != null)
             model.setValue(i);
     }

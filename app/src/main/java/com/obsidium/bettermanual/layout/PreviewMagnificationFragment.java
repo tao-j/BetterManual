@@ -12,35 +12,18 @@ import com.obsidium.bettermanual.OnSwipeTouchListener;
 import com.obsidium.bettermanual.Preferences;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
+import com.obsidium.bettermanual.controller.FocusDriveController;
 import com.obsidium.bettermanual.views.FocusScaleView;
 import com.obsidium.bettermanual.views.PreviewNavView;
 import com.obsidium.bettermanual.views.StarDriftAlginView;
 import com.sony.scalar.hardware.CameraEx;
 
 
-public class PreviewMagnificationFragment extends BaseLayout implements CameraEx.PreviewMagnificationListener, CameraEx.FocusDriveListener {
+public class PreviewMagnificationFragment extends BaseLayout implements CameraEx.PreviewMagnificationListener {
 
 
     private final float STEP_MAG_SIZE = 100f;
 
-    @Override
-    public void onChanged(CameraEx.FocusPosition focusPosition, CameraEx cameraEx) {
-        m_lFocusScale.setVisibility(View.VISIBLE);
-        m_focusScaleView.setMaxPosition(focusPosition.maxPosition);
-        m_focusScaleView.setCurPosition(focusPosition.currentPosition);
-        activityInterface.getMainHandler().removeCallbacks(m_hideFocusScaleRunnable);
-        activityInterface.getMainHandler().postDelayed(m_hideFocusScaleRunnable, 2000);
-    }
-
-
-    private final Runnable m_hideFocusScaleRunnable = new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            m_lFocusScale.setVisibility(View.GONE);
-        }
-    };
 
     private class SurfaceSwipeTouchListener extends OnSwipeTouchListener
     {
@@ -74,8 +57,8 @@ public class PreviewMagnificationFragment extends BaseLayout implements CameraEx
     private float           m_curPreviewMagnificationFactor;
     private Pair<Integer, Integer> m_curPreviewMagnificationPos = new Pair<Integer, Integer>(0, 0);
     private int             m_curPreviewMagnificationMaxPos;
-    private FocusScaleView m_focusScaleView;
-    private View            m_lFocusScale;
+    /*private FocusScaleView m_focusScaleView;
+    private View            m_lFocusScale;*/
 
     private StarDriftAlginView starDriftAlginView;
 
@@ -85,10 +68,10 @@ public class PreviewMagnificationFragment extends BaseLayout implements CameraEx
         magnification = (TextView) findViewById(R.id.tvMagnification);
         previewNavView = (PreviewNavView)findViewById(R.id.vPreviewNav);
         starDriftAlginView = (StarDriftAlginView)findViewById(R.id.stardriftalgin);
-        m_focusScaleView = (FocusScaleView)findViewById(R.id.vFocusScale);
+        FocusDriveController.GetInstance().bindView((FocusScaleView)findViewById(R.id.vFocusScale));
 
-        m_lFocusScale = findViewById(R.id.lFocusScale);
-        m_lFocusScale.setVisibility(View.GONE);
+        /*m_lFocusScale = findViewById(R.id.lFocusScale);
+        m_lFocusScale.setVisibility(View.GONE);*/
         if (!Preferences.GET().showStarAlginView())
             starDriftAlginView.setVisibility(GONE);
         else
@@ -98,12 +81,12 @@ public class PreviewMagnificationFragment extends BaseLayout implements CameraEx
         CameraInstance.GET().setPreviewMagnificationListener(this);
         m_curPreviewMagnification = 100;
         CameraInstance.GET().setPreviewMagnification(m_curPreviewMagnification, m_curPreviewMagnificationPos);
-        CameraInstance.GET().setFocusDriveListener(this);
     }
 
     @Override
     public void Destroy() {
         activityInterface.setSurfaceViewOnTouchListner(null);
+        FocusDriveController.GetInstance().bindView(null);
     }
 
     //##############CameraEx.PreviewMagnificationListener###############

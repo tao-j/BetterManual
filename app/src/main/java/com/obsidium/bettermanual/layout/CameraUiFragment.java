@@ -13,9 +13,9 @@ import com.obsidium.bettermanual.ActivityInterface;
 import com.obsidium.bettermanual.MainActivity;
 import com.obsidium.bettermanual.Preferences;
 import com.obsidium.bettermanual.R;
-import com.obsidium.bettermanual.TimeLog;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.capture.CaptureModeBracket;
+import com.obsidium.bettermanual.capture.CaptureModeBulb;
 import com.obsidium.bettermanual.capture.CaptureModeTimelapse;
 import com.obsidium.bettermanual.controller.ApertureController;
 import com.obsidium.bettermanual.controller.Controller;
@@ -23,22 +23,21 @@ import com.obsidium.bettermanual.controller.DriveModeController;
 import com.obsidium.bettermanual.controller.ExposureCompensationController;
 import com.obsidium.bettermanual.controller.ExposureHintController;
 import com.obsidium.bettermanual.controller.ExposureModeController;
+import com.obsidium.bettermanual.controller.FocusDriveController;
+import com.obsidium.bettermanual.controller.HistogramController;
 import com.obsidium.bettermanual.controller.ImageStabilisationController;
 import com.obsidium.bettermanual.controller.IsoController;
 import com.obsidium.bettermanual.controller.LongExposureNoiseReductionController;
 import com.obsidium.bettermanual.controller.ShutterController;
-import com.obsidium.bettermanual.views.FocusScaleView;
 import com.obsidium.bettermanual.views.GridView;
 import com.obsidium.bettermanual.views.HistogramView;
-import com.sony.scalar.hardware.CameraEx;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class CameraUiFragment extends BaseLayout implements View.OnClickListener,
-        CameraUiInterface, CameraEx.PreviewAnalizeListener,
-        CameraEx.FocusDriveListener
+        CameraUiInterface
 {
 
 
@@ -47,25 +46,17 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
     private static final int MESSAGE_TIMEOUT = 1000;
     private final  String TAG  = CameraUiFragment.class.getSimpleName();
 
-    private int             m_pictureReviewTime;
-
-    private TextView        m_tvExposure;
     private TextView        m_tvLog;
     private TextView        m_tvMsg;
     private HistogramView m_vHist;
-    private ImageView driveMode;
-    //private ExposureModeView exposureMode;
     private ImageView       m_ivTimelapse;
     private ImageView       m_ivBracket;
     private GridView m_vGrid;
     private TextView        m_tvHint;
-    private FocusScaleView m_focusScaleView;
     private View            m_lFocusScale;
 
     private LinearLayout bottomHolder;
     private LinearLayout leftHolder;
-
-    //private ImageStabView imageStabView;
 
     private List<Controller> dialViews;
     private int lastDialView;
@@ -74,18 +65,6 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
 
     private CaptureModeTimelapse timelapse;
     private CaptureModeBracket bracket;
-
-
-    private final Runnable m_hideFocusScaleRunnable = new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            m_lFocusScale.setVisibility(View.GONE);
-        }
-    };
-
-
 
 
     private final Runnable  m_hideMessageRunnable = new Runnable()
@@ -117,7 +96,8 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         m_tvLog = (TextView)findViewById(R.id.tvLog);
         m_tvLog.setVisibility(LOGGING_ENABLED ? View.VISIBLE : View.GONE);
 
-        m_vHist = (HistogramView)findViewById(R.id.vHist);
+
+
 
         m_tvMsg = (TextView)findViewById(R.id.tvMsg);
 
@@ -126,9 +106,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         m_tvHint = (TextView)findViewById(R.id.tvHint);
         m_tvHint.setVisibility(View.GONE);
 
-        m_focusScaleView = (FocusScaleView)findViewById(R.id.vFocusScale);
-        m_lFocusScale = findViewById(R.id.lFocusScale);
-        m_lFocusScale.setVisibility(View.GONE);
+        FocusDriveController.GetInstance().bindView(findViewById(R.id.lFocusScale));
 
         //noinspection ResourceType
         ((ImageView)findViewById(R.id.ivFocusRight)).setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_rec_focuscontrol_far));
@@ -153,6 +131,8 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         timelapse = new CaptureModeTimelapse(this);
         timelapse.bindView(((ImageView)findViewById(R.id.iv_timelapse)));
         dialViews.add(timelapse);
+
+        CaptureModeBulb.CREATE(this);
 
         ImageStabilisationController.GetInstance().bindView((ImageView) findViewById(R.id.iv_imagestab));
         dialViews.add(ImageStabilisationController.GetInstance());
@@ -183,7 +163,8 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         m_vGrid.setVideoRect(activityInterface.getDisplayManager().getDisplayedVideoRect());
 
         // Preview/Histogram
-        CameraInstance.GET().setPreviewAnalizeListener(this);
+        m_vHist = (HistogramView)findViewById(R.id.vHist);
+        HistogramController.GetInstance().bindView(m_vHist);
 
         //returns when a capture is done, seems to replace the default android camera1 api CaptureCallback that get called with Camera.takePicture(shutter,raw, jpeg)
         //also it seems Camera.takePicture is nonfunctional/crash on a6000
@@ -192,16 +173,8 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         //m_camera.setJpegListener(); maybe is used to get jpeg/raw data returned
 
 
-        CameraInstance.GET().setFocusDriveListener(this);
-
         m_viewFlags = Preferences.GET().getViewFlags(VIEW_FLAG_GRID | VIEW_FLAG_HISTOGRAM);
-        activityInterface.getMainHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                setDialMode(Preferences.GET().getDialMode(0));
-            }
-        });
-
+        setDialMode(Preferences.GET().getDialMode(0));
 
         updateViewVisibility();
 
@@ -213,7 +186,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         Preferences.GET().setViewFlags(m_viewFlags);
         Preferences.GET().setDialMode(lastDialView);
 
-        clearUiItems();
+        dialViews.clear();
 
         ApertureController.GetInstance().bindView(null);
         ShutterController.GetInstance().bindView(null);
@@ -224,205 +197,11 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         DriveModeController.GetInstance().bindView(null);
         ImageStabilisationController.GetInstance().bindView(null);
         LongExposureNoiseReductionController.GetIntance().bindView(null);
+        timelapse.bindView(null);
+        bracket.bindView(null);
+        HistogramController.GetInstance().bindView(null);
+        CaptureModeBulb.CLEAR();
     }
-
-
-   /* private void loadUiItems() {
-        final TimeLog timeLog = new TimeLog("loadUiItems");
-
-       *//* if (CameraInstance.GET().isImageStabSupported()) {
-            activityInterface.getMainHandler().post(addImageStabRunnable);
-        }*//*
-
-        if (CameraInstance.GET().isLongExposureNoiseReductionSupported()) {
-            activityInterface.getMainHandler().post(addLongExpoNoiseReductionRunnable);
-        }
-
-        timeLog.logTime();
-    }*/
-
-    private void initUi() {
-
-        Log.d(TAG,"initUi");
-        final TimeLog timeLog = new TimeLog("initUi");
-
-        m_vGrid.setVideoRect(activityInterface.getDisplayManager().getDisplayedVideoRect());
-
-        // Preview/Histogram
-        CameraInstance.GET().setPreviewAnalizeListener(this);
-
-        //returns when a capture is done, seems to replace the default android camera1 api CaptureCallback that get called with Camera.takePicture(shutter,raw, jpeg)
-        //also it seems Camera.takePicture is nonfunctional/crash on a6000
-        //activityInterface.getCamera().setShutterListener(this);
-
-        //m_camera.setJpegListener(); maybe is used to get jpeg/raw data returned
-
-
-        CameraInstance.GET().setFocusDriveListener(this);
-
-        m_viewFlags = Preferences.GET().getViewFlags(VIEW_FLAG_GRID | VIEW_FLAG_HISTOGRAM);
-        activityInterface.getMainHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                setDialMode(Preferences.GET().getDialMode(0));
-            }
-        });
-
-
-        updateViewVisibility();
-
-        Log.d(TAG,"initUiEnd");
-        timeLog.logTime();
-    }
-
-    /*private Runnable addExposureModeRunnable = new Runnable() {
-        @Override
-        public void run() {
-            exposureMode = new ExposureModeView(getContext());
-            exposureMode.setOnClickListener(CameraUiFragment.this);
-            exposureMode.setActivity(activityInterface);
-            dialViews.add(exposureMode);
-            leftHolder.addView(exposureMode);
-            exposureMode.updateImage();
-        }
-    };*/
-
-   /* private Runnable addDriveModeRunnable = new Runnable() {
-        @Override
-        public void run() {
-            driveMode = new DriveMode(getContext());
-            driveMode.setOnClickListener(CameraUiFragment.this);
-            driveMode.setActivity(activityInterface);
-            dialViews.add(driveMode);
-            leftHolder.addView(driveMode);
-            driveMode.updateImage();
-        }
-    };*/
-
-    /*private Runnable addImageStabRunnable = new Runnable() {
-        @Override
-        public void run() {
-            imageStabView = new ImageStabView(getContext());
-            imageStabView.setActivity(activityInterface);
-            imageStabView.setOnClickListener(CameraUiFragment.this);
-            dialViews.add(imageStabView);
-            leftHolder.addView(imageStabView);
-            imageStabView.updateImage();
-        }
-    };*/
-/*
-    private Runnable addLongExpoNoiseReductionRunnable = new Runnable() {
-        @Override
-        public void run() {
-            longExpoNR = new LongExpoNR(getContext());
-            longExpoNR.setActivity(activityInterface);
-            longExpoNR.setOnClickListener(CameraUiFragment.this);
-            dialViews.add(longExpoNR);
-            leftHolder.addView(longExpoNR);
-            longExpoNR.updateImage();
-        }
-    };*/
-
-   /* private Runnable addTimelapseRunnable = new Runnable() {
-        @Override
-        public void run() {
-            m_ivTimelapse = new BaseImageView(getContext()) {
-                @Override
-                public void updateImage() {
-
-                }
-
-                @Override
-                public void toggle() {
-                    if (timelapse.isActive())
-                        timelapse.abort();
-                    else {
-                        activityInterface.getDialHandler().setDialEventListner(timelapse);
-                        timelapse.onEnterKeyUp();
-                    }
-                }
-
-                @Override
-                public void setIn_DecrementValue(int value) {
-
-                }
-
-                @Override
-                public String getNavigationString() {
-                    return activityInterface.getResString(R.string.view_startBracket_Timelapse);
-                }
-            };
-            //noinspection ResourceType
-            m_ivTimelapse.setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_43_shoot_icon_setting_drivemode_invalid));
-            m_ivTimelapse.setOnClickListener(CameraUiFragment.this);
-            dialViews.add(m_ivTimelapse);
-            leftHolder.addView(m_ivTimelapse);
-        }
-    };
-
-    private Runnable addBracketRunnable = new Runnable() {
-        @Override
-        public void run() {
-            m_ivBracket = new BaseImageView(getContext()) {
-                @Override
-                public void updateImage() {
-
-                }
-
-                @Override
-                public void toggle() {
-                    if (bracket.isActive())
-                    {
-                        bracket.abort();
-                    }
-                    else {
-                        activityInterface.getDialHandler().setDialEventListner(bracket);
-                        bracket.onEnterKeyUp();
-                    }
-                }
-
-                @Override
-                public void setIn_DecrementValue(int value) {
-
-                }
-
-                @Override
-                public String getNavigationString() {
-                    return activityInterface.getResString(R.string.view_startBracket_Timelapse);
-                }
-            };
-            //noinspection ResourceType
-            m_ivBracket.setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_contshot));
-            m_ivBracket.setOnClickListener(CameraUiFragment.this);
-            dialViews.add(m_ivBracket);
-            leftHolder.addView(m_ivBracket);
-            // Shutter
-            ShutterController.GetInstance().setShutterSpeedEventListner(bracket);
-        }
-    };
-
-    private Runnable addBottomItems = new Runnable() {
-        @Override
-        public void run() {
-            final int margineright = (int)getResources().getDimension(R.dimen.bottomHolderChildMarginRight);
-            LinearLayout.LayoutParams params= new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            params.setMargins(0, 0, margineright, 0);
-            params.weight = 1;
-
-
-            //dialViews.add(evCompensation);
-
-            setDialMode(0);
-        }
-    };*/
-
-    private void clearUiItems()
-    {
-        dialViews.clear();
-        leftHolder.removeAllViews();
-        bottomHolder.removeAllViews();
-    }
-
 
 
     /* ##############################################################################
@@ -496,10 +275,6 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         m_viewFlags = viewsToShow;
     }
 
-    /*@Override
-    public ExposureModeView getExposureMode() {
-        return exposureMode;
-    }*/
 
     @Override
     public ActivityInterface getActivityInterface() {
@@ -512,7 +287,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         activityInterface.getMainHandler().post(new Runnable() {
             @Override
             public void run() {
-                m_vHist.setVisibility((m_viewFlags & VIEW_FLAG_HISTOGRAM) != 0 ? View.VISIBLE : View.GONE);
+                HistogramController.GetInstance().setVisibility((m_viewFlags & VIEW_FLAG_HISTOGRAM) != 0);
                 m_vGrid.setVisibility((m_viewFlags & VIEW_FLAG_GRID) != 0 ? View.VISIBLE : View.GONE);
             }
         });
@@ -584,7 +359,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
     @Override
     public boolean onUpperDialChanged(int value)
     {
-        dialViews.get(lastDialView).setValue(value);
+        dialViews.get(lastDialView).set_In_De_crase(value);
 
         return true;
     }
@@ -807,35 +582,5 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         activityInterface.closeApp();
         return true;
     }
-
-
-    /*  ##################################################################
-        ## CameraEx Events impl ##
-        ########################## */
-
-    //################# CameraEx.ShutterListener END#############
-
-    //###################### CameraEx.PreviewAnalizeListener #################
-    @Override
-    public void onAnalizedData(CameraEx.AnalizedData analizedData, CameraEx cameraEx) {
-        if (analizedData != null && analizedData.hist != null && analizedData.hist.Y != null && m_vHist.getVisibility() == View.VISIBLE)
-            m_vHist.setHistogram(analizedData.hist.Y);
-    }
-    //############### CameraEx.PreviewAnalizeListener END###############
-
-
-
-    //##########CameraEx.FocusDriveListner################
-    @Override
-    public void onChanged(CameraEx.FocusPosition focusPosition, CameraEx cameraEx) {
-
-            m_lFocusScale.setVisibility(View.VISIBLE);
-            m_focusScaleView.setMaxPosition(focusPosition.maxPosition);
-            m_focusScaleView.setCurPosition(focusPosition.currentPosition);
-            activityInterface.getMainHandler().removeCallbacks(m_hideFocusScaleRunnable);
-            activityInterface.getMainHandler().postDelayed(m_hideFocusScaleRunnable, 2000);
-
-    }
-    //##########CameraEx.FocusDriveListner ENDs################
 
 }

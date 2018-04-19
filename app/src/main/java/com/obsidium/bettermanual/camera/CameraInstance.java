@@ -5,11 +5,14 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+import com.obsidium.bettermanual.Preferences;
 import com.obsidium.bettermanual.controller.ApertureController;
 import com.obsidium.bettermanual.controller.DriveModeController;
 import com.obsidium.bettermanual.controller.ExposureCompensationController;
 import com.obsidium.bettermanual.controller.ExposureHintController;
 import com.obsidium.bettermanual.controller.ExposureModeController;
+import com.obsidium.bettermanual.controller.FocusDriveController;
+import com.obsidium.bettermanual.controller.HistogramController;
 import com.obsidium.bettermanual.controller.ImageStabilisationController;
 import com.obsidium.bettermanual.controller.IsoController;
 import com.obsidium.bettermanual.controller.LongExposureNoiseReductionController;
@@ -19,6 +22,8 @@ import com.obsidium.bettermanual.model.DriveModeModel;
 import com.obsidium.bettermanual.model.ExposureCompensationModel;
 import com.obsidium.bettermanual.model.ExposureHintModel;
 import com.obsidium.bettermanual.model.ExposureModeModel;
+import com.obsidium.bettermanual.model.FocusDriveModel;
+import com.obsidium.bettermanual.model.HistogramModel;
 import com.obsidium.bettermanual.model.ImageStabilisationModel;
 import com.obsidium.bettermanual.model.IsoModel;
 import com.obsidium.bettermanual.model.LongExposureNoiseReductionModel;
@@ -47,6 +52,8 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
     private DriveModeModel driveModeModel;
     private ImageStabilisationModel imageStabilisationModel;
     private LongExposureNoiseReductionModel longExposureNoiseReductionModel;
+    private HistogramModel histogramModel;
+    private FocusDriveModel focusDriveModel;
 
 
     private CameraInstance() {
@@ -81,6 +88,25 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
 
     public void initParameters()
     {
+        setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
+        final String sceneMode = Preferences.GET().getSceneMode();
+        setSceneMode(sceneMode);
+        setDriveMode(Preferences.GET().getDriveMode());
+        setBurstDriveSpeed(Preferences.GET().getBurstDriveSpeed());
+        // Minimum shutter speed
+        if(isAutoShutterSpeedLowLimitSupported()) {
+            if (sceneMode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
+                setAutoShutterSpeedLowLimit(-1);
+            else
+                setAutoShutterSpeedLowLimit(Preferences.GET().getMinShutterSpeed());
+        }
+        // Disable self timer
+        setSelfTimer(0);
+        // Force aspect ratio to 3:2
+        setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
+        setImageQuality(CameraEx.ParametersModifier.PICTURE_STORAGE_FMT_RAW);
+
+
         apertureModel = new ApertureModel(this);
         m_camera.setApertureChangeListener(apertureModel);
         ApertureController.GetInstance().bindModel(apertureModel);
@@ -117,6 +143,14 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
             LongExposureNoiseReductionController.GetIntance().bindModel(longExposureNoiseReductionModel);
         }
 
+        focusDriveModel = new FocusDriveModel(this);
+        m_camera.setFocusDriveListener(focusDriveModel);
+        FocusDriveController.GetInstance().bindModel(focusDriveModel);
+
+        histogramModel = new HistogramModel(this);
+        m_camera.setPreviewAnalizeListener(histogramModel);
+        HistogramController.GetInstance().bindModel(histogramModel);
+
 
         //dumpParameter();
     }
@@ -124,6 +158,11 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
     public void closeCamera() {
         cameraIsOpen = false;
         Log.d(TAG, "closeCamera");
+
+        Preferences.GET().setSceneMode(getSceneMode());
+        // Drive mode and burst speed
+        Preferences.GET().setDriveMode(getDriveMode());
+        Preferences.GET().setBurstDriveSpeed(getBurstDriveSpeed());
 
         ApertureController.GetInstance().bindModel(null);
         m_camera.setApertureChangeListener(null);
@@ -148,6 +187,14 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
 
         DriveModeController.GetInstance().bindModel(null);
         driveModeModel = null;
+
+        HistogramController.GetInstance().bindModel(null);
+        m_camera.setPreviewAnalizeListener(null);
+        histogramModel = null;
+
+        FocusDriveController.GetInstance().bindModel(null);
+        m_camera.setFocusDriveListener(null);
+        focusDriveModel = null;
 
         /*cameraSequence.setShutterSequenceCallback(null);
         cameraSequence.release();*/

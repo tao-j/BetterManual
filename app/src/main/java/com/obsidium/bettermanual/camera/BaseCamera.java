@@ -30,7 +30,6 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
 
     CameraEx.FocusDriveListener focusDriveListener;
     CameraEx.PreviewMagnificationListener previewMagnificationListener;
-    CameraEx.ShutterListener shutterListener;
     CameraEx.FocusLightStateListener focusLightStateListener;
     CameraEx.SettingChangedListener settingChangedListener;
 
@@ -81,7 +80,7 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
 
     @Override
     public void setShutterListener(CameraEx.ShutterListener shutterListener) {
-        this.shutterListener = shutterListener;
+        m_camera.setShutterListener(shutterListener);
     }
 
     @Override

@@ -56,18 +56,18 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
     }
 
     @Override
-    public void prepare() {
+    public boolean prepare() {
         Log.d(TAG,"prepare");
         if (isActive())
             abort();
         currentdial = DIAL_STATE_BULBTIME;
-        //cameraUiInterface.setDialMode(CameraUiFragment.DialMode.timelapseSetInterval);
         bulbCaptureTime = Preferences.GET().getBulbTime();
         updateBulbTime();
         cameraUiInterface.showHintMessage(cameraUiInterface.getActivityInterface().getResString(R.string.icon_lowerDial) +
                 " to set Bulb Duration, "
                 +cameraUiInterface.getActivityInterface().getResString(R.string.icon_enterButton)
                 + " to start");
+        return true;
     }
 
     @Override
@@ -84,12 +84,9 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
             cameraUiInterface.getActivityInterface().getMainHandler().postDelayed(cancelPictureRunner,bulbCaptureTime);
     }
 
-    private Runnable cancelPictureRunner = new Runnable() {
-        @Override
-        public void run() {
-            cameraUiInterface.getActivityInterface().cancelBulbCapture();
-            onCaptureDone();
-        }
+    private Runnable cancelPictureRunner = () -> {
+        cameraUiInterface.getActivityInterface().cancelBulbCapture();
+        onCaptureDone();
     };
 
     @Override
@@ -229,8 +226,8 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
             return false;
         }
         if (currentdial == DIAL_STATE_NOTHING) {
-            prepare();
-            updateBulbTime();
+            if (prepare())
+                updateBulbTime();
         }
         else if (currentdial == DIAL_STATE_BULBTIME)
         {

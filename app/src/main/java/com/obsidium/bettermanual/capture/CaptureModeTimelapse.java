@@ -58,15 +58,13 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, Capt
     }
 
     @Override
-    public void prepare() {
+    public boolean prepare() {
         if (isActive())
             abort();
         else
         {
             cameraUiInterface.setLeftViewVisibility(false);
-
             currentdial = TLS_SET_INTERVAL;
-            //cameraUiInterface.setDialMode(CameraUiFragment.DialMode.timelapseSetInterval);
             m_timelapseInterval = 1000;
             updateTimelapseInterval();
             cameraUiInterface.showHintMessage(cameraUiInterface.getActivityInterface().getResString(R.string.icon_lowerDial) +
@@ -84,6 +82,7 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, Capt
             {
             }
         }
+        return true;
     }
 
     @Override
@@ -137,37 +136,6 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, Capt
         currentdial = TLS_SET_NONE;
 
     }
-
-
-    /*@Override
-    public void onShutter(int i) {
-        if (i == 0)
-        {
-            ++m_timelapsePicsTaken;
-            if (m_timelapsePicCount < 0 || m_timelapsePicCount == 1)
-                abort();
-            else
-            {
-                if (m_timelapsePicCount != 0)
-                    --m_timelapsePicCount;
-                if (m_timelapseInterval >= 1000)
-                {
-                    if (m_timelapsePicCount > 0)
-                        cameraUiInterface.showMessageDelayed(String.format("%d pictures remaining", m_timelapsePicCount));
-                    else
-                        cameraUiInterface.showMessageDelayed(String.format("%d pictures taken", m_timelapsePicsTaken));
-                }
-                if (m_timelapseInterval != 0)
-                    cameraUiInterface.getActivityInterface().getMainHandler().postDelayed(m_timelapseRunnable, m_timelapseInterval);
-                else
-                    cameraUiInterface.getActivityInterface().getCamera().takePicture();
-            }
-        }
-        else
-        {
-            abort();
-        }
-    }*/
 
     @Override
     public void decrement()
@@ -225,14 +193,7 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, Capt
         updateTimelapsePictureCount();
     }
 
-    private final Runnable  m_timelapseRunnable = new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            startShooting();
-        }
-    };
+    private final Runnable  m_timelapseRunnable = () -> startShooting();
 
     @Override
     public boolean onUpperDialChanged(int value) {
@@ -309,8 +270,8 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, Capt
     public boolean onEnterKeyUp() {
         Log.d(TAG,"onEnterKeyDown" + currentdial);
         if (currentdial == TLS_SET_NONE) {
-            prepare();
-            updateTimelapseInterval();
+            if (prepare());
+                updateTimelapseInterval();
         }
         else if (currentdial == TLS_SET_INTERVAL) {
             cameraUiInterface.showHintMessage(cameraUiInterface.getActivityInterface().getResString(R.string.icon_lowerDial)

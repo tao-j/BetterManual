@@ -22,7 +22,7 @@ public class IsoController extends TextViewController<IsoModel>{
 
     @Override
     public int getNavigationHelpID() {
-        if (model.getCurrentIso() == 0)
+        if (model != null && model.getCurrentIso() == 0)
             return R.string.view_iso_navigation_auto;
         return R.string.view_iso_navigation_manual;
     }

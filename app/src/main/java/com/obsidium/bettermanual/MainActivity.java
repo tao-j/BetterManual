@@ -321,7 +321,8 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         Log.d(TAG, "RunMainThread: " + (Thread.currentThread() == Looper.getMainLooper().getThread()));
         if (!isBulbCapture()) {
 
-            CameraInstance.GET().cancelCapture();
+            cameraEx2.cancelTakePicture();
+            //CameraInstance.GET().startPreview();
             /*Caution.SetTrigger(131078, 1, false);
             avIndexHandler.update();
             Caution.SetMode(2, AvindexStore.getExternalMediaIds());

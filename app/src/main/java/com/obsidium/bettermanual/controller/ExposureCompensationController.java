@@ -1,5 +1,6 @@
 package com.obsidium.bettermanual.controller;
 
+import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.model.ExposureCompensationModel;
 
 public class ExposureCompensationController extends TextViewController<ExposureCompensationModel> {
@@ -17,6 +18,6 @@ public class ExposureCompensationController extends TextViewController<ExposureC
 
     @Override
     public int getNavigationHelpID() {
-        return 0;
+        return R.string.view_drivemode_navigation;
     }
 }

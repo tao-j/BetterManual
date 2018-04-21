@@ -1,7 +1,10 @@
 package com.obsidium.bettermanual.controller;
 
+import android.util.Log;
+
 import com.obsidium.bettermanual.ActivityInterface;
 import com.obsidium.bettermanual.MainActivity;
+import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.capture.CaptureModeBulb;
 import com.obsidium.bettermanual.model.ExposureModeModel;
 import com.obsidium.bettermanual.model.Model;
@@ -9,6 +12,8 @@ import com.obsidium.bettermanual.model.ShutterModel;
 import com.sony.scalar.hardware.CameraEx;
 
 public class ShutterController extends TextViewController<ShutterModel> {
+
+    private final String TAG = ShutterController.class.getSimpleName();
 
     public interface ShutterSpeedEvent
     {
@@ -42,7 +47,7 @@ public class ShutterController extends TextViewController<ShutterModel> {
 
     @Override
     public int getNavigationHelpID() {
-        return 0;
+        return R.string.view_drivemode_navigation;
     }
 
     public CameraEx.ShutterSpeedInfo getShutterSpeedInfo()
@@ -59,6 +64,7 @@ public class ShutterController extends TextViewController<ShutterModel> {
 
     @Override
     public void onValueChanged() {
+        Log.d(TAG, "onValueChanged()");
         super.onValueChanged();
         if (shutterSpeedEventListner != null)
             shutterSpeedEventListner.onChanged();

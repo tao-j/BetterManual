@@ -6,7 +6,7 @@ import com.obsidium.bettermanual.model.Model;
 interface CaptureModeInterface {
     void reset();
     void startCountDown();
-    void prepare();
+    boolean prepare();
     void startShooting();
     void abort();
 

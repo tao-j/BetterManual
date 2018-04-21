@@ -355,7 +355,8 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
 
     public void adjustShutterSpeed(int val)
     {
-        m_camera.adjustShutterSpeed(val);
+        cameraHandler.removeMessages(SET_ADJUST_SHUTTER_SPEED);
+        cameraHandler.handleMessage(cameraHandler.obtainMessage(CameraParameterInterface.SET_ADJUST_SHUTTER_SPEED,val,0));
     }
 
 

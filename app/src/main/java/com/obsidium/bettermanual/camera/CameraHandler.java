@@ -132,6 +132,9 @@ public class CameraHandler extends Handler
                 modifier.setAntiHandBlurMode((String) msg.obj);
                 cameraEx.setParameters(parameters);
                 break;
+            case CameraParameterInterface.SET_ADJUST_SHUTTER_SPEED:
+                cameraEx.m_camera.adjustShutterSpeed(msg.arg1);
+                break;
 
             default:
                 super.handleMessage(msg);

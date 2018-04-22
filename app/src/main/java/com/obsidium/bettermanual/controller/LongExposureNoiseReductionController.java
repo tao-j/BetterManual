@@ -36,4 +36,5 @@ public class LongExposureNoiseReductionController extends ImageViewController<Lo
         else
             view.setImageResource(R.drawable.lnr_off);
     }
+
 }

@@ -12,25 +12,27 @@ public abstract class AbstractController<V  extends View, M extends Model> imple
     protected M model;
 
     @Override
-    public void bindView(V v) {
+    public synchronized void bindView(V v) {
         this.view = v;
+        onIsSupportedChanged();
     }
 
     @Override
-    public void bindModel(M model) {
+    public synchronized void bindModel(M model) {
         this.model = model;
         if (model != null)
             model.setListner(this);
+        onIsSupportedChanged();
     }
 
     @Override
     public void onIsSupportedChanged() {
         if (model != null){
             if (view != null)
-                view.setVisibility(model.isSupported() ? View.VISIBLE : View.INVISIBLE);
+                view.post(()->view.setVisibility(model.isSupported() ? View.VISIBLE : View.INVISIBLE));
         }
         else if (view != null)
-            view.setVisibility(View.GONE);
+            view.post(()->view.setVisibility(View.GONE));
     }
 
     @Override

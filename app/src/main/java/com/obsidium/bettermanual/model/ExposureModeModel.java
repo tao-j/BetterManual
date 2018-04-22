@@ -9,7 +9,14 @@ public class ExposureModeModel extends AbstractModel<ExposureModeModel.ExposureM
 
     public ExposureModeModel(CameraInstance camera) {
         super(camera);
-        value = ExposureModes.aperture;
+        if (camera.getSceneMode().equals(CameraEx.ParametersModifier.SCENE_MODE_APERTURE_PRIORITY))
+            value = ExposureModes.aperture;
+        else if (camera.getSceneMode().equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
+            value = ExposureModes.manual;
+        else if (camera.getSceneMode().equals(CameraEx.ParametersModifier.SCENE_MODE_SHUTTER_PRIORITY))
+            value = ExposureModes.shutter;
+        else
+            value = ExposureModes.other;
     }
 
     public enum ExposureModes { manual, aperture, shutter, other }

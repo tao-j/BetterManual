@@ -18,4 +18,9 @@ public class ImageStabilisationModel extends ApertureModel
             camera.setImageStabilisation("onetime");
         fireOnValueChanged();
     }
+
+    @Override
+    public boolean isSupported() {
+        return true;
+    }
 }

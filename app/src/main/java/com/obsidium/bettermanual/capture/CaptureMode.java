@@ -77,4 +77,9 @@ public abstract class CaptureMode extends ImageViewController implements Capture
 
     }
 
+    @Override
+    public void onIsSupportedChanged() {
+        if(view != null)
+            view.setVisibility(View.VISIBLE);
+    }
 }

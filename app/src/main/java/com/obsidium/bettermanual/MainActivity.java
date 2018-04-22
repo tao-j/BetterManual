@@ -120,7 +120,6 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     @Override
     protected void onPause() {
         Log.d(TAG,"onPause");
-        removeSurfaceView();
         super.onPause();
         if (avIndexManager != null) {
             unregisterReceiver(avIndexManager);
@@ -128,6 +127,8 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         }
 
         CameraInstance.GET().closeCamera();
+        removeSurfaceView();
+        layoutHolder.removeAllViews();
     }
 
     @Override
@@ -135,6 +136,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         super.onDestroy();
         stopBackgroundThread();
         Preferences.CLEAR();
+        avIndexManager = null;
         ShutterController.GetInstance().bindActivityInterface(null);
     }
 
@@ -281,6 +283,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
 
     private void removeSurfaceView()
     {
+        m_surfaceHolder.removeCallback(this);
         surfaceView = null;
         surfaceViewHolder.removeAllViews();
     }

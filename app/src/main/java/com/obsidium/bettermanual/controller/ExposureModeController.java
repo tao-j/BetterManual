@@ -62,6 +62,9 @@ public class ExposureModeController extends ImageViewController<ExposureModeMode
 
     public ExposureModeModel.ExposureModes getExposureMode()
     {
-        return model.getValue();
+        if (model != null)
+            return model.getValue();
+        else
+            return null;
     }
 }

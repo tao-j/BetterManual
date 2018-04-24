@@ -71,6 +71,8 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
 
     @Override
     public boolean prepare() {
+        if (ExposureModeController.GetInstance().getExposureMode() == null)
+            return false;
         if (isActive())
             abort();
         else

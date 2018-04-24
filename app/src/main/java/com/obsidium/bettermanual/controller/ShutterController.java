@@ -1,6 +1,7 @@
 package com.obsidium.bettermanual.controller;
 
 import android.util.Log;
+import android.view.View;
 
 import com.obsidium.bettermanual.ActivityInterface;
 import com.obsidium.bettermanual.MainActivity;
@@ -68,5 +69,7 @@ public class ShutterController extends TextViewController<ShutterModel> {
         super.onValueChanged();
         if (shutterSpeedEventListner != null)
             shutterSpeedEventListner.onChanged();
+        if (view != null && view.getVisibility() == View.GONE && model != null)
+            view.setVisibility(View.VISIBLE);
     }
 }

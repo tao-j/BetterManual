@@ -18,6 +18,7 @@ public class IsoModel extends AbstractModel<String> implements CameraEx.AutoISOS
         setValue(camera.getISOSensitivity());
         value = "\uE488 " + String.valueOf(0) + (m_curIso == 0 ? "(A)" : "");
         fireOnValueChanged();
+        fireOnSupportedChanged();
 
     }
 

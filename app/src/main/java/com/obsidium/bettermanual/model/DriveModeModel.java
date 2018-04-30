@@ -17,7 +17,9 @@ public class DriveModeModel extends AbstractModel<String> {
 
     @Override
     public String getValue() {
-        return camera.getDriveMode();
+        if (value == null || value.isEmpty())
+            value = camera.getDriveMode();
+        return value;
     }
 
     public String getBurstDriveSpeed()

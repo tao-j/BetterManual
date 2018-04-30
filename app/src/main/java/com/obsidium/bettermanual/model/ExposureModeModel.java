@@ -31,6 +31,21 @@ public class ExposureModeModel extends AbstractModel<ExposureModeModel.ExposureM
         return value;
     }
 
+    public String getStringValue()
+    {
+        switch (value)
+        {
+            case aperture:
+                return CameraEx.ParametersModifier.SCENE_MODE_APERTURE_PRIORITY;
+            case manual:
+                return CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE;
+            case shutter:
+                return CameraEx.ParametersModifier.SCENE_MODE_SHUTTER_PRIORITY;
+            default:
+                return CameraEx.ParametersModifier.SCENE_MODE_APERTURE_PRIORITY;
+        }
+    }
+
     @Override
     public boolean isSupported() {
         return true;

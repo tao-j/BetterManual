@@ -120,7 +120,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     @Override
     protected void onPause() {
         Log.d(TAG,"onPause");
-        super.onPause();
+
         if (avIndexManager != null) {
             unregisterReceiver(avIndexManager);
             avIndexManager.onPause(getApplicationContext());
@@ -129,6 +129,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         CameraInstance.GET().closeCamera();
         removeSurfaceView();
         layoutHolder.removeAllViews();
+        super.onPause();
     }
 
     @Override

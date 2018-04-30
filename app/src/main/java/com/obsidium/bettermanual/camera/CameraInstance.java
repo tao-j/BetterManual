@@ -159,9 +159,9 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
         cameraIsOpen = false;
         Log.d(TAG, "closeCamera");
 
-        Preferences.GET().setSceneMode(getSceneMode());
+        Preferences.GET().setSceneMode(exposureModeModel.getStringValue());
         // Drive mode and burst speed
-        Preferences.GET().setDriveMode(getDriveMode());
+        Preferences.GET().setDriveMode(driveModeModel.getValue());
         Preferences.GET().setBurstDriveSpeed(getBurstDriveSpeed());
 
         ApertureController.GetInstance().bindModel(null);

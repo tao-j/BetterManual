@@ -1,5 +1,6 @@
 package com.obsidium.bettermanual;
 
+import android.app.DAConnectionManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -167,7 +168,8 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         intent.putExtra("pullingback_key", new String[] {});
         intent.putExtra("resume_key", new String[] {});
         sendBroadcast(intent);
-        onBackPressed();
+        new DAConnectionManager(this).finish();
+        finish();
     }
 
     @Override

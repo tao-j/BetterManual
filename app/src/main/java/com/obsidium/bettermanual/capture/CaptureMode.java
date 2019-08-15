@@ -32,7 +32,7 @@ public abstract class CaptureMode extends ImageViewController implements Capture
 
     @Override
     public int getNavigationHelpID() {
-        return R.string.view_startBracket_Timelapse;
+        return 0;
     }
 
     protected final Runnable  m_countDownRunnable = new Runnable()

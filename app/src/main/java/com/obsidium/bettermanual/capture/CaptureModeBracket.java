@@ -60,7 +60,7 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
 
     @Override
     public int getNavigationHelpID() {
-        return 0;
+        return R.string.view_startBracket;
     }
 
     @Override

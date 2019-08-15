@@ -47,7 +47,7 @@ public class CaptureModeTimelapse extends CaptureMode implements KeyEvents, Capt
 
     @Override
     public int getNavigationHelpID() {
-        return R.string.view_startBracket_Timelapse;
+        return R.string.view_Timelapse;
     }
 
     public void reset()

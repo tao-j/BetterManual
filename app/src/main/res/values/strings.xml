@@ -11,7 +11,8 @@
     <string name="view_shutter_navigation_enable">&icon_top_right_dial; to change</string>
     <string name="view_shutter_navigation_disabled">&icon_enterButton; to change MinShutterSpeed</string>
     <string name="view_drivemode_navigation">&icon_enterButton; to change</string>
-    <string name="view_startBracket_Timelapse">&icon_enterButton; to start</string>
+    <string name="view_startBracket">&icon_enterButton; to start AE Bracket</string>
+    <string name="view_Timelapse">&icon_enterButton; to start Timelapse</string>
     <string name="view_ev">&icon_enterButton; to reset, &icon_top_right_dial; to change</string>
 
 

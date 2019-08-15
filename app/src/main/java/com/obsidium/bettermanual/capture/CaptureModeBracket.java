@@ -120,6 +120,8 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
         //m_handler.removeCallbacks(m_timelapseRunnable);
         isActive = false;
         cameraUiInterface.showMessageDelayed("Bracketing finished");
+        CameraInstance.GET().enableHwShutterButton();
+        CameraInstance.GET().startPreview();
 
         // Update controls
         cameraUiInterface.hideHintMessage();

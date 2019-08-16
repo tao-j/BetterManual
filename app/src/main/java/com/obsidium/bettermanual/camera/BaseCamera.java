@@ -360,6 +360,11 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     }
 
 
+    public void setFocusPosition(int pos)
+    {
+        cameraHandler.handleMessage(cameraHandler.obtainMessage(CameraParameterInterface.MSG_SET_FOCUSPOSITION, pos,0));
+    }
+
     //returns always [0,0,0] when used with mf, dont know if its works with af
     /*public float[]getFocusDistances()
     {

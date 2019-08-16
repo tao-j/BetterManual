@@ -36,6 +36,7 @@ interface CameraParameterInterface
     int MSG_SET_BURSTDRIVESPEED = 23;
     int MSG_SET_IMAGEQUALITY = 24;
     int MSG_SET_IMAGESTABILISATION = 25;
+    int MSG_SET_FOCUSPOSITION = 26;
 
     //ExposureCompensation
     int getExposureCompensation();
@@ -93,6 +94,7 @@ interface CameraParameterInterface
     void setLiveSlowShutter(String liveSlowShutter);
     String getLiveSlowShutter();
     String[] getSupportedLiveSlowShutterModes();
+    void setFocusPosition(int pos);
 
 
 }

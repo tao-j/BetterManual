@@ -93,6 +93,7 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
     public void abort() {
         Log.d(TAG,"abort");
         isActive = false;
+        Log.d(TAG,"remove m_countDownRunnable");
         cameraUiInterface.getActivityInterface().getMainHandler().removeCallbacks(m_countDownRunnable);
         cameraUiInterface.showMessageDelayed("Bulb finished");
         CameraInstance.GET().enableHwShutterButton();

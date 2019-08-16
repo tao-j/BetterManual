@@ -135,7 +135,12 @@ public class CameraHandler extends Handler
             case CameraParameterInterface.SET_ADJUST_SHUTTER_SPEED:
                 cameraEx.m_camera.adjustShutterSpeed(msg.arg1);
                 break;
-
+                case CameraParameterInterface.MSG_SET_FOCUSPOSITION:
+                    if (msg.arg1 < 0)
+                        cameraEx.m_camera.startOneShotFocusDrive(CameraEx.FOCUS_DRIVE_DIRECTION_NEAR,msg.arg1*-1);
+                    else
+                        cameraEx.m_camera.startOneShotFocusDrive(CameraEx.FOCUS_DRIVE_DIRECTION_FAR,msg.arg1);
+                    break;
             default:
                 super.handleMessage(msg);
         }

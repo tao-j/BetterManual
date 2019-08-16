@@ -210,14 +210,17 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
     }
 
     public void startPreview() {
+        Log.d(TAG,"startPreview");
         cameraHandler.sendMessage(cameraHandler.obtainMessage(START_PREVIEW));
     }
 
     public void stopPreview() {
+        Log.d(TAG,"stopPreview");
         cameraHandler.sendMessage(cameraHandler.obtainMessage(STOP_PREVIEW));
     }
 
     public void enableHwShutterButton() {
+        Log.d(TAG,"enableHwShutterButton");
         m_camera.startDirectShutter();
 
     }
@@ -228,6 +231,7 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
 
     public void cancelCapture()
     {
+        Log.d(TAG,"cancelCapture");
         cameraHandler.sendMessage(cameraHandler.obtainMessage(CANCEL_CAPTURE));
     }
 

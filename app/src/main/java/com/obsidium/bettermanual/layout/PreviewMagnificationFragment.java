@@ -142,6 +142,7 @@ public class PreviewMagnificationFragment extends BaseLayout implements CameraEx
 
     @Override
     public boolean onUpperDialChanged(int value) {
+        CameraInstance.GET().setFocusPosition(value);
         return false;
     }
 

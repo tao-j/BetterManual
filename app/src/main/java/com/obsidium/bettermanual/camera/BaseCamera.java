@@ -60,6 +60,7 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     public void setPreviewMagnificationListener(CameraEx.PreviewMagnificationListener previewMagnificationListener)
     {
         this.previewMagnificationListener = previewMagnificationListener;
+        m_camera.setPreviewMagnificationListener(previewMagnificationListener);
     }
 
 

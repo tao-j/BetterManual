@@ -2,7 +2,6 @@ package com.obsidium.bettermanual.capture;
 
 import android.util.Log;
 import android.util.Pair;
-import android.view.View;
 
 import com.obsidium.bettermanual.CameraUtil;
 import com.obsidium.bettermanual.KeyEvents;
@@ -17,7 +16,6 @@ import com.obsidium.bettermanual.controller.IsoController;
 import com.obsidium.bettermanual.controller.ShutterController;
 import com.obsidium.bettermanual.layout.CameraUiInterface;
 import com.obsidium.bettermanual.model.ExposureModeModel;
-import com.obsidium.bettermanual.model.Model;
 import com.sony.scalar.hardware.CameraEx;
 
 public class CaptureModeBracket extends CaptureMode implements  ShutterController.ShutterSpeedEvent, KeyEvents, CaptureSession.CaptureDoneEvent {

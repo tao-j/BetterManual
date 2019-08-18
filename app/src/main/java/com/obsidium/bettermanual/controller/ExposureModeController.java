@@ -1,9 +1,5 @@
 package com.obsidium.bettermanual.controller;
 
-import android.graphics.Color;
-import android.util.Log;
-import android.widget.ImageView;
-
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.model.ExposureModeModel;
 

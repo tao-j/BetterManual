@@ -1,10 +1,7 @@
 package com.obsidium.bettermanual.controller;
 
-import android.widget.TextView;
-
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.model.IsoModel;
-import com.obsidium.bettermanual.model.Model;
 
 public class IsoController extends TextViewController<IsoModel>{
 

@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
+import com.github.ma1co.openmemories.framework.ImageInfo;
 import com.sony.scalar.media.AvindexContentInfo;
 import com.sony.scalar.provider.AvindexStore;
 
@@ -51,17 +52,15 @@ public class AvIndexManager extends BroadcastReceiver
     private ContentResolver contentResolver;
     private Cursor cursor;
     private final Uri mediaStorageUri;
-
-    final String[] GROUP_QUERY_PROJECTION = new String[] { "_id", "_count", "count_of_one_before", "dcf_folder_number" };
-    final String[] QUERY_PROJECTION = new String[] { "_id", "_data", "_display_name", "datetaken" };
-    protected static final String[] CONTENTS_QUERY_PROJECTION = { "_id", "_data", "dcf_file_number", "dcf_folder_number", "content_created_local_date", "content_created_utc_date", "content_created_local_date_time", "content_created_utc_date_time", "exist_jpeg", "exist_raw", "exist_mpo", "rec_order", "content_type" };
-    //final Uri baseUri = AvindexStore.Images.Media.EXTERNAL_CONTENT_URI;
+    private Context context;
+    private long _id;
 
     public IntentFilter MEDIA_INTENTS = new IntentFilter();
     public IntentFilter AVAILABLE_SIZE_INTENTS = new IntentFilter("com.sony.scalar.providers.avindex.action.AVINDEX_MEDIA_AVAILABLE_SIZE_CHANGED");
 
-    public AvIndexManager(ContentResolver contentResolver)
+    public AvIndexManager(ContentResolver contentResolver,Context context)
     {
+        this.context = context;
         this.contentResolver = contentResolver;
         mediaStorageUri = AvindexStore.Images.Media.getContentUri(AvindexStore.getExternalMediaIds()[0]);
     }
@@ -73,8 +72,9 @@ public class AvIndexManager extends BroadcastReceiver
 
     private Cursor getCursorFromUri(Uri uri)
     {
-        return contentResolver.query(uri, CONTENTS_QUERY_PROJECTION, null, null,"content_created_utc_date_time DESC");
+        return contentResolver.query(uri, AvindexStore.Images.Media.ALL_COLUMNS, null, null,AvindexStore.Images.ImageColumns.CONTENT_CREATED_UTC_DATE +" DESC");
     }
+
 
     public void onPause(Context context)
     {
@@ -84,12 +84,29 @@ public class AvIndexManager extends BroadcastReceiver
 
     public String getData()
     {
-        return cursor.getString(cursor.getColumnIndexOrThrow("_data"));
+        return cursor.getString(cursor.getColumnIndexOrThrow(AvindexStore.Images.ImageColumns.DATA));
+    }
+
+    public String getFolder()
+    {
+        return cursor.getString(cursor.getColumnIndexOrThrow(AvindexStore.Images.ImageColumns.DCF_FOLDER_NUMBER));
+    }
+
+    public String getFileName()
+    {
+        return cursor.getString(cursor.getColumnIndexOrThrow(AvindexStore.Images.ImageColumns.DCF_FILE_NUMBER));
+    }
+
+    /**
+     * Creates a new {@link ImageInfo} instance for the given image id
+     */
+    public ImageInfo getImageInfo() {
+        return ImageInfo.create(context, mediaStorageUri, _id);
     }
 
     public boolean existsJpeg()
     {
-        if (Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow("exist_jpeg")))> 0)
+        if (Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow(AvindexStore.Images.ImageColumns.EXIST_JPEG)))> 0)
             return true;
         else
             return false;
@@ -97,7 +114,7 @@ public class AvIndexManager extends BroadcastReceiver
 
     public boolean existsRaw()
     {
-        if (Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow("exist_raw")))> 0)
+        if (Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow(AvindexStore.Images.ImageColumns.EXIST_RAW)))> 0)
             return true;
         else
             return false;
@@ -115,37 +132,9 @@ public class AvIndexManager extends BroadcastReceiver
 
     public void update()
     {
-        /*
-        I/_jniOsalUtil_: SendObjMsg OSAL send. srcId = 0x15e6119, osalErr = 0x0, msgId(android) = 0x1100b, msgId(osal) = 0x1100b
-        I/_jniOsalUtil_: RecvObjMsg start OSAL Receive waiting...
-        I/_jniOsalUtil_: RecvObjMsg messageId = 0x1100c, srcId = 0x15e6119, osalErr = OK
-        I/_InfraScalarMprWrapper_: InfraScalarMprWrapper::waitAndUpdateDatabase# return ret = true
-         */
-        //AvindexStore.Images.waitAndUpdateDatabase(contentResolver, AvindexStore.getExternalMediaIds()[0]);
-
-        /*
-            I/_jniOsalUtil_: SendObjMsg OSAL send. srcId = 0x0, osalErr = 0x0, msgId(android) = 0x1100d, msgId(osal) = 0x1100d
-            I/_InfraScalarMprWrapper_: InfraScalarMprWrapper::cancelWaitAndUpdateDatabase# return ret = true
-         */
-        //AvindexStore.Images.cancelWaitAndUpdateDatabase(contentResolver, AvindexStore.getExternalMediaIds()[0]);
-       /* AvindexDatabaseManager avindexDatabaseManager = AvindexDatabaseManager.GET();
-        AvindexDatabase[] avindexDatabases = avindexDatabaseManager.getAllDatabase();
-        for (AvindexDatabase database : avindexDatabases)
-            database.updateDatabase();
-
-        if (cursor != null && cursor.isClosed())
-            cursor.close();
-        cursor = getCursorFromUri(mediaStorageUri);*/
-        /*AvindexStore.Images.waitAndUpdateDatabase(contentResolver, AvindexStore.getExternalMediaIds()[0]);
-        AvindexStore.loadMedia(AvindexStore.getExternalMediaIds()[0], 1);
-        AvindexStore.Images.waitAndUpdateDatabase(contentResolver, AvindexStore.getExternalMediaIds()[0]);
-        AvindexStore.waitLoadMediaComplete(AvindexStore.getExternalMediaIds()[0]);
-        AvindexStore.cancelWaitLoadMediaComplete(AvindexStore.getExternalMediaIds()[0]);
-        MediaInfo info = AvindexStore.getMediaInfo(AvindexStore.getExternalMediaIds()[0]);
-        String state = android.os.Environment.getExternalStorageState();
-        int remaining = AvindexStore.Images.getAvailableCount(AvindexStore.getExternalMediaIds()[0]);*/
         cursor = getCursorFromUri(mediaStorageUri);
         cursor.moveToFirst();
+        _id = Long.parseLong(getId());
     }
 
     public void moveToNext()
@@ -153,6 +142,7 @@ public class AvIndexManager extends BroadcastReceiver
         cursor.moveToNext();
         if(cursor.isAfterLast())
             cursor.moveToFirst();
+        _id = Long.parseLong(getId());
     }
 
     public void moveToPrevious()
@@ -160,6 +150,7 @@ public class AvIndexManager extends BroadcastReceiver
         cursor.moveToPrevious();
         if (cursor.isBeforeFirst())
             cursor.moveToLast();
+        _id = Long.parseLong(getId());
     }
 
     public int getPosition()
@@ -176,6 +167,10 @@ public class AvIndexManager extends BroadcastReceiver
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG,intent.getAction());
         update();
+    }
+
+    public byte[] getFullImage() {
+        return AvindexStore.Images.Media.getJpegImage(contentResolver, mediaStorageUri, _id);
     }
 
 }

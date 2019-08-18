@@ -1,8 +1,6 @@
 package com.obsidium.bettermanual.controller;
 
-import android.os.Looper;
 import android.util.Log;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.obsidium.bettermanual.model.Model;

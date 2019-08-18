@@ -4,7 +4,6 @@ import android.util.Pair;
 
 import com.obsidium.bettermanual.CameraUtil;
 import com.obsidium.bettermanual.camera.CameraInstance;
-import com.obsidium.bettermanual.controller.ShutterController;
 import com.sony.scalar.hardware.CameraEx;
 
 public class ShutterModel extends AbstractModel<String> implements CameraEx.ShutterSpeedChangeListener {

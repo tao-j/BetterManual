@@ -1,7 +1,6 @@
 package com.obsidium.bettermanual.controller;
 
 import android.view.View;
-import android.widget.TextView;
 
 import com.obsidium.bettermanual.model.Model;
 

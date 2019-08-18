@@ -8,7 +8,6 @@ import com.obsidium.bettermanual.MainActivity;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.capture.CaptureModeBulb;
 import com.obsidium.bettermanual.model.ExposureModeModel;
-import com.obsidium.bettermanual.model.Model;
 import com.obsidium.bettermanual.model.ShutterModel;
 import com.sony.scalar.hardware.CameraEx;
 

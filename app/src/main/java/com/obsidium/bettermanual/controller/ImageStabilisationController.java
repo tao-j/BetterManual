@@ -1,11 +1,7 @@
 package com.obsidium.bettermanual.controller;
 
-import android.graphics.Color;
-import android.widget.ImageView;
-
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.model.ImageStabilisationModel;
-import com.obsidium.bettermanual.model.Model;
 
 public class ImageStabilisationController extends ImageViewController<ImageStabilisationModel> {
 

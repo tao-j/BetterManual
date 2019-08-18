@@ -1,7 +1,5 @@
 package com.obsidium.bettermanual.model;
 
-import android.view.View;
-
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.sony.scalar.hardware.CameraEx;
 

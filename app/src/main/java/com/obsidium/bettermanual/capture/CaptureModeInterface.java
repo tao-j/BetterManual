@@ -1,8 +1,5 @@
 package com.obsidium.bettermanual.capture;
 
-import com.obsidium.bettermanual.controller.Controller;
-import com.obsidium.bettermanual.model.Model;
-
 interface CaptureModeInterface {
     void reset();
     void startCountDown();

@@ -7,7 +7,6 @@ import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.controller.ImageViewController;
 import com.obsidium.bettermanual.layout.CameraUiInterface;
-import com.obsidium.bettermanual.model.Model;
 
 
 public abstract class CaptureMode extends ImageViewController implements CaptureModeInterface

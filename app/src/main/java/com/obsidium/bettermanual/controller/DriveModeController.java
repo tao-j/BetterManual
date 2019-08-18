@@ -1,8 +1,5 @@
 package com.obsidium.bettermanual.controller;
 
-import android.graphics.Color;
-import android.widget.ImageView;
-
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.model.DriveModeModel;
 import com.sony.scalar.hardware.CameraEx;

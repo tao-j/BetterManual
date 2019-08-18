@@ -4,7 +4,6 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.obsidium.bettermanual.camera.CameraInstance;
-import com.sony.scalar.hardware.CameraEx;
 
 
 

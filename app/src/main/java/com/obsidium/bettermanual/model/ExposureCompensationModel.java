@@ -1,8 +1,6 @@
 package com.obsidium.bettermanual.model;
 
-import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
-import com.obsidium.bettermanual.controller.ExposureCompensationController;
 
 public class ExposureCompensationModel extends AbstractModel<String> {
 

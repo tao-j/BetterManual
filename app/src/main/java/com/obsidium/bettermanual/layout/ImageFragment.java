@@ -3,7 +3,6 @@ package com.obsidium.bettermanual.layout;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Point;
-import android.net.Uri;
 import android.util.Log;
 import android.widget.FrameLayout;
 
@@ -13,13 +12,10 @@ import com.obsidium.bettermanual.R;
 import com.sony.scalar.graphics.OptimizedImage;
 import com.sony.scalar.graphics.OptimizedImageFactory;
 import com.sony.scalar.media.AvindexContentInfo;
-import com.sony.scalar.provider.AvindexStore;
 import com.sony.scalar.widget.OptimizedImageView;
 
 
 public class ImageFragment extends BaseLayout {
-
-
 
     private final String TAG = ImageFragment.class.getSimpleName();
     private OptimizedImageView imageView;
@@ -39,38 +35,33 @@ public class ImageFragment extends BaseLayout {
         imageView.setDisplayPosition(new Point(0,0), OptimizedImageView.PositionType.POS_TYPE_NONE);
         Log.d(TAG, "ImageCount:" + activityInterface.getAvIndexManager().getCount());
         loadOptimizedImg();
-
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-
-
     }
 
     @Override
     public void Destroy() {
         closeImageInfo();
         closeOptimizedImage();
-
     }
 
     private void loadOptimizedImg()
     {
-
         if (activityInterface.getAvIndexManager().getPosition() > -1 && activityInterface.getAvIndexManager().getCount() > 0)
         {
             Log.d(TAG,"MEDIA");
 
             String data = activityInterface.getAvIndexManager().getData();
-            boolean israw = activityInterface.getAvIndexManager().existsRaw();
-            boolean isjpeg = activityInterface.getAvIndexManager().existsJpeg();
+            Log.d(TAG,"Img path:" + data);
+            Log.d(TAG,"Img folder:" + activityInterface.getAvIndexManager().getFolder());
+            Log.d(TAG,"Img name:" + activityInterface.getAvIndexManager().getFileName());
 
             closeImageInfo();
 
             info = activityInterface.getAvIndexManager().getContentInfo();
-
             OptimizedImageFactory.Options options = new OptimizedImageFactory.Options();
             options.bBasicInfo = false;
             options.bCamInfo = false;
@@ -82,10 +73,11 @@ public class ImageFragment extends BaseLayout {
 
             closeOptimizedImage();
             image = OptimizedImageFactory.decodeImage(data,options);
-
             imageView.setOptimizedImage(image);
         }
     }
+
+
 
     private void closeOptimizedImage() {
         if (image != null) {
@@ -123,10 +115,7 @@ public class ImageFragment extends BaseLayout {
         else Log.d(TAG, "Nothing to log");
     }
 
-    private Cursor getCursorFromUri(Uri uri)
-    {
-        return getContext().getContentResolver().query(uri, AvindexStore.Images.Media.ALL_COLUMNS, null, null, null);
-    }
+
 
 
     @Override

@@ -16,7 +16,6 @@ import android.widget.LinearLayout;
 import com.github.ma1co.pmcademo.app.BaseActivity;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
-import com.obsidium.bettermanual.controller.FocusDriveController;
 import com.obsidium.bettermanual.controller.ShutterController;
 import com.obsidium.bettermanual.layout.BaseLayout;
 import com.obsidium.bettermanual.layout.CameraUiFragment;
@@ -95,7 +94,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         surfaceViewHolder = (FrameLayout) findViewById(R.id.surfaceView);
         //surfaceView.setOnTouchListener(new CameraUiFragment.SurfaceSwipeTouchListener(getContext()));
         if (AvIndexManager.isSupported())
-            avIndexManager = new AvIndexManager(getContentResolver());
+            avIndexManager = new AvIndexManager(getContentResolver(),getApplicationContext());
 
         layoutHolder = (LinearLayout)findViewById(R.id.fragment_holder);
         Preferences.CREATE(getApplicationContext());

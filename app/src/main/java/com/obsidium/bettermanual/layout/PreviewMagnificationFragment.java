@@ -3,7 +3,6 @@ package com.obsidium.bettermanual.layout;
 import android.content.Context;
 import android.util.Log;
 import android.util.Pair;
-import android.view.View;
 import android.widget.TextView;
 
 import com.obsidium.bettermanual.ActivityInterface;

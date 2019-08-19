@@ -1,7 +1,7 @@
 # BetterManual
 
-This app is intended to ease shooting in manual and aperture priority mode with (legacy) prime lenses on the A5100 camera. It uses the [OpenMemories Framework](https://github.com/ma1co/OpenMemories-Framework).
-**While the app may work on other cameras, it was written specifically for use with the A5100.**
+This app is intended to ease shooting in manual and aperture priority mode with (legacy) prime lenses on the A6000 camera. It uses the [OpenMemories Framework](https://github.com/ma1co/OpenMemories-Framework).
+**While the app may work on other cameras, it was written specifically for use with the A6000.**
 
 ## Installation ##
 
@@ -9,33 +9,32 @@ Use [Sony-PMCA-RE](https://github.com/ma1co/Sony-PMCA-RE) or install through [so
 
 ## Usage and features ##
 
-Features are accessed using either the touch screen or the control wheel.
+Features are accessed using control wheel.
 
-### Shooting modes ###
+Camera Ui:
+Use the Center Wheel Up/Down to cycle between the icons. Rotate the Wheel to Change the Value of the selected Item.
+Use Center Wheel Left Right to toggle between GridLayout and Histogram Visibility.
+Click on Ael to En/Disable FocusMagnification
 
-Touch the mode indicator on the top left to toggle between manual and aperture priority mode.
-The icon directly below it allows you to cycle between single shot, low speed and high speed burst modes.
+Press the Picture/Play Button to open/close the Gallery.
 
-### Shooting parameters ###
+Gallery:
+Navigate with center wheel left right trough the images. 
 
-The following parameters can be configured directly: Shutter speed, aperture, ISO, exposure compensation.
-Using the control wheel: Press the down button to select the parameter you'd like to change, then turn the wheel to change its value. Additionally, the enter button allows you to toggle between manual and automatic ISO and set a minimum shutter speed in aperture priority mode.
-Using the touch screen: Swipe left/right or up/down to change parameters. Tap once to toggle between manual and automatic ISO or set the minimum shutter speed.
-
-### Interface ###
-
-Press the up button to cycle through display modes. This will toggle the histogram, metering display and rule of 3rds grid lines.
 
 ### Focus magnification ###
 
-Use the zoom lever to activate focus magnification and zoom in or out. Half-pressing the shutter button ends focus magnification. You can change the position of the preview rectangle by either using the control wheel or swiping the touch screen. The enter button centers the preview rectangle.
+use the center wheel button to toggle between different zoom factors.
+Menu Button adds somekind of Crosshair, the size can get changed with the top left wheel. 
+fn button adds a grid to the view
+Rotate the center wheel to set focus or use your lens focus
 
 ### Other features ###
 
-The app also includes simple timelapse and exposure bracketing modes. Touch the icon on the left side and follow the on-screen instructions.
+The app also includes simple timelapse and exposure bracketing modes. Click on CenterWheel Button and follow the on-screen instructions.
 
-Long exposure noise reduction is disabled (normally forced in single shot mode for exposures >= 1" and in bulb mode on the A5100).
+Long exposure noise reduction can get disabled and also SteadyShot/ImageStabilisation
 
 Exit the app using the help/trash button.
 
-The app remembers the configured settings across multiple runs.
+The app remembers the (for some) configured settings across multiple runs.

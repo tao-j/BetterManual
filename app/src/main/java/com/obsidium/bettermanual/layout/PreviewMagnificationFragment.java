@@ -141,12 +141,6 @@ public class PreviewMagnificationFragment extends BaseLayout implements CameraEx
 
     @Override
     public boolean onUpperDialChanged(int value) {
-        CameraInstance.GET().setFocusPosition(value);
-        return false;
-    }
-
-    @Override
-    public boolean onLowerDialChanged(int value) {
         if (starDriftAlginView.getVisibility() == VISIBLE) {
             if (value < 0)
                 starDriftAlginView.decraseSize();
@@ -155,6 +149,12 @@ public class PreviewMagnificationFragment extends BaseLayout implements CameraEx
             starDriftAlginView.invalidate();
         }
 
+        return false;
+    }
+
+    @Override
+    public boolean onLowerDialChanged(int value) {
+        CameraInstance.GET().setFocusPosition(value);
         return false;
     }
 
@@ -249,15 +249,13 @@ public class PreviewMagnificationFragment extends BaseLayout implements CameraEx
     @Override
     public boolean onFnKeyUp() {
 
-        if (starDriftAlginView.getVisibility() == VISIBLE) {
-            if (Preferences.GET().showStarAlginViewGrid()) {
-                Preferences.GET().setShowStarAlignGrid(false);
-                starDriftAlginView.enableGrid(false);
-            }
-            else {
-                Preferences.GET().setShowStarAlignGrid(true);
-                starDriftAlginView.enableGrid(true);
-            }
+        if (Preferences.GET().showStarAlginViewGrid()) {
+            Preferences.GET().setShowStarAlignGrid(false);
+            starDriftAlginView.enableGrid(false);
+        }
+        else {
+            Preferences.GET().setShowStarAlignGrid(true);
+            starDriftAlginView.enableGrid(true);
         }
         return false;
     }

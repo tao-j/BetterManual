@@ -76,10 +76,8 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         }
     };
 
-    private static final int VIEW_FLAG_GRID         = 0x01;
-    private static final int VIEW_FLAG_HISTOGRAM    = 0x02;
-    private static final int VIEW_FLAG_EXPOSURE     = 0x04;
-    private static final int VIEW_FLAG_MASK         = 0x07; // all flags combined
+    private Runnable[] gridHistogramViewRunners;
+
     private int             m_viewFlags;
     private boolean bulbcapture = false;
 
@@ -95,6 +93,28 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
 
         m_tvLog = (TextView)findViewById(R.id.tvLog);
         m_tvLog.setVisibility(LOGGING_ENABLED ? View.VISIBLE : View.GONE);
+
+        gridHistogramViewRunners = new Runnable[4];
+        gridHistogramViewRunners[0] =() -> {
+            Log.d(TAG, "Histo:false Grid:false");
+            m_vHist.setVisibility(GONE);
+            m_vGrid.setVisibility(GONE);
+        };
+        gridHistogramViewRunners[1] = () -> {
+            Log.d(TAG, "Histo:false Grid:true");
+            m_vHist.setVisibility(GONE);
+            m_vGrid.setVisibility(VISIBLE);
+        };
+        gridHistogramViewRunners[2] = () -> {
+            Log.d(TAG, "Histo:true Grid:true");
+            m_vHist.setVisibility(VISIBLE);
+            m_vGrid.setVisibility(VISIBLE);
+        };
+        gridHistogramViewRunners[3] = () -> {
+            Log.d(TAG, "Histo:true Grid:false");
+            m_vHist.setVisibility(VISIBLE);
+            m_vGrid.setVisibility(GONE);
+        };
 
 
 
@@ -173,7 +193,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         //m_camera.setJpegListener(); maybe is used to get jpeg/raw data returned
 
 
-        m_viewFlags = Preferences.GET().getViewFlags(VIEW_FLAG_GRID | VIEW_FLAG_HISTOGRAM);
+        m_viewFlags = Preferences.GET().getViewFlags(0);
         setDialMode(Preferences.GET().getDialMode(0));
 
         updateViewVisibility();
@@ -284,13 +304,6 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
     @Override
     public void updateViewVisibility()
     {
-        activityInterface.getMainHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                HistogramController.GetInstance().setVisibility((m_viewFlags & VIEW_FLAG_HISTOGRAM) != 0);
-                m_vGrid.setVisibility((m_viewFlags & VIEW_FLAG_GRID) != 0 ? View.VISIBLE : View.GONE);
-            }
-        });
 
     }
 
@@ -303,11 +316,16 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         bottomHolder.setVisibility(visibility);
     }
 
-    private void cycleVisibleViews()
+    private void changeHistogramGridViewVisibility(int val)
     {
-        if (++m_viewFlags > VIEW_FLAG_MASK)
+        m_viewFlags += val;
+
+        if (m_viewFlags > gridHistogramViewRunners.length-1)
             m_viewFlags = 0;
-        updateViewVisibility();
+        if (m_viewFlags < 0)
+            m_viewFlags = gridHistogramViewRunners.length-1;
+        Log.d(TAG, "viewFLags:" + m_viewFlags);
+        activityInterface.getMainHandler().post(gridHistogramViewRunners[m_viewFlags]);
     }
 
 
@@ -359,16 +377,14 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
     @Override
     public boolean onUpperDialChanged(int value)
     {
-        dialViews.get(lastDialView).set_In_De_crase(value);
+
 
         return true;
     }
 
     @Override
     public boolean onLowerDialChanged(int value) {
-
-        setDialMode(value);
-
+        dialViews.get(lastDialView).set_In_De_crase(value);
         return true;
     }
 
@@ -451,9 +467,9 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
     @Override
     public boolean onUpKeyUp()
     {
-            // Toggle visibility of some views
-            cycleVisibleViews();
-            return true;
+        setDialMode(-1);
+
+        return true;
     }
 
     @Override
@@ -478,6 +494,8 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
     @Override
     public boolean onLeftKeyUp()
     {
+        // Toggle visibility of some views
+        changeHistogramGridViewVisibility(1);
         return false;
     }
 
@@ -490,6 +508,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
     @Override
     public boolean onRightKeyUp()
     {
+        changeHistogramGridViewVisibility(-1);
         return false;
     }
 

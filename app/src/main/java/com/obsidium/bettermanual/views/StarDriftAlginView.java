@@ -18,6 +18,7 @@ public class StarDriftAlginView extends View {
     private final int gridSize = 20;
 
     private boolean drawGrid = false;
+    private boolean drawCenterLines = false;
 
     public StarDriftAlginView(Context context) {
         super(context);
@@ -63,18 +64,24 @@ public class StarDriftAlginView extends View {
             }
         }
 
-        canvas.drawLine(centerX - margine,0,centerX-margine, getHeight(),crossPaint);
-        canvas.drawLine(centerX + margine,0,centerX+margine, getHeight(),crossPaint);
+        if (drawCenterLines) {
+            canvas.drawLine(centerX - margine, 0, centerX - margine, getHeight(), crossPaint);
+            canvas.drawLine(centerX + margine, 0, centerX + margine, getHeight(), crossPaint);
 
-        canvas.drawLine(0, centerY -margine, getWidth(), centerY-margine,crossPaint);
-        canvas.drawLine(0, centerY +margine, getWidth(), centerY+margine,crossPaint);
-
-
+            canvas.drawLine(0, centerY - margine, getWidth(), centerY - margine, crossPaint);
+            canvas.drawLine(0, centerY + margine, getWidth(), centerY + margine, crossPaint);
+        }
     }
 
     public void enableGrid(boolean enable)
     {
         this.drawGrid = enable;
+        invalidate();
+    }
+
+    public void enableCenterLines(boolean enable)
+    {
+        this.drawCenterLines = enable;
         invalidate();
     }
 

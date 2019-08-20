@@ -71,10 +71,8 @@ public class PreviewMagnificationFragment extends BaseLayout implements CameraEx
 
         /*m_lFocusScale = findViewById(R.id.lFocusScale);
         m_lFocusScale.setVisibility(View.GONE);*/
-        if (!Preferences.GET().showStarAlginView())
-            starDriftAlginView.setVisibility(GONE);
-        else
-            starDriftAlginView.enableGrid(Preferences.GET().showStarAlginViewGrid());
+        starDriftAlginView.enableCenterLines(Preferences.GET().showStarAlginView());
+        starDriftAlginView.enableGrid(Preferences.GET().showStarAlginViewGrid());
 
         activityInterface.setSurfaceViewOnTouchListner(new SurfaceSwipeTouchListener(getContext()));
         CameraInstance.GET().setPreviewMagnificationListener(this);
@@ -141,7 +139,7 @@ public class PreviewMagnificationFragment extends BaseLayout implements CameraEx
 
     @Override
     public boolean onUpperDialChanged(int value) {
-        if (starDriftAlginView.getVisibility() == VISIBLE) {
+        if (Preferences.GET().showStarAlginView()) {
             if (value < 0)
                 starDriftAlginView.decraseSize();
             else
@@ -280,12 +278,12 @@ public class PreviewMagnificationFragment extends BaseLayout implements CameraEx
 
     @Override
     public boolean onMenuKeyUp() {
-        if (starDriftAlginView.getVisibility() == GONE) {
-            starDriftAlginView.setVisibility(VISIBLE);
+        if (!Preferences.GET().showStarAlginView()) {
+            starDriftAlginView.enableCenterLines(true);
             Preferences.GET().setShowStarAlign(true);
         }
         else {
-            starDriftAlginView.setVisibility(GONE);
+            starDriftAlginView.enableCenterLines(false);
             Preferences.GET().setShowStarAlign(false);
         }
         return false;

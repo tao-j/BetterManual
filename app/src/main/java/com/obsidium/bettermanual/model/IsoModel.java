@@ -9,26 +9,44 @@ public class IsoModel extends AbstractModel<String> implements CameraEx.AutoISOS
 
 
     private int m_curIso;
+    private int currentIsoPos;
     private List<Integer> m_supportedIsos;
 
     public IsoModel(CameraInstance cameraInstance)
     {
         super(cameraInstance);
         this.m_supportedIsos = camera.getSupportedISOSensitivities();
-        setValue(camera.getISOSensitivity());
+        m_curIso = camera.getISOSensitivity();
         value = "\uE488 " + String.valueOf(0) + (m_curIso == 0 ? "(A)" : "");
+        currentIsoPos = getIsoPos(m_curIso);
         fireOnValueChanged();
         fireOnSupportedChanged();
 
     }
 
+    private int getIsoPos(int isovalue)
+    {
+        for (int i= 0; i< m_supportedIsos.size();i++)
+        {
+            if (m_supportedIsos.get(i) == isovalue)
+                return i;
+        }
+        return 0;
+    }
+
     @Override
     public void setValue(int i) {
-        final int iso = i < 0 ? getPreviousIso(m_curIso) : getNextIso(m_curIso);
-        m_curIso = iso;
-        value = String.format("\uE488 %s", (iso == 0 ? "AUTO" : String.valueOf(iso)));
+        currentIsoPos += i;
 
-        camera.setISOSensitivity(iso);
+        if (currentIsoPos < 0)
+            currentIsoPos = 0;
+        if (currentIsoPos >= m_supportedIsos.size())
+            currentIsoPos = m_supportedIsos.size()-1;
+
+        m_curIso = m_supportedIsos.get(currentIsoPos);
+        value = String.format("\uE488 %s", (m_curIso == 0 ? "AUTO" : String.valueOf(m_curIso)));
+
+        camera.setISOSensitivity(m_curIso);
         fireOnValueChanged();
     }
 
@@ -59,27 +77,6 @@ public class IsoModel extends AbstractModel<String> implements CameraEx.AutoISOS
         fireOnValueChanged();
     }
 
-    private int getPreviousIso(int current) {
-        int previous = 0;
-        for (Integer iso : m_supportedIsos) {
-            if (iso == current)
-                return previous;
-            else
-                previous = iso;
-        }
-        return 0;
-    }
-
-    private int getNextIso(int current) {
-        boolean next = false;
-        for (Integer iso : m_supportedIsos) {
-            if (next)
-                return iso;
-            else if (iso == current)
-                next = true;
-        }
-        return current;
-    }
 
     public int getCurrentIso()
     {
@@ -89,10 +86,7 @@ public class IsoModel extends AbstractModel<String> implements CameraEx.AutoISOS
     public int getFirstManualIso() {
         if (m_supportedIsos == null)
             return 0;
-        for (Integer iso : m_supportedIsos) {
-            if (iso != 0)
-                return iso;
-        }
-        return 0;
+
+        return m_supportedIsos.get(1);
     }
 }

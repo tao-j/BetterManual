@@ -56,28 +56,6 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
 
     private AvIndexManager avIndexManager;
 
-    //Caution caution;
-
-    public void startBackgroundThread(){
-        cameraThread = new HandlerThread("HandlerThread");
-        cameraThread.start();
-    }
-
-    private void stopBackgroundThread()
-    {
-        Log.d(TAG,"stopBackgroundThread");
-        if(cameraThread == null)
-            return;
-
-        cameraThread.quit();
-        try {
-            cameraThread.join();
-            cameraThread = null;
-            cameraThread = null;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,10 +63,8 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         super.onCreate(savedInstanceState);
         if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler))
             Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());
-        startBackgroundThread();
         m_handler = new Handler();
         setContentView(R.layout.main_activity);
-        CameraInstance.GET().initHandler(cameraThread.getLooper());
         ShutterController.GetInstance().bindActivityInterface(this);
 
         surfaceViewHolder = (FrameLayout) findViewById(R.id.surfaceView);
@@ -135,7 +111,6 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        stopBackgroundThread();
         Preferences.CLEAR();
         avIndexManager = null;
         ShutterController.GetInstance().bindActivityInterface(null);

@@ -65,12 +65,6 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
         return INSTANCE;
     }
 
-    public void initHandler(Looper looper)
-    {
-        cameraHandler = new CameraHandler(looper,this);
-    }
-
-
     public void startCamera() {
 /*        CameraEx.OpenOptions options = new CameraEx.OpenOptions();
         options.setPreview(true);*/
@@ -81,30 +75,14 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
         setOptions(null);
         cameraSequence.setShutterSequenceCallback(this);*/
         Log.d(TAG, "Cam open");
-        cameraHandler.sendMessage(cameraHandler.obtainMessage(MSG_INIT_CAMERA));
+        initCamera();
         fireOnCameraOpen(true);
 
     }
 
     public void initParameters()
     {
-        setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
-        final String sceneMode = Preferences.GET().getSceneMode();
-        setSceneMode(sceneMode);
-        setDriveMode(Preferences.GET().getDriveMode());
-        setBurstDriveSpeed(Preferences.GET().getBurstDriveSpeed());
-        // Minimum shutter speed
-        if(isAutoShutterSpeedLowLimitSupported()) {
-            if (sceneMode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
-                setAutoShutterSpeedLowLimit(-1);
-            else
-                setAutoShutterSpeedLowLimit(Preferences.GET().getMinShutterSpeed());
-        }
-        // Disable self timer
-        setSelfTimer(0);
-        // Force aspect ratio to 3:2
-        setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
-        setImageQuality(CameraEx.ParametersModifier.PICTURE_STORAGE_FMT_RAW);
+
 
 
         apertureModel = new ApertureModel(this);
@@ -151,18 +129,46 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
         m_camera.setPreviewAnalizeListener(histogramModel);
         HistogramController.GetInstance().bindModel(histogramModel);
 
-
+        applySettings();
         //dumpParameter();
+    }
+
+    private void applySettings() {
+        setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
+        final String sceneMode = Preferences.GET().getSceneMode();
+        setSceneMode(sceneMode);
+        setDriveMode(Preferences.GET().getDriveMode());
+        setBurstDriveSpeed(Preferences.GET().getBurstDriveSpeed());
+        // Minimum shutter speed
+        if(isAutoShutterSpeedLowLimitSupported()) {
+            if (sceneMode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
+                setAutoShutterSpeedLowLimit(-1);
+            else
+                setAutoShutterSpeedLowLimit(Preferences.GET().getMinShutterSpeed());
+        }
+        // Disable self timer
+        setSelfTimer(0);
+        // Force aspect ratio to 3:2
+        setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
+        setImageQuality(CameraEx.ParametersModifier.PICTURE_STORAGE_FMT_RAW);
     }
 
     public void closeCamera() {
         cameraIsOpen = false;
         Log.d(TAG, "closeCamera");
 
-        Preferences.GET().setSceneMode(exposureModeModel.getStringValue());
+        if (exposureModeModel != null)
+            Preferences.GET().setSceneMode(exposureModeModel.getStringValue());
         // Drive mode and burst speed
-        Preferences.GET().setDriveMode(driveModeModel.getValue());
-        Preferences.GET().setBurstDriveSpeed(getBurstDriveSpeed());
+        if (driveModeModel != null)
+            Preferences.GET().setDriveMode(driveModeModel.getValue());
+        try {
+            Preferences.GET().setBurstDriveSpeed(getBurstDriveSpeed());
+        }
+        catch (NullPointerException ex)
+        {
+            ex.printStackTrace();
+        }
 
         ApertureController.GetInstance().bindModel(null);
         m_camera.setApertureChangeListener(null);
@@ -211,12 +217,12 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
 
     public void startPreview() {
         Log.d(TAG,"startPreview");
-        cameraHandler.sendMessage(cameraHandler.obtainMessage(START_PREVIEW));
+        getCameraEx().getNormalCamera().startPreview();
     }
 
     public void stopPreview() {
         Log.d(TAG,"stopPreview");
-        cameraHandler.sendMessage(cameraHandler.obtainMessage(STOP_PREVIEW));
+        getCameraEx().getNormalCamera().stopPreview();
     }
 
     public void enableHwShutterButton() {
@@ -232,12 +238,18 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
     public void cancelCapture()
     {
         Log.d(TAG,"cancelCapture");
-        cameraHandler.sendMessage(cameraHandler.obtainMessage(CANCEL_CAPTURE));
+        getCameraEx().cancelTakePicture();
     }
 
     public void takePicture()
     {
-        cameraHandler.sendMessage(cameraHandler.obtainMessage(CAPTURE_IMAGE));
+        //hw shutter button must get stopped else burstableTakePicture does not trigger
+        getCameraEx().stopDirectShutter(new CameraEx.DirectShutterStoppedCallback() {
+            @Override
+            public void onShutterStopped(CameraEx cameraEx) {
+                cameraEx.burstableTakePicture();
+            }
+        });
 
     }
 

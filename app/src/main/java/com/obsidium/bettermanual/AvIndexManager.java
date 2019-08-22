@@ -72,7 +72,7 @@ public class AvIndexManager extends BroadcastReceiver
 
     private Cursor getCursorFromUri(Uri uri)
     {
-        return contentResolver.query(uri, AvindexStore.Images.Media.ALL_COLUMNS, null, null,AvindexStore.Images.ImageColumns.CONTENT_CREATED_UTC_DATE +" DESC");
+        return contentResolver.query(uri, AvindexStore.Images.Media.ALL_COLUMNS, null, null,AvindexStore.Images.ImageColumns.CONTENT_CREATED_LOCAL_DATE_TIME +" DESC");
     }
 
 
@@ -166,7 +166,7 @@ public class AvIndexManager extends BroadcastReceiver
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG,intent.getAction());
-        update();
+        //update();
     }
 
     public byte[] getFullImage() {

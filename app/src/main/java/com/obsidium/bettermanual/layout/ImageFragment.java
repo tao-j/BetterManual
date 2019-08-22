@@ -34,6 +34,7 @@ public class ImageFragment extends BaseLayout {
         surfaceViewParent.addView(imageView);
         imageView.setDisplayPosition(new Point(0,0), OptimizedImageView.PositionType.POS_TYPE_NONE);
         Log.d(TAG, "ImageCount:" + activityInterface.getAvIndexManager().getCount());
+        activityInterface.getAvIndexManager().update();
         loadOptimizedImg();
     }
 

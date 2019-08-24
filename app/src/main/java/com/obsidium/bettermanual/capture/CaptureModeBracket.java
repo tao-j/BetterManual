@@ -25,16 +25,14 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
     private int             m_bracketStep;  // in 1/3 stops
     private int             m_bracketMaxPicCount;
     private int             m_bracketPicCount;
-    private int             m_bracketShutterDelta;
-    private Pair<Integer, Integer> m_bracketNextShutterSpeed;
     private int             m_bracketNeutralShutterIndex;
-
     private final int BRACKET_NON = 0;
     private final int BRACKET_STEP = 1;
     private final int BRACKET_PICCOUNT = 2;
     private int currentDialMode = BRACKET_NON;
-    private final int MAX_RETRYS = 3;
-    private int retryCount = 0;
+
+
+    private BracketShutterController bracketShutterController;
 
 
     public CaptureModeBracket(CameraUiInterface cameraUiInterface)
@@ -92,7 +90,6 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
 
             m_bracketPicCount = 3;
             m_bracketStep = 3;
-            m_bracketShutterDelta = 0;
             updateBracketStep();
 
             // Remember current shutter speed
@@ -108,13 +105,20 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
         cameraUiInterface.hideMessage();
         // Take first picture at set shutter speed
         cameraUiInterface.getActivityInterface().setBulbCapture(false);
-        cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(this);
-        CameraInstance.GET().takePicture();
+        bracketShutterController = new BracketShutterController(m_bracketPicCount,m_bracketStep);
+        bracketShutterController.captureRange();
+        //CameraInstance.GET().takePicture();
     }
 
     @Override
     public void abort() {
+        if (bracketShutterController != null)
+            bracketShutterController.abort();
+        m_bracketPicCount = 0;
         cameraUiInterface.getActivityInterface().getMainHandler().removeCallbacks(m_countDownRunnable);
+        cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(null);
+        ShutterController.GetInstance().setShutterSpeedEventListner(null);
+        currentDialMode = BRACKET_NON;
         //m_handler.removeCallbacks(m_timelapseRunnable);
         isActive = false;
         cameraUiInterface.showMessageDelayed("Bracketing finished");
@@ -177,6 +181,7 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
         final int index = CameraUtil.getShutterValueIndex(CameraInstance.GET().getShutterSpeed());
         final int maxSteps = Math.min(index, CameraUtil.SHUTTER_SPEED_VALUES.length - 1 - index);
         m_bracketMaxPicCount = (maxSteps / m_bracketStep) * 2 + 1;
+        Log.d(TAG, "calcMaxBracketPicCount Index:" + index +" maxsteps:" + maxSteps +" bracketMaxPicCount:" + m_bracketMaxPicCount);
     }
 
     protected void updateBracketStep()
@@ -287,12 +292,12 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
                     + " to confirm");
             currentDialMode = BRACKET_PICCOUNT;
             reset();
-            updateBracketPicCount();
         }
         else
         {
             cameraUiInterface.getActivityInterface().getDialHandler().setDialEventListner((KeyEvents)cameraUiInterface);
             ShutterController.GetInstance().setShutterSpeedEventListner(this);
+            cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(this);
             startCountDown();
             currentDialMode = BRACKET_NON;
         }
@@ -422,74 +427,104 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
     @Override
     public void onCaptureDone() {
         Log.d(TAG,"onCaptureDone :" + m_bracketPicCount);
-        if (--m_bracketPicCount == 0) {
-            Log.d(TAG,"abort");
-            abort();
-            cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(null);
-            CameraInstance.GET().startPreview();
-        }
-        else
-        {
-            Log.d(TAG,"prepare next capture");
-            retryCount = 0;
-            m_bracketShutterDelta += m_bracketStep;
-            final int shutterIndex = CameraUtil.getShutterValueIndex(CameraInstance.GET().getShutterSpeed());
-            Log.d(TAG,"shutterIndex:" + shutterIndex);
-            if (m_bracketShutterDelta % 2 == 0)
-            {
-                // Even, reduce shutter speed
-                Log.d(TAG,"reduce");
-                int newShutterspeed = shutterIndex - m_bracketShutterDelta;
-                if (newShutterspeed < 0)
-                    newShutterspeed = 0;
-                Log.d(TAG,"newshutterindex:" +newShutterspeed + " bracketdelta:" + m_bracketShutterDelta);
-                ShutterSpeedValue shutterSpeedValue = CameraUtil.SHUTTER_SPEED_VALUES[newShutterspeed];
-                m_bracketNextShutterSpeed = shutterSpeedValue.getPair();
-                CameraInstance.GET().adjustShutterSpeed(m_bracketShutterDelta);
-            }
-            else
-            {
-                Log.d(TAG,"increase");
-                // Odd, increase shutter speed
-                int newShutterspeed = shutterIndex + m_bracketShutterDelta;
-                if (newShutterspeed > CameraUtil.SHUTTER_SPEED_VALUES.length)
-                    newShutterspeed = CameraUtil.SHUTTER_SPEED_VALUES.length-1;
-                Log.d(TAG,"newshutterindex:" +newShutterspeed + " bracketdelta:" + m_bracketShutterDelta);
-                ShutterSpeedValue shutterSpeedValue = CameraUtil.SHUTTER_SPEED_VALUES[newShutterspeed];
-                m_bracketNextShutterSpeed = shutterSpeedValue.getPair();
-                CameraInstance.GET().adjustShutterSpeed(-m_bracketShutterDelta);
-            }
-        }
-
+        bracketShutterController.NotifyWaitlock();
     }
 
     @Override
     public void onChanged() {
         Log.d(TAG, "onShutterSpeedChange");
-        CameraEx.ShutterSpeedInfo shutterSpeedInfo = ShutterController.GetInstance().getShutterSpeedInfo();
-        if (m_bracketPicCount > 0) {
 
-            if (m_bracketNextShutterSpeed != null) {
-                Log.d(TAG, "currentshutterspeed:" + shutterSpeedInfo.currentShutterSpeed_n + "/" + shutterSpeedInfo.currentShutterSpeed_d);
-                Log.d(TAG, "bracketNextShutterSpeed:" + m_bracketNextShutterSpeed.first + "/" + m_bracketNextShutterSpeed.second);
+        bracketShutterController.NotifyWaitlock();
 
-                if (shutterSpeedInfo.currentShutterSpeed_n == m_bracketNextShutterSpeed.first &&
-                        shutterSpeedInfo.currentShutterSpeed_d == m_bracketNextShutterSpeed.second) {
-                    Log.d(TAG, "shutterspeed match start capture");
-                    // Shutter speed adjusted, take next picture
-                    startShooting();
-                } else {
-                    retryCount++;
-                    Log.d(TAG, "shutterspeed does not match wait for next callback");
-                    if (retryCount < MAX_RETRYS)
-                        CameraInstance.GET().adjustShutterSpeed(m_bracketShutterDelta);
-                    else //capture anyway
-                        startShooting();
-                }
-            } else
-                Log.d(TAG, "m_bracketNextShutterSpeed null");
-        }
     }
 
 
+    private class BracketShutterController
+    {
+        int[] shutterSpeedIndexesToCapture;
+        private Thread captureThread;
+        private Object waitlock = new Object();
+
+        public void NotifyWaitlock()
+        {
+            synchronized (waitlock)
+            {
+                waitlock.notify();
+            }
+        }
+
+        public BracketShutterController(int pictureCount, int bracketSteps)
+        {
+            int arrapos = 0;
+            shutterSpeedIndexesToCapture = new int[pictureCount];
+            final int shutterIndex = CameraUtil.getShutterValueIndex(CameraInstance.GET().getShutterSpeed());
+            int stepsize = (pictureCount-1) /2;
+            for(int i = stepsize; i >= 1; i--)
+            {
+                shutterSpeedIndexesToCapture[arrapos++] = shutterIndex - bracketSteps*i;
+            }
+            shutterSpeedIndexesToCapture[arrapos++] = shutterIndex;
+            for(int i = 1; i <= stepsize; i++)
+            {
+                shutterSpeedIndexesToCapture[arrapos++] = shutterIndex + bracketSteps*i;
+            }
+        }
+
+        public void abort()
+        {
+            captureThread.interrupt();
+        }
+
+        public void captureRange()
+        {
+            captureThread = new Thread(){
+                @Override
+                public void run() {
+                    int currentPicture =0;
+                    while (currentPicture < shutterSpeedIndexesToCapture.length && !Thread.currentThread().isInterrupted())
+                    {
+                        int newIndex = shutterSpeedIndexesToCapture[currentPicture];
+                        int shutterIndex = CameraUtil.getShutterValueIndex(CameraInstance.GET().getShutterSpeed());
+                        while (newIndex != shutterIndex && !Thread.currentThread().isInterrupted())
+                        {
+                            synchronized (waitlock)
+                            {
+                                final int toset = newIndex - shutterIndex;
+                                cameraUiInterface.getActivityInterface().getMainHandler().post(()-> {
+                                    CameraInstance.GET().adjustShutterSpeed(-toset);
+                                });
+
+                                //wait for next shutterspeed changed
+                                try {
+                                    waitlock.wait();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            shutterIndex = CameraUtil.getShutterValueIndex(CameraInstance.GET().getShutterSpeed());
+                        }
+                        cameraUiInterface.getActivityInterface().getMainHandler().post(()-> {
+                            CameraInstance.GET().takePicture();
+                        });
+
+                        //wait for capture complete
+                        synchronized (waitlock)
+                        {
+                            try {
+                                waitlock.wait();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        currentPicture++;
+                    }
+                    cameraUiInterface.getActivityInterface().getMainHandler().post(()-> {
+                        Log.d(TAG,"abort");
+                        CaptureModeBracket.this.abort();
+                    });
+                }
+            };
+            captureThread.start();
+        }
+    }
 }

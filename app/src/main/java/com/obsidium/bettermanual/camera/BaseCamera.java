@@ -407,6 +407,30 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
             m_camera.startOneShotFocusDrive(CameraEx.FOCUS_DRIVE_DIRECTION_FAR,pos);
     }
 
+    public void setRedEyeReduction(String enable)
+    {
+        Camera.Parameters parameters = getEmptyParameters();
+        CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
+        modifier.setRedEyeReductionMode(enable);
+        setParameters(parameters);
+    }
+
+    public void setFlashMode(String enable)
+    {
+        Camera.Parameters parameters = getEmptyParameters();
+        parameters.setFlashMode(enable);
+        setParameters(parameters);
+    }
+
+    public void setFlashType(String enable)
+    {
+        Camera.Parameters parameters = getEmptyParameters();
+        CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
+        modifier.setFlashType(enable);
+        setParameters(parameters);
+    }
+
+
     //returns always [0,0,0] when used with mf, dont know if its works with af
     /*public float[]getFocusDistances()
     {

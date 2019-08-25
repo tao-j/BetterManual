@@ -14,6 +14,7 @@ import com.obsidium.bettermanual.MainActivity;
 import com.obsidium.bettermanual.Preferences;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
+import com.obsidium.bettermanual.capture.CaptureModeAfBracket;
 import com.obsidium.bettermanual.capture.CaptureModeBracket;
 import com.obsidium.bettermanual.capture.CaptureModeBulb;
 import com.obsidium.bettermanual.capture.CaptureModeTimelapse;
@@ -51,6 +52,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
     private HistogramView m_vHist;
     private ImageView       m_ivTimelapse;
     private ImageView       m_ivBracket;
+    private ImageView       m_ivAfBracket;
     private GridView m_vGrid;
     private TextView        m_tvHint;
     private View            m_lFocusScale;
@@ -65,6 +67,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
 
     private CaptureModeTimelapse timelapse;
     private CaptureModeBracket bracket;
+    private CaptureModeAfBracket afBracket;
 
 
     private final Runnable  m_hideMessageRunnable = new Runnable()
@@ -137,6 +140,8 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         m_ivBracket.setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_contshot));
         m_ivTimelapse = (ImageView)findViewById(R.id.iv_timelapse);
         m_ivTimelapse.setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_43_shoot_icon_setting_drivemode_invalid));
+        m_ivAfBracket = (ImageView)findViewById(R.id.iv_afbracket);
+        m_ivAfBracket.setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_rec_focuscontrol_far));
 
         ExposureModeController.GetInstance().bindView((ImageView) findViewById(R.id.iv_exposuremode));
         dialViews.add(ExposureModeController.GetInstance());
@@ -151,6 +156,10 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         timelapse = new CaptureModeTimelapse(this);
         timelapse.bindView(((ImageView)findViewById(R.id.iv_timelapse)));
         dialViews.add(timelapse);
+
+        afBracket = new CaptureModeAfBracket(this);
+        afBracket.bindView(m_ivAfBracket);
+        dialViews.add(afBracket);
 
         CaptureModeBulb.CREATE(this);
 
@@ -219,6 +228,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         LongExposureNoiseReductionController.GetIntance().bindView(null);
         timelapse.bindView(null);
         bracket.bindView(null);
+        afBracket.bindView(null);
         HistogramController.GetInstance().bindView(null);
         CaptureModeBulb.CLEAR();
     }

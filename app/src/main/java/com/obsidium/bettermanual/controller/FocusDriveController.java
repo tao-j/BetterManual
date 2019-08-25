@@ -2,6 +2,7 @@ package com.obsidium.bettermanual.controller;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 
 import com.obsidium.bettermanual.R;
@@ -19,6 +20,13 @@ public class FocusDriveController extends AbstractController<View,FocusDriveMode
 
     private FocusScaleView focusScaleView;
     private Handler handler = new Handler(Looper.getMainLooper());
+    private FocusPostionChangedEvent focusPostionChangedEvent;
+    private String TAG = FocusDriveController.class.getSimpleName();
+
+    public interface FocusPostionChangedEvent
+    {
+        void onFocusPostionChanged();
+    }
 
     @Override
     public void bindView(View view) {
@@ -46,12 +54,34 @@ public class FocusDriveController extends AbstractController<View,FocusDriveMode
 
     @Override
     public void onValueChanged() {
+
+        Log.d(TAG,"OnFocusPositionChanged");
         view.setVisibility(View.VISIBLE);
         focusScaleView.setCurPosition(model.getValue());
         focusScaleView.setMaxPosition(model.getMaxPosition());
         handler.removeCallbacks(m_hideFocusScaleRunnable);
         handler.postDelayed(m_hideFocusScaleRunnable, 2000);
+        if (focusPostionChangedEvent != null)
+            focusPostionChangedEvent.onFocusPostionChanged();
+    }
 
+    public int getFocusPosition()
+    {
+        if (model == null)
+            return 0;
+        return model.getValue();
+    }
+
+    public int getFocusMaxPosition()
+    {
+        if (model == null)
+            return 0;
+        return model.getMaxPosition();
+    }
+
+    public void setFocusPostionChangedEventListner(FocusPostionChangedEvent eventListner)
+    {
+        this.focusPostionChangedEvent = eventListner;
     }
 
     private final Runnable m_hideFocusScaleRunnable = () -> view.setVisibility(View.GONE);

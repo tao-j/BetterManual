@@ -30,6 +30,7 @@ import com.obsidium.bettermanual.model.LongExposureNoiseReductionModel;
 import com.obsidium.bettermanual.model.ShutterModel;
 import com.sony.scalar.hardware.CameraEx;
 import com.sony.scalar.hardware.CameraSequence;
+import com.sony.scalar.meta.FaceInfo;
 
 import java.util.List;
 import java.util.StringTokenizer;
@@ -151,6 +152,50 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
         // Force aspect ratio to 3:2
         setImageAspectRatio(CameraEx.ParametersModifier.IMAGE_ASPECT_RATIO_3_2);
         setImageQuality(CameraEx.ParametersModifier.PICTURE_STORAGE_FMT_RAW);
+        setRedEyeReduction(CameraEx.ParametersModifier.RED_EYE_REDUCTION_MODE_OFF);
+        setFlashType(CameraEx.ParametersModifier.FLASH_TYPE_SLOW_SYNC);
+        setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+        m_camera.setFlashChargingStateListener(new CameraEx.FlashChargingStateListener() {
+            @Override
+            public void onChanged(int i, CameraEx cameraEx) {
+                Log.d(TAG,"FlashChargingStateChanged" + i);
+            }
+        });
+        m_camera.setFlashEmittingListener(new CameraEx.FlashEmittingListener() {
+            @Override
+            public void onFlash(boolean b, CameraEx cameraEx) {
+                Log.d(TAG,"FlashEmittingListner changed onFlash " + b);
+            }
+        });
+        m_camera.setFocusLightStateListener(new CameraEx.FocusLightStateListener() {
+            @Override
+            public void onChanged(boolean b, boolean b1, CameraEx cameraEx) {
+                Log.d(TAG,"FocusLightstateChanger onChange " + b + " " + b1);
+            }
+        });
+        /*try {
+            m_camera.setCaptureStatusListener(new CameraEx.OnCaptureStatusListener() {
+                @Override
+                public void onEnd(int i, int i1, CameraEx cameraEx) {
+                    Log.d(TAG, "onCaptureStatusListner END");
+                }
+
+                @Override
+                public void onStart(int i, CameraEx cameraEx) {
+                    Log.d(TAG, "onCaptureStatusListner Start");
+                }
+            });
+        }
+        catch (NoClassDefFoundError ex)
+        {
+            ex.printStackTrace();
+        }*/
+        m_camera.setFaceDetectionListener(new CameraEx.FaceDetectionListener() {
+            @Override
+            public void onFaceDetected(FaceInfo[] faceInfos, CameraEx cameraEx) {
+                Log.d(TAG,"onFaceDetected");
+            }
+        });
     }
 
     public void closeCamera() {

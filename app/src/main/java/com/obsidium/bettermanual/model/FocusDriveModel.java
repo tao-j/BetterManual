@@ -14,7 +14,7 @@ public class FocusDriveModel extends AbstractModel<Integer> implements CameraEx.
 
     @Override
     public void setValue(int i) {
-
+        camera.setFocusPosition(i);
     }
 
     @Override

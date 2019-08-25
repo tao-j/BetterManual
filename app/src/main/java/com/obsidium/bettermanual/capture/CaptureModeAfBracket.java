@@ -34,7 +34,8 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
             focusFar = FocusDriveController.GetInstance().getFocusPosition();
             updateFarTextView();
         }
-        else if (afBracketCaptureController != null)
+
+        if (afBracketCaptureController != null)
         {
             Log.d(TAG, "onFocusPostionChanged notify afbracketController");
             afBracketCaptureController.NotifyWaitlock();
@@ -399,13 +400,15 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
         private int[] focusPositions;
         private Thread captureThread;
         private Object waitlock = new Object();
+        private boolean doFocus = false;
+
         public AfBracketCaptureController(int minFocusPos, int maxFocusPos, int picturCount)
         {
             focusPositions = new int[picturCount];
             int dif = maxFocusPos -minFocusPos;
             int step = dif/picturCount;
             focusPositions[0] = minFocusPos;
-            for (int i = 1; i < picturCount-1;i++)
+            for (int i = 1; i < picturCount;i++)
             {
                 focusPositions[i] = minFocusPos + step*i;
             }
@@ -414,14 +417,18 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
 
         public void NotifyWaitlock()
         {
+            if (!doFocus)
+                return;
             synchronized (waitlock)
             {
                 waitlock.notify();
             }
         }
 
+
         public void abort()
         {
+            doFocus = false;
             captureThread.interrupt();
         }
 
@@ -429,7 +436,11 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
         {
             if (diff < 0)
                 diff *= -1;
-            if (diff >= 2)
+            if (diff > 25)
+                return   4;
+            else if (diff > 20)
+                return 3;
+            else if (diff > 15)
                 return 2;
             else
                 return 1;
@@ -437,18 +448,19 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
 
         public void captureRange()
         {
+            doFocus = true;
             captureThread = new Thread(){
                 @Override
                 public void run() {
-                    int currentCapture = 0;
-
-                    while (currentCapture < focusPositions.length && !Thread.currentThread().isInterrupted())
+                    for (int i = 0; i< focusPositions.length; i++)
                     {
-                        int newpos = focusPositions[currentCapture++];
+                        if (!doFocus)
+                            return;
+                        int newpos = focusPositions[i];
                         int currentPos =FocusDriveController.GetInstance().getFocusPosition();
                         Log.d(TAG, "new Pos:" + newpos + " currentPos:" + currentPos);
-                        while (newpos != currentPos && !Thread.currentThread().isInterrupted()) {
-                            synchronized (waitlock) {
+                        while (newpos != currentPos && !Thread.currentThread().isInterrupted() && doFocus) {
+
                                 final int dif = newpos - currentPos;
                                 Log.d(TAG, "Diff:" + dif);
                                 cameraUiInterface.getActivityInterface().getMainHandler().post(()-> {
@@ -457,40 +469,31 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
                                     else
                                         FocusDriveController.GetInstance().set_In_De_crase(getStep(dif));
                                 });
-
+                            synchronized (waitlock) {
                                 try {
-                                    waitlock.wait(50);
-                                    /*final int newdif = newpos - FocusDriveController.GetInstance().getFocusPosition();
-                                    if (dif == newdif)
-                                    {
-                                        cameraUiInterface.getActivityInterface().getMainHandler().post(()-> {
-                                            if (dif < 0)
-                                                FocusDriveController.GetInstance().set_In_De_crase(-getStep(dif));
-                                            else
-                                                FocusDriveController.GetInstance().set_In_De_crase(getStep(dif));
-                                        });
-                                        waitlock.wait(50);
-                                    }*/
+                                    if (doFocus)
+                                        waitlock.wait(20);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
                             }
                             currentPos =FocusDriveController.GetInstance().getFocusPosition();
                         }
-                        cameraUiInterface.getActivityInterface().getMainHandler().post(()-> {
-                            CameraInstance.GET().takePicture();
-                        });
+                        if (doFocus)
+                            cameraUiInterface.getActivityInterface().getMainHandler().post(()-> {
+                                CameraInstance.GET().takePicture();
+                            });
 
                         //wait for capture complete
                         synchronized (waitlock)
                         {
                             try {
-                                waitlock.wait();
+                                if (doFocus)
+                                    waitlock.wait();
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
                         }
-                        currentCapture++;
                     }
                     cameraUiInterface.getActivityInterface().getMainHandler().post(()-> {
                         Log.d(TAG,"abort");

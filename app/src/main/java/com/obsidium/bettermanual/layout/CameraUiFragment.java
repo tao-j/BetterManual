@@ -368,7 +368,8 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         lastView = dialViews.get(lastDialView);
         lastView.setColorToView(Color.GREEN);
         try {
-            showHintMessage(getResources().getString(lastView.getNavigationHelpID()));
+            if (lastView.getNavigationHelpID() != 0)
+                showHintMessage(getResources().getString(lastView.getNavigationHelpID()));
         }
         catch (Resources.NotFoundException ex)
         {

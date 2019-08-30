@@ -127,18 +127,24 @@ public class AvIndexManager extends BroadcastReceiver
 
     public AvindexContentInfo getContentInfo()
     {
+        if (cursor.getCount() == 0)
+            return null;
         return AvindexStore.Images.Media.getImageInfo(getId());
     }
 
     public void update()
     {
         cursor = getCursorFromUri(mediaStorageUri);
+        if (cursor.getCount() == 0)
+            return;
         cursor.moveToFirst();
         _id = Long.parseLong(getId());
     }
 
     public void moveToNext()
     {
+        if (cursor.getCount() == 0)
+            return;
         cursor.moveToNext();
         if(cursor.isAfterLast())
             cursor.moveToFirst();
@@ -147,6 +153,8 @@ public class AvIndexManager extends BroadcastReceiver
 
     public void moveToPrevious()
     {
+        if (cursor.getCount() == 0)
+            return;
         cursor.moveToPrevious();
         if (cursor.isBeforeFirst())
             cursor.moveToLast();

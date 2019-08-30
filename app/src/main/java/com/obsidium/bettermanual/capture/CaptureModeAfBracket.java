@@ -392,7 +392,7 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
     @Override
     public void onCaptureDone() {
         if (afBracketCaptureController != null)
-            afBracketCaptureController.NotifyWaitlock();
+            afBracketCaptureController.NotifyCaptureWaitlock();
     }
 
     private class AfBracketCaptureController
@@ -400,6 +400,7 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
         private int[] focusPositions;
         private Thread captureThread;
         private Object waitlock = new Object();
+        private Object captureWaitLock = new Object();
         private boolean doFocus = false;
 
         public AfBracketCaptureController(int minFocusPos, int maxFocusPos, int picturCount)
@@ -413,6 +414,16 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
                 focusPositions[i] = minFocusPos + step*i;
             }
             Log.d(TAG, "NearFocus:" + focusNear + " FarFocus:" +focusFar +" Dif:" + dif + " Step:" + step + "PicCount:" + picturCount);
+        }
+
+        public void NotifyCaptureWaitlock()
+        {
+            if (!doFocus)
+                return;
+            synchronized (captureWaitLock)
+            {
+                captureWaitLock.notify();
+            }
         }
 
         public void NotifyWaitlock()
@@ -460,7 +471,7 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
                         int currentPos =FocusDriveController.GetInstance().getFocusPosition();
                         Log.d(TAG, "new Pos:" + newpos + " currentPos:" + currentPos);
                         while (newpos != currentPos && !Thread.currentThread().isInterrupted() && doFocus) {
-
+                            synchronized (waitlock) {
                                 final int dif = newpos - currentPos;
                                 Log.d(TAG, "Diff:" + dif);
                                 cameraUiInterface.getActivityInterface().getMainHandler().post(()-> {
@@ -469,27 +480,28 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
                                     else
                                         FocusDriveController.GetInstance().set_In_De_crase(getStep(dif));
                                 });
-                            synchronized (waitlock) {
+
                                 try {
                                     if (doFocus)
-                                        waitlock.wait(20);
+                                        waitlock.wait(30);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
                             }
                             currentPos =FocusDriveController.GetInstance().getFocusPosition();
                         }
-                        if (doFocus)
-                            cameraUiInterface.getActivityInterface().getMainHandler().post(()-> {
-                                CameraInstance.GET().takePicture();
-                            });
+
 
                         //wait for capture complete
-                        synchronized (waitlock)
+                        synchronized (captureWaitLock)
                         {
+                            if (doFocus)
+                                cameraUiInterface.getActivityInterface().getMainHandler().post(()-> {
+                                    CameraInstance.GET().takePicture();
+                                });
                             try {
                                 if (doFocus)
-                                    waitlock.wait();
+                                    captureWaitLock.wait();
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }

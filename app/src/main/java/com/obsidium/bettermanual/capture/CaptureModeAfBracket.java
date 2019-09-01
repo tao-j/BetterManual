@@ -483,7 +483,7 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
 
                                 try {
                                     if (doFocus)
-                                        waitlock.wait(30);
+                                        waitlock.wait(20);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }

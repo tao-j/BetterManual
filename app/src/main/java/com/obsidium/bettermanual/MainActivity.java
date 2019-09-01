@@ -12,10 +12,12 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.github.ma1co.pmcademo.app.BaseActivity;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
+import com.obsidium.bettermanual.controller.BatteryObserverController;
 import com.obsidium.bettermanual.controller.ShutterController;
 import com.obsidium.bettermanual.layout.BaseLayout;
 import com.obsidium.bettermanual.layout.CameraUiFragment;
@@ -81,7 +83,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     protected void onResume() {
         Log.d(TAG,"onResume");
         super.onResume();
-
+        BatteryObserverController.GetInstance().bindView((TextView)findViewById(R.id.textView_battery));
         if (avIndexManager != null) {
             registerReceiver(avIndexManager, avIndexManager.AVAILABLE_SIZE_INTENTS);
             registerReceiver(avIndexManager, avIndexManager.MEDIA_INTENTS);
@@ -96,7 +98,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
     @Override
     protected void onPause() {
         Log.d(TAG,"onPause");
-
+        BatteryObserverController.GetInstance().bindView(null);
         if (avIndexManager != null) {
             unregisterReceiver(avIndexManager);
             avIndexManager.onPause(getApplicationContext());

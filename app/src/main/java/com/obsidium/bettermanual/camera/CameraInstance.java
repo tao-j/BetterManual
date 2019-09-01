@@ -7,6 +7,7 @@ import android.view.SurfaceHolder;
 
 import com.obsidium.bettermanual.Preferences;
 import com.obsidium.bettermanual.controller.ApertureController;
+import com.obsidium.bettermanual.controller.BatteryObserverController;
 import com.obsidium.bettermanual.controller.DriveModeController;
 import com.obsidium.bettermanual.controller.ExposureCompensationController;
 import com.obsidium.bettermanual.controller.ExposureHintController;
@@ -18,6 +19,7 @@ import com.obsidium.bettermanual.controller.IsoController;
 import com.obsidium.bettermanual.controller.LongExposureNoiseReductionController;
 import com.obsidium.bettermanual.controller.ShutterController;
 import com.obsidium.bettermanual.model.ApertureModel;
+import com.obsidium.bettermanual.model.BatteryObserverModel;
 import com.obsidium.bettermanual.model.DriveModeModel;
 import com.obsidium.bettermanual.model.ExposureCompensationModel;
 import com.obsidium.bettermanual.model.ExposureHintModel;
@@ -55,6 +57,7 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
     private LongExposureNoiseReductionModel longExposureNoiseReductionModel;
     private HistogramModel histogramModel;
     private FocusDriveModel focusDriveModel;
+    private BatteryObserverModel batteryObserverModel;
 
 
     private CameraInstance() {
@@ -129,6 +132,10 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
         histogramModel = new HistogramModel(this);
         m_camera.setPreviewAnalizeListener(histogramModel);
         HistogramController.GetInstance().bindModel(histogramModel);
+
+        batteryObserverModel = new BatteryObserverModel(this);
+        BatteryObserverController.GetInstance().bindModel(batteryObserverModel);
+        batteryObserverModel.start();
 
         applySettings();
         //dumpParameter();
@@ -246,6 +253,10 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
         FocusDriveController.GetInstance().bindModel(null);
         m_camera.setFocusDriveListener(null);
         focusDriveModel = null;
+
+        batteryObserverModel.stop();
+        BatteryObserverController.GetInstance().bindModel(null);
+        batteryObserverModel = null;
 
         /*cameraSequence.setShutterSequenceCallback(null);
         cameraSequence.release();*/

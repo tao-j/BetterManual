@@ -47,6 +47,11 @@ public class Preferences
         this.m_prefs = null;
     }
 
+    public Context getContext()
+    {
+        return context;
+    }
+
     public String getSceneMode()
     {
         return m_prefs.getString(context.getString(R.string.ask_sceneMode), CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE);

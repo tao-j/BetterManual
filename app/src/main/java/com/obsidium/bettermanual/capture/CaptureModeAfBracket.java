@@ -55,6 +55,11 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
     }
 
     @Override
+    public int getNavigationHelpID() {
+        return R.string.view_startAFBracket;
+    }
+
+    @Override
     public void reset() {
         focusNear = 0;
         focusFar = 20;

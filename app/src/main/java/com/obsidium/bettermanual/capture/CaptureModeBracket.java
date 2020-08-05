@@ -1,7 +1,6 @@
 package com.obsidium.bettermanual.capture;
 
 import android.util.Log;
-import android.util.Pair;
 
 import com.obsidium.bettermanual.CameraUtil;
 import com.obsidium.bettermanual.KeyEvents;
@@ -9,14 +8,12 @@ import com.obsidium.bettermanual.Preferences;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
-import com.obsidium.bettermanual.camera.ShutterSpeedValue;
 import com.obsidium.bettermanual.controller.DriveModeController;
 import com.obsidium.bettermanual.controller.ExposureModeController;
 import com.obsidium.bettermanual.controller.IsoController;
 import com.obsidium.bettermanual.controller.ShutterController;
 import com.obsidium.bettermanual.layout.CameraUiInterface;
 import com.obsidium.bettermanual.model.ExposureModeModel;
-import com.sony.scalar.hardware.CameraEx;
 
 public class CaptureModeBracket extends CaptureMode implements  ShutterController.ShutterSpeedEvent, KeyEvents, CaptureSession.CaptureDoneEvent {
 
@@ -141,7 +138,7 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
     }
 
     @Override
-    public void increment() {
+    public void incrementInterval() {
         if (m_bracketStep < 9)
         {
             ++m_bracketStep;
@@ -150,7 +147,7 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
     }
 
     @Override
-    public void decrement() {
+    public void decrementInterval() {
         if (m_bracketStep > 1)
         {
             --m_bracketStep;
@@ -213,9 +210,9 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
         if (currentDialMode == BRACKET_STEP)
         {
             if (value <0)
-                decrement();
+                decrementInterval();
             else
-                increment();
+                incrementInterval();
         }
         else
         if (currentDialMode == BRACKET_PICCOUNT)

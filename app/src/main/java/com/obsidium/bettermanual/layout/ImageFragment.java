@@ -6,7 +6,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.obsidium.bettermanual.ActivityInterface;
@@ -352,7 +351,7 @@ public class ImageFragment extends BaseLayout {
 
     @Override
     public boolean onPlayKeyUp() {
-        activityInterface.loadFragment(MainActivity.FRAGMENT_WAITFORCAMERARDY);
+        activityInterface.loadFragment(MainActivity.FRAGMENT_WAIT_FOR_CAMERA_RDY);
         return false;
     }
 

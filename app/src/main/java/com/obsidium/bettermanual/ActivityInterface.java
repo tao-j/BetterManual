@@ -26,5 +26,5 @@ public interface ActivityInterface {
     void cancelBulbCapture();
     void setBulbCapture(boolean bulbCapture);
     AvIndexManager getAvIndexManager();
-
 }
+

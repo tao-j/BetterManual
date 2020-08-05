@@ -101,7 +101,7 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
     }
 
     @Override
-    public void increment() {
+    public void incrementInterval() {
         if (bulbCaptureTime < 1000) //ms
             bulbCaptureTime += 100;
         else if(bulbCaptureTime > 1000 * 60)//min
@@ -112,7 +112,7 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
     }
 
     @Override
-    public void decrement() {
+    public void decrementInterval() {
         if (bulbCaptureTime > 0)
         {
             if (bulbCaptureTime <= 1000) //ms
@@ -167,9 +167,9 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
         if (currentdial == DIAL_STATE_BULBTIME)
         {
             if (value <0)
-                decrement();
+                decrementInterval();
             else
-                increment();
+                incrementInterval();
         }
         return false;
     }

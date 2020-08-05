@@ -10,9 +10,9 @@ import android.graphics.PorterDuffXfermode;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class StarDriftAlginView extends View {
+public class StarDriftAlignView extends View {
 
-    private int margine = 5;
+    private int margin = 5;
     private Paint crossPaint;
     private Paint gridPaint;
     private final int gridSize = 20;
@@ -20,12 +20,12 @@ public class StarDriftAlginView extends View {
     private boolean drawGrid = false;
     private boolean drawCenterLines = false;
 
-    public StarDriftAlginView(Context context) {
+    public StarDriftAlignView(Context context) {
         super(context);
         initPaint();
     }
 
-    public StarDriftAlginView(Context context, AttributeSet attrs) {
+    public StarDriftAlignView(Context context, AttributeSet attrs) {
         super(context, attrs);
         initPaint();
     }
@@ -65,11 +65,11 @@ public class StarDriftAlginView extends View {
         }
 
         if (drawCenterLines) {
-            canvas.drawLine(centerX - margine, 0, centerX - margine, getHeight(), crossPaint);
-            canvas.drawLine(centerX + margine, 0, centerX + margine, getHeight(), crossPaint);
+            canvas.drawLine(centerX - margin, 0, centerX - margin, getHeight(), crossPaint);
+            canvas.drawLine(centerX + margin, 0, centerX + margin, getHeight(), crossPaint);
 
-            canvas.drawLine(0, centerY - margine, getWidth(), centerY - margine, crossPaint);
-            canvas.drawLine(0, centerY + margine, getWidth(), centerY + margine, crossPaint);
+            canvas.drawLine(0, centerY - margin, getWidth(), centerY - margin, crossPaint);
+            canvas.drawLine(0, centerY + margin, getWidth(), centerY + margin, crossPaint);
         }
     }
 
@@ -87,13 +87,13 @@ public class StarDriftAlginView extends View {
 
     public void increaseSize()
     {
-        if (margine < 100)
-            margine++;
+        if (margin < 100)
+            margin++;
     }
 
     public void decraseSize()
     {
-        if (margine > 2)
-            margine--;
+        if (margin > 2)
+            margin--;
     }
 }

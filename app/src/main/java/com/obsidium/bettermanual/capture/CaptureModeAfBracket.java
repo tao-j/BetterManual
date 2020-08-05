@@ -10,7 +10,6 @@ import com.obsidium.bettermanual.camera.CaptureSession;
 import com.obsidium.bettermanual.controller.DriveModeController;
 import com.obsidium.bettermanual.controller.ExposureModeController;
 import com.obsidium.bettermanual.controller.FocusDriveController;
-import com.obsidium.bettermanual.controller.ShutterController;
 import com.obsidium.bettermanual.layout.CameraUiInterface;
 
 public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, CaptureSession.CaptureDoneEvent,FocusDriveController.FocusPostionChangedEvent {
@@ -114,14 +113,14 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
     }
 
     @Override
-    public void increment() {
+    public void incrementInterval() {
         if (uiState == UiState.SelectNear || uiState == UiState.SelectFar)
             FocusDriveController.GetInstance().set_In_De_crase(+2);
 
     }
 
     @Override
-    public void decrement() {
+    public void decrementInterval() {
         if (uiState == UiState.SelectNear || uiState == UiState.SelectFar)
             FocusDriveController.GetInstance().set_In_De_crase(-2);
     }
@@ -181,9 +180,9 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
         if (uiState == UiState.SelectNear || uiState == UiState.SelectFar)
         {
             if (value <0)
-                decrement();
+                decrementInterval();
             else
-                increment();
+                incrementInterval();
         }
         if (uiState == UiState.SelectPictureCount)
         {

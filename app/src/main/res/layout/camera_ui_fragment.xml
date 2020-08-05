@@ -65,17 +65,17 @@
 
 
     <TextView
+        android:id="@+id/tvLog"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/tvLog"
-        android:textSize="10dp"
-        tools:text="Log"
-        android:textColor="@android:color/white"
         android:layout_marginLeft="64dp"
         android:layout_marginTop="4dp"
         android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
         android:gravity="bottom"
-        android:layout_marginBottom="4dp"/>
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        tools:text="Log" />
 
 
 
@@ -129,7 +129,7 @@
             android:layout_weight="1"
             android:gravity="center_horizontal"
             android:text="TextView"
-            android:textSize="15dp" />
+            android:textSize="@dimen/textSize" />
 
         <TextView
             android:id="@+id/aperture_txt"
@@ -138,7 +138,7 @@
             android:layout_weight="1"
             android:gravity="center_horizontal"
             android:text="TextView"
-            android:textSize="15dp" />
+            android:textSize="@dimen/textSize" />
 
         <TextView
             android:id="@+id/iso_txt"
@@ -147,7 +147,7 @@
             android:layout_weight="1"
             android:gravity="center_horizontal"
             android:text="TextView"
-            android:textSize="15dp" />
+            android:textSize="@dimen/textSize" />
 
         <TextView
             android:id="@+id/evcopmensation_txt"
@@ -156,7 +156,7 @@
             android:layout_weight="1"
             android:gravity="center_horizontal"
             android:text="TextView"
-            android:textSize="15dp" />
+            android:textSize="@dimen/textSize" />
 
         <TextView
             android:id="@+id/evhint_txt"
@@ -165,7 +165,7 @@
             android:layout_weight="1"
             android:gravity="center_horizontal"
             android:text="TextView"
-            android:textSize="15dp" />
+            android:textSize="@dimen/textSize" />
     </LinearLayout>
 
     <TextView

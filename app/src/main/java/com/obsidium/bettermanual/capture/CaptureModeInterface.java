@@ -10,8 +10,8 @@ interface CaptureModeInterface {
     boolean isActive();
 
 
-    void increment();
-    void decrement();
+    void incrementInterval();
+    void decrementInterval();
     void incrementPicCount();
     void decrementPicCount();
 }

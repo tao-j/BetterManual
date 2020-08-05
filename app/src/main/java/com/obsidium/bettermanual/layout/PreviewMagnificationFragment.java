@@ -14,7 +14,7 @@ import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.controller.FocusDriveController;
 import com.obsidium.bettermanual.views.FocusScaleView;
 import com.obsidium.bettermanual.views.PreviewNavView;
-import com.obsidium.bettermanual.views.StarDriftAlginView;
+import com.obsidium.bettermanual.views.StarDriftAlignView;
 import com.sony.scalar.hardware.CameraEx;
 
 
@@ -59,20 +59,20 @@ public class PreviewMagnificationFragment extends BaseLayout implements CameraEx
     /*private FocusScaleView m_focusScaleView;
     private View            m_lFocusScale;*/
 
-    private StarDriftAlginView starDriftAlginView;
+    private StarDriftAlignView starDriftAlignView;
 
     public PreviewMagnificationFragment(Context context, ActivityInterface activityInterface) {
         super(context, activityInterface);
         inflateLayout(R.layout.preview_magnification_fragment);
         magnification = (TextView) findViewById(R.id.tvMagnification);
         previewNavView = (PreviewNavView)findViewById(R.id.vPreviewNav);
-        starDriftAlginView = (StarDriftAlginView)findViewById(R.id.stardriftalgin);
+        starDriftAlignView = (StarDriftAlignView)findViewById(R.id.stardriftalgin);
         FocusDriveController.GetInstance().bindView((FocusScaleView)findViewById(R.id.vFocusScale));
 
         /*m_lFocusScale = findViewById(R.id.lFocusScale);
         m_lFocusScale.setVisibility(View.GONE);*/
-        starDriftAlginView.enableCenterLines(Preferences.GET().showStarAlginView());
-        starDriftAlginView.enableGrid(Preferences.GET().showStarAlginViewGrid());
+        starDriftAlignView.enableCenterLines(Preferences.GET().showStarAlignView());
+        starDriftAlignView.enableGrid(Preferences.GET().showStarAlignViewGrid());
 
         activityInterface.setSurfaceViewOnTouchListner(new SurfaceSwipeTouchListener(getContext()));
         CameraInstance.GET().setPreviewMagnificationListener(this);
@@ -139,12 +139,12 @@ public class PreviewMagnificationFragment extends BaseLayout implements CameraEx
 
     @Override
     public boolean onUpperDialChanged(int value) {
-        if (Preferences.GET().showStarAlginView()) {
+        if (Preferences.GET().showStarAlignView()) {
             if (value < 0)
-                starDriftAlginView.decraseSize();
+                starDriftAlignView.decraseSize();
             else
-                starDriftAlginView.increaseSize();
-            starDriftAlginView.invalidate();
+                starDriftAlignView.increaseSize();
+            starDriftAlignView.invalidate();
         }
 
         return false;
@@ -247,13 +247,13 @@ public class PreviewMagnificationFragment extends BaseLayout implements CameraEx
     @Override
     public boolean onFnKeyUp() {
 
-        if (Preferences.GET().showStarAlginViewGrid()) {
+        if (Preferences.GET().showStarAlignViewGrid()) {
             Preferences.GET().setShowStarAlignGrid(false);
-            starDriftAlginView.enableGrid(false);
+            starDriftAlignView.enableGrid(false);
         }
         else {
             Preferences.GET().setShowStarAlignGrid(true);
-            starDriftAlginView.enableGrid(true);
+            starDriftAlignView.enableGrid(true);
         }
         return false;
     }
@@ -278,12 +278,12 @@ public class PreviewMagnificationFragment extends BaseLayout implements CameraEx
 
     @Override
     public boolean onMenuKeyUp() {
-        if (!Preferences.GET().showStarAlginView()) {
-            starDriftAlginView.enableCenterLines(true);
+        if (!Preferences.GET().showStarAlignView()) {
+            starDriftAlignView.enableCenterLines(true);
             Preferences.GET().setShowStarAlign(true);
         }
         else {
-            starDriftAlginView.enableCenterLines(false);
+            starDriftAlignView.enableCenterLines(false);
             Preferences.GET().setShowStarAlign(false);
         }
         return false;

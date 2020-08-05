@@ -12,73 +12,61 @@ import java.util.List;
  * Created by KillerInk on 30.08.2017.
  */
 
-public class BaseCamera implements CameraEventListnerInterface, CameraParameterInterface {
+public class BaseCamera implements CameraEventListenerInterface, CameraParameterInterface {
 
     private static final String TAG = BaseCamera.class.getSimpleName();
 
-    public interface CameraEvents{
-        void onCameraOpen(boolean isOpen);
-    }
-
-
+    CameraEx m_camera;
+    CameraEvents m_cameraEvents;
 
     CameraEx.AutoPictureReviewControl autoPictureReviewControl;
-    CameraEvents cameraEventsListner;
     CameraEx.ShutterSpeedInfo shutterSpeedInfo;
-    CameraEx m_camera;
-    protected boolean cameraIsOpen = false;
-
-    CameraEx.PreviewAnalizeListener previewAnalizeListener;
-
+    CameraEx.PreviewAnalizeListener previewAnalyzeListener;
     CameraEx.FocusDriveListener focusDriveListener;
     CameraEx.PreviewMagnificationListener previewMagnificationListener;
     CameraEx.FocusLightStateListener focusLightStateListener;
     CameraEx.SettingChangedListener settingChangedListener;
 
-    public CameraEx getCameraEx()
-    {
+    protected boolean cameraIsOpen = false;
+
+    public CameraEx getCameraEx() {
         return m_camera;
     }
 
+    public interface CameraEvents {
+        void onCameraOpen(boolean isOpen);
+    }
 
-    public CameraEx.AutoPictureReviewControl getAutoPictureReviewControls()
-    {
+    @Override
+    public void fireOnCameraOpen(boolean isOpen) {
+        if (m_cameraEvents != null) {
+            m_cameraEvents.onCameraOpen(true);
+        }
+    }
+
+    public CameraEx.AutoPictureReviewControl getAutoPictureReviewControls() {
         return autoPictureReviewControl;
     }
 
     @Override
-    public void setPreviewAnalizeListener(CameraEx.PreviewAnalizeListener previewAnalizeListener)
-    {
-        this.previewAnalizeListener = previewAnalizeListener;
+    public void setPreviewAnalyzeListener(CameraEx.PreviewAnalizeListener previewAnalyzeListener) {
+        this.previewAnalyzeListener = previewAnalyzeListener;
     }
 
     @Override
-    public void setFocusDriveListener(CameraEx.FocusDriveListener focusDriveListener)
-    {
-       this.focusDriveListener = focusDriveListener;
+    public void setFocusDriveListener(CameraEx.FocusDriveListener focusDriveListener) {
+        this.focusDriveListener = focusDriveListener;
     }
 
     @Override
-    public void setPreviewMagnificationListener(CameraEx.PreviewMagnificationListener previewMagnificationListener)
-    {
+    public void setPreviewMagnificationListener(CameraEx.PreviewMagnificationListener previewMagnificationListener) {
         this.previewMagnificationListener = previewMagnificationListener;
         m_camera.setPreviewMagnificationListener(previewMagnificationListener);
     }
 
-
     @Override
-    public void setCameraEventsListner(CameraEvents eventsListner)
-    {
-        this.cameraEventsListner = eventsListner;
-    }
-
-    @Override
-    public void fireOnCameraOpen(boolean isopen)
-    {
-        if (cameraEventsListner != null)
-        {
-            cameraEventsListner.onCameraOpen(true);
-        }
+    public void setM_cameraEvents(CameraEvents eventsListener) {
+        this.m_cameraEvents = eventsListener;
     }
 
     @Override
@@ -87,8 +75,7 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     }
 
     @Override
-    public CameraEx.ShutterSpeedInfo getShutterSpeedInfo()
-    {
+    public CameraEx.ShutterSpeedInfo getShutterSpeedInfo() {
         if (shutterSpeedInfo == null) {
             shutterSpeedInfo = new CameraEx.ShutterSpeedInfo();
             CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(getParameters());
@@ -100,27 +87,20 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
         return shutterSpeedInfo;
     }
 
-    protected Camera.Parameters getParameters()
-    {
+    protected Camera.Parameters getParameters() {
         return m_camera.getNormalCamera().getParameters();
     }
 
-    protected CameraEx.ParametersModifier getModifier()
-    {
+    protected void setParameters(Camera.Parameters parameters) {
+        m_camera.getNormalCamera().setParameters(parameters);
+    }
+
+    protected CameraEx.ParametersModifier getModifier() {
         return m_camera.createParametersModifier(getParameters());
     }
 
-
-    protected Camera.Parameters getEmptyParameters()
-    {
+    protected Camera.Parameters getEmptyParameters() {
         return m_camera.createEmptyParameters();
-    }
-
-
-
-    protected void setParameters(Camera.Parameters parameters)
-    {
-        m_camera.getNormalCamera().setParameters(parameters);
     }
 
     public int getExposureCompensation() {
@@ -146,151 +126,127 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
         float ret = 0;
         try {
             ret = getParameters().getExposureCompensationStep();
-        }
-        catch (NullPointerException ex)
-        {
+        } catch (NullPointerException ex) {
             ex.printStackTrace();
         }
         return ret;
     }
 
-    public boolean isLongExposureNoiseReductionSupported()
-    {
+    public boolean isLongExposureNoiseReductionSupported() {
         try {
             getModifier().getLongExposureNR();
             return true;
-        }
-        catch (NoSuchMethodError ex)
-        {
+        } catch (NoSuchMethodError ex) {
             ex.printStackTrace();
             return false;
         }
     }
 
-    public void setLongExposureNoiseReduction(boolean enable)
-    {
+    public void setLongExposureNoiseReduction(boolean enable) {
         Camera.Parameters parameters = getEmptyParameters();
         CameraEx.ParametersModifier modifier = getCameraEx().createParametersModifier(parameters);
         modifier.setLongExposureNR(enable);
         setParameters(parameters);
     }
 
-
     @Override
     public boolean getLongeExposureNR() {
         return getModifier().getLongExposureNR();
     }
 
-    public void setFocusMode(String value)
-    {
-        Log.d(TAG, "setFocusmode:" +value);
+    public void setFocusMode(String value) {
+        Log.d(TAG, "setFocusmode:" + value);
         Camera.Parameters parameters = getEmptyParameters();
         parameters.setFocusMode(value);
         setParameters(parameters);
     }
 
-    public void setSceneMode(String value)
-    {
-        Log.d(TAG, "setSceneMode:" +value);
+    public String getSceneMode() {
+        return getParameters().getSceneMode();
+    }
+
+    public void setSceneMode(String value) {
+        Log.d(TAG, "setSceneMode:" + value);
         Camera.Parameters parameters = getEmptyParameters();
         parameters.setSceneMode(value);
         setParameters(parameters);
     }
 
-    public String getSceneMode()
-    {
-        return getParameters().getSceneMode();
+    public String getDriveMode() {
+        return getModifier().getDriveMode();
     }
 
-    public void setDriveMode(String value)
-    {
-        Log.d(TAG, "setDriveMode:" +value);
+    public void setDriveMode(String value) {
+        Log.d(TAG, "setDriveMode:" + value);
         Camera.Parameters parameters = getEmptyParameters();
         CameraEx.ParametersModifier modifier = getCameraEx().createParametersModifier(parameters);
         modifier.setDriveMode(value);
         setParameters(parameters);
     }
 
-    public String getDriveMode()
-    {
-        return getModifier().getDriveMode();
-    }
-
-    public void setImageAspectRatio(String value)
-    {
+    public void setImageAspectRatio(String value) {
         Camera.Parameters parameters = getEmptyParameters();
         CameraEx.ParametersModifier modifier = getCameraEx().createParametersModifier(parameters);
         modifier.setImageAspectRatio(value);
         setParameters(parameters);
     }
 
-    public void setImageQuality(String value)
-    {
+    public void setImageQuality(String value) {
         Camera.Parameters parameters = getEmptyParameters();
         CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
         modifier.setPictureStorageFormat(value);
         setParameters(parameters);
     }
 
-    public void setBurstDriveSpeed(String value)
-    {
+    public String getBurstDriveSpeed() {
+        return getModifier().getBurstDriveSpeed();
+    }
+
+    public void setBurstDriveSpeed(String value) {
         Camera.Parameters parameters = getEmptyParameters();
         CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
         modifier.setBurstDriveSpeed(value);
         setParameters(parameters);
     }
 
-    public String getBurstDriveSpeed()
-    {
-        return getModifier().getBurstDriveSpeed();
-    }
-
-    public boolean isAutoShutterSpeedLowLimitSupported()
-    {
+    public boolean isAutoShutterSpeedLowLimitSupported() {
         return getModifier().isSupportedAutoShutterSpeedLowLimit();
     }
 
-    public void setAutoShutterSpeedLowLimit(int value)
-    {
+    public int getAutoShutterSpeedLowLimit() {
+        return getModifier().getAutoShutterSpeedLowLimit();
+    }
+
+    public void setAutoShutterSpeedLowLimit(int value) {
         Camera.Parameters parameters = getEmptyParameters();
         CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
         modifier.setAutoShutterSpeedLowLimit(value);
         setParameters(parameters);
     }
 
-    public int getAutoShutterSpeedLowLimit()
-    {
-        return getModifier().getAutoShutterSpeedLowLimit();
-    }
-
-    public void setSelfTimer(int value)
-    {
+    public void setSelfTimer(int value) {
         Camera.Parameters parameters = getEmptyParameters();
         CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
         modifier.setSelfTimer(value);
         setParameters(parameters);
     }
 
-    public List<Integer> getSupportedISOSensitivities()
-    {
+    public List<Integer> getSupportedISOSensitivities() {
         return getModifier().getSupportedISOSensitivities();
     }
 
-    public int getISOSensitivity()
-    {
+    public int getISOSensitivity() {
         return getModifier().getISOSensitivity();
     }
 
-    public void setISOSensitivity(int value)
-    {
+    public void setISOSensitivity(int value) {
         Camera.Parameters parameters = getEmptyParameters();
         CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
         modifier.setISOSensitivity(value);
         setParameters(parameters);
     }
 
-    public void setPreviewMagnification(int factor, Pair position)
-    {
+    public void setPreviewMagnification(int factor, Pair position) {
         m_camera.setPreviewMagnification(factor, position);
     }
 
@@ -303,22 +259,21 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
         return getModifier().getSupportedPreviewMagnification();
     }
 
-    public void decrementShutterSpeed(){
+    public void decrementShutterSpeed() {
         m_camera.decrementShutterSpeed();
     }
-    public void incrementShutterSpeed()
-    {
+
+    public void incrementShutterSpeed() {
         m_camera.incrementShutterSpeed();
     }
 
-    public void decrementAperture(){
+    public void decrementAperture() {
         m_camera.decrementAperture();
     }
 
-    public void incrementAperture(){
+    public void incrementAperture() {
         m_camera.incrementAperture();
     }
-
 
     public int getAperture() {
         return getModifier().getAperture();
@@ -330,8 +285,7 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
             getModifier().getAntiHandBlurMode();
 
             return true;
-        }
-        catch (NoSuchMethodError ex) {
+        } catch (NoSuchMethodError ex) {
             ex.printStackTrace();
             return false;
         }
@@ -360,20 +314,10 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
     public boolean isLiveSlowShutterSupported() {
         try {
             return getModifier().isSupportedSlowShutterLiveviewMode();
-        }
-        catch (NoSuchMethodError ex)
-        {
+        } catch (NoSuchMethodError ex) {
             ex.printStackTrace();
             return false;
         }
-    }
-
-    public void setLiveSlowShutter(String liveSlowShutter)
-    {
-        Camera.Parameters parameters = getEmptyParameters();
-        CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
-        modifier.setSlowShutterLiveviewMode(liveSlowShutter);
-        setParameters(parameters);
     }
 
     @Override
@@ -381,54 +325,53 @@ public class BaseCamera implements CameraEventListnerInterface, CameraParameterI
         return getModifier().getSlowShutterLiveviewMode();
     }
 
-    @Override
-    public String[] getSupportedLiveSlowShutterModes() {
-        return new String[] { getModifier().SLOW_SHUTTER_LIVEVIEW_MODE_OFF,getModifier().SLOW_SHUTTER_LIVEVIEW_MODE_ON};
+    public void setLiveSlowShutter(String liveSlowShutter) {
+        Camera.Parameters parameters = getEmptyParameters();
+        CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
+        modifier.setSlowShutterLiveviewMode(liveSlowShutter);
+        setParameters(parameters);
     }
 
+    @Override
+    public String[] getSupportedLiveSlowShutterModes() {
+        return new String[]{getModifier().SLOW_SHUTTER_LIVEVIEW_MODE_OFF, getModifier().SLOW_SHUTTER_LIVEVIEW_MODE_ON};
+    }
 
-
-    public Pair getShutterSpeed()
-    {
+    public Pair getShutterSpeed() {
         return getModifier().getShutterSpeed();
     }
 
-    public void adjustShutterSpeed(int val)
-    {
+    public void adjustShutterSpeed(int val) {
         m_camera.adjustShutterSpeed(val);
     }
 
-
-    public void setFocusPosition(int pos)
-    {
+    public void setFocusPosition(int pos) {
         if (pos < 0)
-            m_camera.startOneShotFocusDrive(CameraEx.FOCUS_DRIVE_DIRECTION_NEAR,pos*-1);
+            m_camera.startOneShotFocusDrive(CameraEx.FOCUS_DRIVE_DIRECTION_NEAR, pos * -1);
         else
-            m_camera.startOneShotFocusDrive(CameraEx.FOCUS_DRIVE_DIRECTION_FAR,pos);
+            m_camera.startOneShotFocusDrive(CameraEx.FOCUS_DRIVE_DIRECTION_FAR, pos);
     }
 
-    public void setRedEyeReduction(String enable)
-    {
+    public void setRedEyeReduction(String enable) {
         Camera.Parameters parameters = getEmptyParameters();
         CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
         modifier.setRedEyeReductionMode(enable);
         setParameters(parameters);
     }
 
-    public void setFlashMode(String enable)
-    {
+    public void setFlashMode(String enable) {
         Camera.Parameters parameters = getEmptyParameters();
         parameters.setFlashMode(enable);
         setParameters(parameters);
     }
 
-    public void setFlashType(String enable)
-    {
+    public void setFlashType(String enable) {
         Camera.Parameters parameters = getEmptyParameters();
         CameraEx.ParametersModifier modifier = m_camera.createParametersModifier(parameters);
         modifier.setFlashType(enable);
         setParameters(parameters);
     }
+
 
 
     //returns always [0,0,0] when used with mf, dont know if its works with af

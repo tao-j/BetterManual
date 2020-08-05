@@ -10,7 +10,7 @@ android {
         }
     }
     compileSdkVersion 10
-    buildToolsVersion '29.0.0 rc3'
+//    buildToolsVersion '
     defaultConfig {
         applicationId "com.obsidium.bettermanual"
         minSdkVersion 10

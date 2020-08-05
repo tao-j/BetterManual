@@ -37,54 +37,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class CameraUiFragment extends BaseLayout implements View.OnClickListener,
-        CameraUiInterface
-{
+public class CameraUIFragment extends BaseLayout implements View.OnClickListener, CameraUiInterface {
 
-
-
-    private static final boolean LOGGING_ENABLED = false;
+    private static final boolean LOGGING_ENABLED = true;
     private static final int MESSAGE_TIMEOUT = 1000;
-    private final  String TAG  = CameraUiFragment.class.getSimpleName();
-
-    private TextView        m_tvLog;
-    private TextView        m_tvMsg;
-    private HistogramView m_vHist;
-    private ImageView       m_ivTimelapse;
-    private ImageView       m_ivBracket;
-    private ImageView       m_ivAfBracket;
-    private GridView m_vGrid;
-    private TextView        m_tvHint;
-    private View            m_lFocusScale;
+    private final String TAG = CameraUIFragment.class.getSimpleName();
+    private int lastDialView;
 
     private LinearLayout bottomHolder;
     private LinearLayout leftHolder;
-
     private List<Controller> dialViews;
-    private int lastDialView;
 
-    // Timelapse
+    private HistogramView m_vHist;
+    private TextView m_tvLog;
+    private TextView m_tvMsg;
+    private GridView m_vGrid;
+    private TextView m_tvHint;
+    private ImageView m_ivTimelapse;
+    private ImageView m_ivBracket;
+    private ImageView m_ivAfBracket;
+    private View m_lFocusScale;
 
     private CaptureModeTimelapse timelapse;
     private CaptureModeBracket bracket;
     private CaptureModeAfBracket afBracket;
 
-
-    private final Runnable  m_hideMessageRunnable = new Runnable()
-    {
+    private Runnable[] gridHistogramViewRunners;
+    private final Runnable m_hideMessageRunnable = new Runnable() {
         @Override
-        public void run()
-        {
+        public void run() {
             m_tvMsg.setVisibility(View.GONE);
         }
     };
 
-    private Runnable[] gridHistogramViewRunners;
-
-    private int             m_viewFlags;
+    private int m_viewFlags;
     private boolean bulbcapture = false;
 
-    public CameraUiFragment(Context context, ActivityInterface activityInterface)
+    public CameraUIFragment(Context context, ActivityInterface activityInterface)
     {
         super(context,activityInterface);
         inflateLayout(R.layout.camera_ui_fragment);
@@ -187,7 +176,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         //dialViews.add(ExposureHintController.GetInstance());
 
                 //then set the key event listner to avoid nullpointer
-        activityInterface.getDialHandler().setDialEventListner(CameraUiFragment.this);
+        activityInterface.getDialHandler().setDialEventListner(CameraUIFragment.this);
 
         m_vGrid.setVideoRect(activityInterface.getDisplayManager().getDisplayedVideoRect());
 
@@ -210,8 +199,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         Log.d(TAG,"initUiEnd");
     }
 
-    public void Destroy()
-    {
+    public void Destroy() {
         Preferences.GET().setViewFlags(m_viewFlags);
         Preferences.GET().setDialMode(lastDialView);
 
@@ -239,16 +227,14 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
        #################################  */
 
     @Override
-    public void showMessageDelayed(String msg)
-    {
+    public void showMessageDelayed(String msg) {
         showMessage(msg);
         activityInterface.getMainHandler().removeCallbacks(m_hideMessageRunnable);
         activityInterface.getMainHandler().postDelayed(m_hideMessageRunnable, MESSAGE_TIMEOUT);
     }
 
     @Override
-    public void showMessage(final String msg)
-    {
+    public void showMessage(final String msg) {
         activityInterface.getMainHandler().post(new Runnable() {
             @Override
             public void run() {
@@ -260,39 +246,25 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
     }
 
     @Override
-    public void hideMessage()
-    {
-        activityInterface.getMainHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                m_tvMsg.setVisibility(View.GONE);
-            }
+    public void hideMessage() {
+        activityInterface.getMainHandler().post(() -> {
+            m_tvMsg.setVisibility(View.GONE);
         });
-
     }
 
     @Override
     public void showHintMessage(final String msg) {
-        activityInterface.getMainHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                m_tvHint.setText(msg);
-                if (m_tvHint.getVisibility() != VISIBLE)
-                    m_tvHint.setVisibility(View.VISIBLE);
-            }
+        activityInterface.getMainHandler().post(() -> {
+            m_tvHint.setText(msg);
+            if (m_tvHint.getVisibility() != VISIBLE)
+                m_tvHint.setVisibility(View.VISIBLE);
         });
 
     }
 
     @Override
     public void hideHintMessage() {
-        activityInterface.getMainHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                m_tvHint.setVisibility(View.GONE);
-            }
-        });
-
+        activityInterface.getMainHandler().post(() -> m_tvHint.setVisibility(View.GONE));
     }
 
     @Override
@@ -305,44 +277,36 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         m_viewFlags = viewsToShow;
     }
 
-
     @Override
     public ActivityInterface getActivityInterface() {
         return activityInterface;
     }
 
     @Override
-    public void updateViewVisibility()
-    {
+    public void updateViewVisibility() {
 
     }
 
-
     @Override
-    public void setLeftViewVisibility(boolean visible)
-    {
+    public void setLeftViewVisibility(boolean visible) {
         final int visibility = visible ? View.VISIBLE : View.GONE;
         leftHolder.setVisibility(visibility);
         bottomHolder.setVisibility(visibility);
     }
 
-    private void changeHistogramGridViewVisibility(int val)
-    {
+    private void changeHistogramGridViewVisibility(int val) {
         m_viewFlags += val;
 
-        if (m_viewFlags > gridHistogramViewRunners.length-1)
+        if (m_viewFlags > gridHistogramViewRunners.length - 1)
             m_viewFlags = 0;
         if (m_viewFlags < 0)
-            m_viewFlags = gridHistogramViewRunners.length-1;
+            m_viewFlags = gridHistogramViewRunners.length - 1;
         Log.d(TAG, "viewFLags:" + m_viewFlags);
         activityInterface.getMainHandler().post(gridHistogramViewRunners[m_viewFlags]);
     }
 
-
-
     // OnClickListener
-    public void onClick(View view)
-    {
+    public void onClick(View view) {
         /*if(view instanceof BaseImageView)
             ((BaseImageView) view).toggle();
         else
@@ -352,9 +316,8 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
             bracket.prepare();*/
     }
 
-    private void setDialMode(final int mode)
-    {
-        Log.d(TAG , "setDialMode:" +mode);
+    private void setDialMode(final int mode) {
+        Log.d(TAG, "setDialMode:" + mode);
         Controller lastView = dialViews.get(lastDialView);
         if (lastView == null)
             return;
@@ -362,17 +325,15 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         lastDialView = lastDialView + mode;
         if (lastDialView >= dialViews.size())
             lastDialView = 0;
-        else if(lastDialView < 0)
-            lastDialView = dialViews.size()-1;
+        else if (lastDialView < 0)
+            lastDialView = dialViews.size() - 1;
 
         lastView = dialViews.get(lastDialView);
         lastView.setColorToView(Color.GREEN);
         try {
             if (lastView.getNavigationHelpID() != 0)
                 showHintMessage(getResources().getString(lastView.getNavigationHelpID()));
-        }
-        catch (Resources.NotFoundException ex)
-        {
+        } catch (Resources.NotFoundException ex) {
             ex.printStackTrace();
         }
 
@@ -386,10 +347,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         ##################### */
 
     @Override
-    public boolean onUpperDialChanged(int value)
-    {
-
-
+    public boolean onUpperDialChanged(int value) {
         return true;
     }
 
@@ -400,22 +358,19 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
     }
 
     @Override
-    public boolean onEnterKeyUp()
-    {
+    public boolean onEnterKeyUp() {
         Controller view = dialViews.get(lastDialView);
         view.toggle();
-        Log.d(TAG,"onEnterKeyDown");
+        Log.d(TAG, "onEnterKeyDown");
        /* if (view instanceof BaseImageView)
             ((BaseImageView) view).toggle();
         else if (view instanceof BaseTextView)
             ((BaseTextView) view).onClick();*/
-       try {
-           showHintMessage(getResources().getString(view.getNavigationHelpID()));
-       }
-       catch (Resources.NotFoundException ex)
-       {
-           ex.printStackTrace();
-       }
+        try {
+            showHintMessage(getResources().getString(view.getNavigationHelpID()));
+        } catch (Resources.NotFoundException ex) {
+            ex.printStackTrace();
+        }
 
         return true;
     }
@@ -428,7 +383,6 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
     @Override
     public boolean onFnKeyUp() {
         CameraInstance.GET().cancelCapture();
-
         return false;
     }
 
@@ -439,7 +393,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
 
     @Override
     public boolean onAelKeyUp() {
-        activityInterface.loadFragment(MainActivity.FRAGMENT_PREVIEWMAGNIFICATION);
+        activityInterface.loadFragment(MainActivity.FRAGMENT_PREVIEW_MAGNIFICATION);
         return false;
     }
 
@@ -464,76 +418,64 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
     }
 
     @Override
-    public boolean onEnterKeyDown()
-    {
+    public boolean onEnterKeyDown() {
         return false;
     }
 
     @Override
-    public boolean onUpKeyDown()
-    {
+    public boolean onUpKeyDown() {
         return true;
     }
 
     @Override
-    public boolean onUpKeyUp()
-    {
+    public boolean onUpKeyUp() {
         setDialMode(-1);
-
         return true;
     }
 
     @Override
-    public boolean onDownKeyDown()
-    {
+    public boolean onDownKeyDown() {
         return true;
     }
 
     @Override
-    public boolean onDownKeyUp()
-    {
+    public boolean onDownKeyUp() {
         setDialMode(1);
         return true;
     }
 
     @Override
-    public boolean onLeftKeyDown()
-    {
+    public boolean onLeftKeyDown() {
         return true;
     }
 
     @Override
-    public boolean onLeftKeyUp()
-    {
+    public boolean onLeftKeyUp() {
         // Toggle visibility of some views
         changeHistogramGridViewVisibility(1);
         return false;
     }
 
     @Override
-    public boolean onRightKeyDown()
-    {
+    public boolean onRightKeyDown() {
         return true;
     }
 
     @Override
-    public boolean onRightKeyUp()
-    {
+    public boolean onRightKeyUp() {
         changeHistogramGridViewVisibility(-1);
         return false;
     }
 
     @Override
-    public boolean onShutterKeyUp()
-    {
-        Log.d(TAG,"onShutterKeyUp");
+    public boolean onShutterKeyUp() {
+        Log.d(TAG, "onShutterKeyUp");
         return true;
     }
 
     @Override
-    public boolean onShutterKeyDown()
-    {
-        Log.d(TAG,"onShutterKeyDown");
+    public boolean onShutterKeyDown() {
+        Log.d(TAG, "onShutterKeyDown");
         return true;
     }
 
@@ -544,7 +486,7 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
 
     @Override
     public boolean onPlayKeyUp() {
-        activityInterface.loadFragment(MainActivity.FRAGMENT_IMAGEVIEW);
+        activityInterface.loadFragment(MainActivity.FRAGMENT_IMAGE_VIEW);
         return false;
     }
 
@@ -603,11 +545,8 @@ public class CameraUiFragment extends BaseLayout implements View.OnClickListener
         return false;
     }
 
-
-
     @Override
-    public boolean onDeleteKeyUp()
-    {
+    public boolean onDeleteKeyUp() {
         // Exiting, make sure the app isn't restarted
         activityInterface.closeApp();
         return true;

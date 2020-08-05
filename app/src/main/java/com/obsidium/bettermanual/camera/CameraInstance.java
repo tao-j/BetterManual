@@ -1,7 +1,6 @@
 package com.obsidium.bettermanual.camera;
 
 import android.hardware.Camera;
-import android.os.Looper;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -38,13 +37,12 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 
-public class CameraInstance extends BaseCamera implements  CameraSequence.ShutterSequenceCallback   {
-    private final String TAG = CameraInstance.class.getSimpleName();
+public class CameraInstance extends BaseCamera implements CameraSequence.ShutterSequenceCallback {
+    private static CameraInstance INSTANCE = new CameraInstance();
 
 //    public CameraSequence cameraSequence;
-
     final int SETSURFACE = 0;
-    private static CameraInstance INSTANCE = new CameraInstance();
+    private final String TAG = CameraInstance.class.getSimpleName();
     private SurfaceHolder surfaceHolder;
     private ApertureModel apertureModel;
     private ShutterModel shutterModel;
@@ -64,8 +62,7 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
         super();
     }
 
-    public static CameraInstance GET()
-    {
+    public static CameraInstance GET() {
         return INSTANCE;
     }
 
@@ -81,14 +78,21 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
         Log.d(TAG, "Cam open");
         initCamera();
         fireOnCameraOpen(true);
-
     }
 
-    public void initParameters()
-    {
+    public void initCamera() {
+        autoPictureReviewControl = new CameraEx.AutoPictureReviewControl();
+        m_camera.setAutoPictureReviewControl(getAutoPictureReviewControls());
+        autoPictureReviewControl.setPictureReviewTime(0);
+        autoPictureReviewControl.cancelAutoPictureReview();
 
+        initParameters();
 
+        //when false cameraparameters contains only the active parameters, but supported stuff is missing
+        m_camera.withSupportedParameters(true);
+    }
 
+    public void initParameters() {
         apertureModel = new ApertureModel(this);
         m_camera.setApertureChangeListener(apertureModel);
         ApertureController.GetInstance().bindModel(apertureModel);
@@ -119,8 +123,7 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
             ImageStabilisationController.GetInstance().bindModel(imageStabilisationModel);
         }
 
-        if (isLongExposureNoiseReductionSupported())
-        {
+        if (isLongExposureNoiseReductionSupported()) {
             longExposureNoiseReductionModel = new LongExposureNoiseReductionModel(this);
             LongExposureNoiseReductionController.GetIntance().bindModel(longExposureNoiseReductionModel);
         }
@@ -148,7 +151,7 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
         setDriveMode(Preferences.GET().getDriveMode());
         setBurstDriveSpeed(Preferences.GET().getBurstDriveSpeed());
         // Minimum shutter speed
-        if(isAutoShutterSpeedLowLimitSupported()) {
+        if (isAutoShutterSpeedLowLimitSupported()) {
             if (sceneMode.equals(CameraEx.ParametersModifier.SCENE_MODE_MANUAL_EXPOSURE))
                 setAutoShutterSpeedLowLimit(-1);
             else
@@ -165,19 +168,19 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
         m_camera.setFlashChargingStateListener(new CameraEx.FlashChargingStateListener() {
             @Override
             public void onChanged(int i, CameraEx cameraEx) {
-                Log.d(TAG,"FlashChargingStateChanged" + i);
+                Log.d(TAG, "FlashChargingStateChanged" + i);
             }
         });
         m_camera.setFlashEmittingListener(new CameraEx.FlashEmittingListener() {
             @Override
             public void onFlash(boolean b, CameraEx cameraEx) {
-                Log.d(TAG,"FlashEmittingListner changed onFlash " + b);
+                Log.d(TAG, "FlashEmittingListner changed onFlash " + b);
             }
         });
         m_camera.setFocusLightStateListener(new CameraEx.FocusLightStateListener() {
             @Override
             public void onChanged(boolean b, boolean b1, CameraEx cameraEx) {
-                Log.d(TAG,"FocusLightstateChanger onChange " + b + " " + b1);
+                Log.d(TAG, "FocusLightstateChanger onChange " + b + " " + b1);
             }
         });
         /*try {
@@ -200,7 +203,7 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
         m_camera.setFaceDetectionListener(new CameraEx.FaceDetectionListener() {
             @Override
             public void onFaceDetected(FaceInfo[] faceInfos, CameraEx cameraEx) {
-                Log.d(TAG,"onFaceDetected");
+                Log.d(TAG, "onFaceDetected");
             }
         });
     }
@@ -216,9 +219,7 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
             Preferences.GET().setDriveMode(driveModeModel.getValue());
         try {
             Preferences.GET().setBurstDriveSpeed(getBurstDriveSpeed());
-        }
-        catch (NullPointerException ex)
-        {
+        } catch (NullPointerException ex) {
             ex.printStackTrace();
         }
 
@@ -272,17 +273,17 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
     }
 
     public void startPreview() {
-        Log.d(TAG,"startPreview");
+        Log.d(TAG, "startPreview");
         getCameraEx().getNormalCamera().startPreview();
     }
 
     public void stopPreview() {
-        Log.d(TAG,"stopPreview");
+        Log.d(TAG, "stopPreview");
         getCameraEx().getNormalCamera().stopPreview();
     }
 
     public void enableHwShutterButton() {
-        Log.d(TAG,"enableHwShutterButton");
+        Log.d(TAG, "enableHwShutterButton");
         m_camera.startDirectShutter();
 
     }
@@ -291,14 +292,12 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
         m_camera.stopDirectShutter(null);
     }
 
-    public void cancelCapture()
-    {
-        Log.d(TAG,"cancelCapture");
+    public void cancelCapture() {
+        Log.d(TAG, "cancelCapture");
         getCameraEx().cancelTakePicture();
     }
 
-    public void takePicture()
-    {
+    public void takePicture() {
         //hw shutter button must get stopped else burstableTakePicture does not trigger
         getCameraEx().stopDirectShutter(new CameraEx.DirectShutterStoppedCallback() {
             @Override
@@ -311,7 +310,7 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
 
     @Override
     public void onShutterSequence(CameraSequence.RawData rawData, CameraSequence cameraSequence) {
-        Log.d(TAG,"onShutterSequence");
+        Log.d(TAG, "onShutterSequence");
         m_camera.cancelTakePicture();
         //cameraSequence.setReleaseLock(true);
     }
@@ -329,18 +328,6 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
     }*/
 
 
-    public void initCamera()
-    {
-        autoPictureReviewControl = new CameraEx.AutoPictureReviewControl();
-        m_camera.setAutoPictureReviewControl(getAutoPictureReviewControls());
-        autoPictureReviewControl.setPictureReviewTime(0);
-        autoPictureReviewControl.cancelAutoPictureReview();
-
-        initParameters();
-
-        //when false cameraparameters contains only the active parameters, but supported stuff is missing
-        m_camera.withSupportedParameters(true);
-    }
 
 
 
@@ -355,14 +342,13 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
     }*/
 
     private void dumpParameter() {
-        StringTokenizer localStringTokenizer = new StringTokenizer(((Camera.Parameters)getParameters()).flatten(), ";");
+        StringTokenizer localStringTokenizer = new StringTokenizer(((Camera.Parameters) getParameters()).flatten(), ";");
         while (localStringTokenizer.hasMoreElements())
             Log.d(TAG, localStringTokenizer.nextToken());
 
         List<String> tmp = null;
-        if (isImageStabSupported())
-        {
-            Log.d(TAG,"getSupportedImageStabModes");
+        if (isImageStabSupported()) {
+            Log.d(TAG, "getSupportedImageStabModes");
             logList(getSupportedImageStabModes());
         }
         if (isLiveSlowShutterSupported()) {
@@ -371,19 +357,18 @@ public class CameraInstance extends BaseCamera implements  CameraSequence.Shutte
         }
     }
 
-    private void logList(List<String> list)
-    {
+    private void logList(List<String> list) {
         String st = new String();
         for (String s : list)
-            st += s+",";
-        Log.d(TAG,st);
+            st += s + ",";
+        Log.d(TAG, st);
     }
-    private void logArray(String[] list)
-    {
+
+    private void logArray(String[] list) {
         String st = new String();
         for (String s : list)
-            st += s+",";
-        Log.d(TAG,st);
+            st += s + ",";
+        Log.d(TAG, st);
     }
 }
 

@@ -1,9 +1,9 @@
 package com.obsidium.bettermanual.controller;
 
 import com.obsidium.bettermanual.R;
-import com.obsidium.bettermanual.model.IsoModel;
+import com.obsidium.bettermanual.model.ISOModel;
 
-public class IsoController extends TextViewController<IsoModel>{
+public class IsoController extends TextViewController<ISOModel>{
 
     private static IsoController isoController = new IsoController();
 

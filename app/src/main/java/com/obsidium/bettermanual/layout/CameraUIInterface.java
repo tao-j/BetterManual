@@ -2,7 +2,7 @@ package com.obsidium.bettermanual.layout;
 
 import com.obsidium.bettermanual.ActivityInterface;
 
-public interface CameraUiInterface
+public interface CameraUIInterface
 {
     void showMessageDelayed(String msg);
     void showMessage(String msg);

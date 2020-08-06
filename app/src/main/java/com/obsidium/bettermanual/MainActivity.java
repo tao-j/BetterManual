@@ -128,13 +128,13 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
         switch (fragment) {
             case FRAGMENT_MIN_SHUTTER:
                 MinShutterFragment msa = new MinShutterFragment(getApplicationContext(), this);
-                getDialHandler().setDialEventListner(msa);
+                getDialHandler().setDialEventListener(msa);
                 currentLayout = msa;
                 layoutHolder.addView(msa);
                 break;
             case FRAGMENT_PREVIEW_MAGNIFICATION:
                 PreviewMagnificationFragment pmf = new PreviewMagnificationFragment(getApplicationContext(), this);
-                getDialHandler().setDialEventListner(pmf);
+                getDialHandler().setDialEventListener(pmf);
                 currentLayout = pmf;
                 layoutHolder.addView(pmf);
                 break;
@@ -142,7 +142,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
                 CameraInstance.GET().closeCamera();
                 removeSurfaceView();
                 ImageFragment imageFragment = new ImageFragment(getApplicationContext(), this);
-                getDialHandler().setDialEventListner(imageFragment);
+                getDialHandler().setDialEventListener(imageFragment);
                 currentLayout = imageFragment;
                 layoutHolder.addView(imageFragment);
                 break;
@@ -152,7 +152,7 @@ public class MainActivity extends BaseActivity implements ActivityInterface, Cam
             case FRAGMENT_CAMERA_UI:
             default:
                 CameraUIFragment cameraUIFragment = new CameraUIFragment(getApplicationContext(), this);
-                getDialHandler().setDialEventListner(cameraUIFragment);
+                getDialHandler().setDialEventListener(cameraUIFragment);
                 currentLayout = cameraUIFragment;
                 layoutHolder.addView(cameraUIFragment);
                 break;

@@ -17,7 +17,7 @@ import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.capture.CaptureModeAfBracket;
 import com.obsidium.bettermanual.capture.CaptureModeBracket;
 import com.obsidium.bettermanual.capture.CaptureModeBulb;
-import com.obsidium.bettermanual.capture.CaptureModeTimelapse;
+import com.obsidium.bettermanual.capture.CaptureModeTimeLapse;
 import com.obsidium.bettermanual.controller.ApertureController;
 import com.obsidium.bettermanual.controller.Controller;
 import com.obsidium.bettermanual.controller.DriveModeController;
@@ -37,16 +37,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class CameraUIFragment extends BaseLayout implements View.OnClickListener, CameraUiInterface {
+public class CameraUIFragment extends BaseLayout implements View.OnClickListener, CameraUIInterface {
 
     private static final boolean LOGGING_ENABLED = true;
     private static final int MESSAGE_TIMEOUT = 1000;
     private final String TAG = CameraUIFragment.class.getSimpleName();
-    private int lastDialView;
 
     private LinearLayout bottomHolder;
     private LinearLayout leftHolder;
-    private List<Controller> dialViews;
+    private List<Controller> controllerList;
+    private int lastControllerIndex;
 
     private HistogramView m_vHist;
     private TextView m_tvLog;
@@ -58,7 +58,7 @@ public class CameraUIFragment extends BaseLayout implements View.OnClickListener
     private ImageView m_ivAfBracket;
     private View m_lFocusScale;
 
-    private CaptureModeTimelapse timelapse;
+    private CaptureModeTimeLapse timelapse;
     private CaptureModeBracket bracket;
     private CaptureModeAfBracket afBracket;
 
@@ -79,7 +79,7 @@ public class CameraUIFragment extends BaseLayout implements View.OnClickListener
         inflateLayout(R.layout.camera_ui_fragment);
         this.activityInterface = activityInterface;
 
-        dialViews = new ArrayList();
+        controllerList = new ArrayList();
         bottomHolder = (LinearLayout)findViewById(R.id.bottom_holder);
         leftHolder = (LinearLayout)findViewById(R.id.left_holder);
 
@@ -108,9 +108,6 @@ public class CameraUIFragment extends BaseLayout implements View.OnClickListener
             m_vGrid.setVisibility(GONE);
         };
 
-
-
-
         m_tvMsg = (TextView)findViewById(R.id.tvMsg);
 
         m_vGrid = (GridView)findViewById(R.id.vGrid);
@@ -133,42 +130,42 @@ public class CameraUIFragment extends BaseLayout implements View.OnClickListener
         m_ivAfBracket.setImageResource(getResources().getInteger(R.integer.p_16_dd_parts_rec_focuscontrol_far));
 
         ExposureModeController.GetInstance().bindView((ImageView) findViewById(R.id.iv_exposuremode));
-        dialViews.add(ExposureModeController.GetInstance());
+        controllerList.add(ExposureModeController.GetInstance());
 
         DriveModeController.GetInstance().bindView((ImageView)findViewById(R.id.iv_drivemode));
-        dialViews.add(DriveModeController.GetInstance());
+        controllerList.add(DriveModeController.GetInstance());
 
         bracket = new CaptureModeBracket(this);
         bracket.bindView((ImageView)findViewById(R.id.iv_bracket));
-        dialViews.add(bracket);
+        controllerList.add(bracket);
 
-        timelapse = new CaptureModeTimelapse(this);
+        timelapse = new CaptureModeTimeLapse(this);
         timelapse.bindView(((ImageView)findViewById(R.id.iv_timelapse)));
-        dialViews.add(timelapse);
+        controllerList.add(timelapse);
 
         afBracket = new CaptureModeAfBracket(this);
         afBracket.bindView(m_ivAfBracket);
-        dialViews.add(afBracket);
+        controllerList.add(afBracket);
 
         CaptureModeBulb.CREATE(this);
 
         ImageStabilisationController.GetInstance().bindView((ImageView) findViewById(R.id.iv_imagestab));
-        dialViews.add(ImageStabilisationController.GetInstance());
+        controllerList.add(ImageStabilisationController.GetInstance());
 
         LongExposureNoiseReductionController.GetIntance().bindView((ImageView)findViewById(R.id.iv_longexponr));
-        dialViews.add(LongExposureNoiseReductionController.GetIntance());
+        controllerList.add(LongExposureNoiseReductionController.GetIntance());
 
         ShutterController.GetInstance().bindView((TextView)findViewById(R.id.shutter_txt));
-        dialViews.add(ShutterController.GetInstance());
+        controllerList.add(ShutterController.GetInstance());
 
         ApertureController.GetInstance().bindView((TextView)findViewById(R.id.aperture_txt));
-        dialViews.add(ApertureController.GetInstance());
+        controllerList.add(ApertureController.GetInstance());
 
         IsoController.GetInstance().bindView((TextView)findViewById(R.id.iso_txt));
-        dialViews.add(IsoController.GetInstance());
+        controllerList.add(IsoController.GetInstance());
 
         ExposureCompensationController.GetInstance().bindView((TextView)findViewById(R.id.evcopmensation_txt));
-        dialViews.add(ExposureCompensationController.GetInstance());
+        controllerList.add(ExposureCompensationController.GetInstance());
 
         TextView m_tvExposure = (TextView) findViewById(R.id.evhint_txt);
         m_tvExposure.setCompoundDrawablesWithIntrinsicBounds(getResources().getInteger(R.integer.p_meteredmanualicon), 0, 0, 0);
@@ -176,7 +173,7 @@ public class CameraUIFragment extends BaseLayout implements View.OnClickListener
         //dialViews.add(ExposureHintController.GetInstance());
 
                 //then set the key event listner to avoid nullpointer
-        activityInterface.getDialHandler().setDialEventListner(CameraUIFragment.this);
+        activityInterface.getDialHandler().setDialEventListener(CameraUIFragment.this);
 
         m_vGrid.setVideoRect(activityInterface.getDisplayManager().getDisplayedVideoRect());
 
@@ -201,9 +198,9 @@ public class CameraUIFragment extends BaseLayout implements View.OnClickListener
 
     public void Destroy() {
         Preferences.GET().setViewFlags(m_viewFlags);
-        Preferences.GET().setDialMode(lastDialView);
+        Preferences.GET().setDialMode(lastControllerIndex);
 
-        dialViews.clear();
+        controllerList.clear();
 
         ApertureController.GetInstance().bindView(null);
         ShutterController.GetInstance().bindView(null);
@@ -242,7 +239,6 @@ public class CameraUIFragment extends BaseLayout implements View.OnClickListener
                 m_tvMsg.setVisibility(View.VISIBLE);
             }
         });
-
     }
 
     @Override
@@ -259,7 +255,6 @@ public class CameraUIFragment extends BaseLayout implements View.OnClickListener
             if (m_tvHint.getVisibility() != VISIBLE)
                 m_tvHint.setVisibility(View.VISIBLE);
         });
-
     }
 
     @Override
@@ -284,7 +279,6 @@ public class CameraUIFragment extends BaseLayout implements View.OnClickListener
 
     @Override
     public void updateViewVisibility() {
-
     }
 
     @Override
@@ -316,23 +310,27 @@ public class CameraUIFragment extends BaseLayout implements View.OnClickListener
             bracket.prepare();*/
     }
 
-    private void setDialMode(final int mode) {
-        Log.d(TAG, "setDialMode:" + mode);
-        Controller lastView = dialViews.get(lastDialView);
+    private void setDialMode(final int direction) {
+        Log.d(TAG, "setDialMode:" + direction);
+        Controller lastView = controllerList.get(lastControllerIndex);
         if (lastView == null)
             return;
         lastView.setColorToView(Color.WHITE);
-        lastDialView = lastDialView + mode;
-        if (lastDialView >= dialViews.size())
-            lastDialView = 0;
-        else if (lastDialView < 0)
-            lastDialView = dialViews.size() - 1;
 
-        lastView = dialViews.get(lastDialView);
+        lastControllerIndex = lastControllerIndex + direction;
+        if (lastControllerIndex >= controllerList.size()) {
+            lastControllerIndex = 0;
+        }
+        else if (lastControllerIndex < 0) {
+            lastControllerIndex = controllerList.size() - 1;
+        }
+
+        lastView = controllerList.get(lastControllerIndex);
         lastView.setColorToView(Color.GREEN);
         try {
-            if (lastView.getNavigationHelpID() != 0)
+            if (lastView.getNavigationHelpID() != 0) {
                 showHintMessage(getResources().getString(lastView.getNavigationHelpID()));
+            }
         } catch (Resources.NotFoundException ex) {
             ex.printStackTrace();
         }
@@ -353,13 +351,13 @@ public class CameraUIFragment extends BaseLayout implements View.OnClickListener
 
     @Override
     public boolean onLowerDialChanged(int value) {
-        dialViews.get(lastDialView).set_In_De_crase(value);
+        controllerList.get(lastControllerIndex).set_In_De_crase(value);
         return true;
     }
 
     @Override
     public boolean onEnterKeyUp() {
-        Controller view = dialViews.get(lastDialView);
+        Controller view = controllerList.get(lastControllerIndex);
         view.toggle();
         Log.d(TAG, "onEnterKeyDown");
        /* if (view instanceof BaseImageView)

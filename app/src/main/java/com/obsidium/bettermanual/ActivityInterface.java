@@ -11,20 +11,23 @@ import com.sony.scalar.hardware.avio.DisplayManager;
  */
 
 public interface ActivityInterface {
-    boolean hasTouchScreen();
     KeyEventHandler getDialHandler();
     Handler getMainHandler();
+    String getResString(int id);
     DisplayManager getDisplayManager();
+    boolean hasTouchScreen();
     void closeApp();
     void setColorDepth(boolean highQuality);
     void loadFragment(int fragment);
     void setSurfaceViewOnTouchListner(View.OnTouchListener onTouchListner);
-    String getResString(int id);
     void setCaptureDoneEventListner(CaptureSession.CaptureDoneEvent eventListner);
+
     boolean isCaptureInProgress();
+
     boolean isBulbCapture();
     void cancelBulbCapture();
     void setBulbCapture(boolean bulbCapture);
+
     AvIndexManager getAvIndexManager();
 }
 

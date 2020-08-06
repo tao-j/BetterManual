@@ -6,22 +6,22 @@ import com.obsidium.bettermanual.Preferences;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.controller.ImageViewController;
-import com.obsidium.bettermanual.layout.CameraUiInterface;
+import com.obsidium.bettermanual.layout.CameraUIInterface;
 
 
 public abstract class CaptureMode extends ImageViewController implements CaptureModeInterface
 {
     public static final int COUNTDOWN_SECONDS = 5;
 
-    protected CameraUiInterface cameraUiInterface;
+    protected CameraUIInterface cameraUIInterface;
     protected boolean isActive = false;
 
 
     protected int             m_countdown;
 
-    public CaptureMode(CameraUiInterface cameraUiInterface)
+    public CaptureMode(CameraUIInterface cameraUIInterface)
     {
-        this.cameraUiInterface = cameraUiInterface;
+        this.cameraUIInterface = cameraUIInterface;
     }
 
     @Override
@@ -41,12 +41,12 @@ public abstract class CaptureMode extends ImageViewController implements Capture
         {
             if (--m_countdown > 0)
             {
-                cameraUiInterface.showMessage(String.format("Starting in %d...", m_countdown));
-                cameraUiInterface.getActivityInterface().getMainHandler().postDelayed(this, 1000);
+                cameraUIInterface.showMessage(String.format("Starting in %d...", m_countdown));
+                cameraUIInterface.getActivityInterface().getMainHandler().postDelayed(this, 1000);
             }
             else
             {
-                cameraUiInterface.hideMessage();
+                cameraUIInterface.hideMessage();
                 startShooting();
             }
         }
@@ -56,19 +56,19 @@ public abstract class CaptureMode extends ImageViewController implements Capture
     public void startCountDown() {
         isActive = true;
         //cameraUiInterface.getActivityInterface().getCamera().disableHwShutterButton();
-        cameraUiInterface.showHintMessage(cameraUiInterface.getActivityInterface().getResString(R.string.icon_enterButton) + " to abort");
+        cameraUIInterface.showHintMessage(cameraUIInterface.getActivityInterface().getResString(R.string.icon_enterButton) + " to abort");
         // Stop preview (doesn't seem to preserve battery life?)
         CameraInstance.GET().stopPreview();
 
         // Hide some bottom views
-        Preferences.GET().setViewFlags(cameraUiInterface.getActiveViewsFlag());
-        cameraUiInterface.setActiveViewFlag(0);
-        cameraUiInterface.updateViewVisibility();
+        Preferences.GET().setViewFlags(cameraUIInterface.getActiveViewsFlag());
+        cameraUIInterface.setActiveViewFlag(0);
+        cameraUIInterface.updateViewVisibility();
 
         // Start countdown
         m_countdown = COUNTDOWN_SECONDS;
-        cameraUiInterface.showMessage(String.format("Starting in %d...", m_countdown));
-        cameraUiInterface.getActivityInterface().getMainHandler().postDelayed(m_countDownRunnable, 1000);
+        cameraUIInterface.showMessage(String.format("Starting in %d...", m_countdown));
+        cameraUIInterface.getActivityInterface().getMainHandler().postDelayed(m_countDownRunnable, 1000);
     }
 
     @Override

@@ -7,7 +7,7 @@ import com.obsidium.bettermanual.Preferences;
 import com.obsidium.bettermanual.R;
 import com.obsidium.bettermanual.camera.CameraInstance;
 import com.obsidium.bettermanual.camera.CaptureSession;
-import com.obsidium.bettermanual.layout.CameraUiInterface;
+import com.obsidium.bettermanual.layout.CameraUIInterface;
 
 /**
  * Created by KillerInk on 11.10.2017.
@@ -22,7 +22,7 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
         return captureModeBulb;
     }
 
-    public static void CREATE(CameraUiInterface cameraUiInterface)
+    public static void CREATE(CameraUIInterface cameraUiInterface)
     {
         captureModeBulb = new CaptureModeBulb(cameraUiInterface);
     }
@@ -41,7 +41,7 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
 
 
 
-    private CaptureModeBulb(CameraUiInterface cameraUiInterface) {
+    private CaptureModeBulb(CameraUIInterface cameraUiInterface) {
         super(cameraUiInterface);
     }
 
@@ -63,9 +63,9 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
         currentdial = DIAL_STATE_BULBTIME;
         bulbCaptureTime = Preferences.GET().getBulbTime();
         updateBulbTime();
-        cameraUiInterface.showHintMessage(cameraUiInterface.getActivityInterface().getResString(R.string.icon_lowerDial) +
+        cameraUIInterface.showHintMessage(cameraUIInterface.getActivityInterface().getResString(R.string.icon_lowerDial) +
                 " to set Bulb Duration, "
-                +cameraUiInterface.getActivityInterface().getResString(R.string.icon_enterButton)
+                + cameraUIInterface.getActivityInterface().getResString(R.string.icon_enterButton)
                 + " to start");
         return true;
     }
@@ -74,18 +74,18 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
     public void startShooting() {
         Log.d(TAG,"startShooting");
         Preferences.GET().setBulbTime(bulbCaptureTime);
-        cameraUiInterface.hideHintMessage();
-        cameraUiInterface.hideMessage();
+        cameraUIInterface.hideHintMessage();
+        cameraUIInterface.hideMessage();
 
-        cameraUiInterface.getActivityInterface().setBulbCapture(true);
-        cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(this);
+        cameraUIInterface.getActivityInterface().setBulbCapture(true);
+        cameraUIInterface.getActivityInterface().setCaptureDoneEventListner(this);
         CameraInstance.GET().takePicture();
         if (bulbCaptureTime > 0);
-            cameraUiInterface.getActivityInterface().getMainHandler().postDelayed(cancelPictureRunner,bulbCaptureTime);
+            cameraUIInterface.getActivityInterface().getMainHandler().postDelayed(cancelPictureRunner,bulbCaptureTime);
     }
 
     private Runnable cancelPictureRunner = () -> {
-        cameraUiInterface.getActivityInterface().cancelBulbCapture();
+        cameraUIInterface.getActivityInterface().cancelBulbCapture();
         onCaptureDone();
     };
 
@@ -94,8 +94,8 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
         Log.d(TAG,"abort");
         isActive = false;
         Log.d(TAG,"remove m_countDownRunnable");
-        cameraUiInterface.getActivityInterface().getMainHandler().removeCallbacks(m_countDownRunnable);
-        cameraUiInterface.showMessageDelayed("Bulb finished");
+        cameraUIInterface.getActivityInterface().getMainHandler().removeCallbacks(m_countDownRunnable);
+        cameraUIInterface.showMessageDelayed("Bulb finished");
         CameraInstance.GET().enableHwShutterButton();
         CameraInstance.GET().startPreview();
     }
@@ -139,21 +139,21 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
     private void updateBulbTime()
     {
         if (bulbCaptureTime == 0)
-            cameraUiInterface.showMessage("Unlimited");
+            cameraUIInterface.showMessage("Unlimited");
         else if (bulbCaptureTime < 1000)
-            cameraUiInterface.showMessage(String.format("%d msec", bulbCaptureTime));
+            cameraUIInterface.showMessage(String.format("%d msec", bulbCaptureTime));
         else if (bulbCaptureTime == 1000)
-            cameraUiInterface.showMessage("1 second");
+            cameraUIInterface.showMessage("1 second");
         else if (bulbCaptureTime /1000 /60 < 1)
-            cameraUiInterface.showMessage(String.format("%d seconds", bulbCaptureTime / 1000));
+            cameraUIInterface.showMessage(String.format("%d seconds", bulbCaptureTime / 1000));
         else
-            cameraUiInterface.showMessage(String.format("%d min", bulbCaptureTime /1000 / 60) );
+            cameraUIInterface.showMessage(String.format("%d min", bulbCaptureTime /1000 / 60) );
     }
 
     @Override
     public void onCaptureDone() {
         Log.d(TAG,"onCaptureDone");
-        cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(null);
+        cameraUIInterface.getActivityInterface().setCaptureDoneEventListner(null);
         abort();
     }
 
@@ -233,7 +233,7 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
         else if (currentdial == DIAL_STATE_BULBTIME)
         {
             Log.d(TAG, "onEnterKeyDown setDefaultDialListner");
-            cameraUiInterface.getActivityInterface().getDialHandler().setDialEventListner((KeyEvents)cameraUiInterface);
+            cameraUIInterface.getActivityInterface().getDialHandler().setDialEventListener((KeyEvents) cameraUIInterface);
             Log.d(TAG, "onEnterKeyDown startCountDown");
             startCountDown();
             currentdial = DIAL_STATE_NOTHING;
@@ -368,7 +368,7 @@ public class CaptureModeBulb extends CaptureMode implements CaptureSession.Captu
             abort();
         }
         else {
-            cameraUiInterface.getActivityInterface().getDialHandler().setDialEventListner(this);
+            cameraUIInterface.getActivityInterface().getDialHandler().setDialEventListener(this);
             onEnterKeyUp();
         }
     }

@@ -10,7 +10,7 @@ import com.obsidium.bettermanual.camera.CaptureSession;
 import com.obsidium.bettermanual.controller.DriveModeController;
 import com.obsidium.bettermanual.controller.ExposureModeController;
 import com.obsidium.bettermanual.controller.FocusDriveController;
-import com.obsidium.bettermanual.layout.CameraUiInterface;
+import com.obsidium.bettermanual.layout.CameraUIInterface;
 
 public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, CaptureSession.CaptureDoneEvent,FocusDriveController.FocusPostionChangedEvent {
 
@@ -49,7 +49,7 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
         SelectPictureCount,
     }
 
-    public CaptureModeAfBracket(CameraUiInterface cameraUiInterface) {
+    public CaptureModeAfBracket(CameraUIInterface cameraUiInterface) {
         super(cameraUiInterface);
     }
 
@@ -78,10 +78,10 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
     @Override
     public void startShooting() {
         Log.d(TAG,"startShooting");
-        cameraUiInterface.hideHintMessage();
-        cameraUiInterface.hideMessage();
+        cameraUIInterface.hideHintMessage();
+        cameraUIInterface.hideMessage();
         // Take first picture at set shutter speed
-        cameraUiInterface.getActivityInterface().setBulbCapture(false);
+        cameraUIInterface.getActivityInterface().setBulbCapture(false);
         afBracketCaptureController = new AfBracketCaptureController(focusNear,focusFar,pictureCount);
         afBracketCaptureController.captureRange();
     }
@@ -92,24 +92,24 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
             afBracketCaptureController.abort();
             afBracketCaptureController = null;
         }
-        cameraUiInterface.getActivityInterface().getMainHandler().removeCallbacks(m_countDownRunnable);
-        cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(null);
+        cameraUIInterface.getActivityInterface().getMainHandler().removeCallbacks(m_countDownRunnable);
+        cameraUIInterface.getActivityInterface().setCaptureDoneEventListner(null);
         FocusDriveController.GetInstance().setFocusPostionChangedEventListner(null);
         uiState = UiState.None;
         //m_handler.removeCallbacks(m_timelapseRunnable);
         isActive = false;
-        cameraUiInterface.showMessageDelayed("Bracketing finished");
+        cameraUIInterface.showMessageDelayed("Bracketing finished");
         CameraInstance.GET().enableHwShutterButton();
         CameraInstance.GET().startPreview();
 
         // Update controls
-        cameraUiInterface.hideHintMessage();
-        cameraUiInterface.setLeftViewVisibility(true);
+        cameraUIInterface.hideHintMessage();
+        cameraUIInterface.setLeftViewVisibility(true);
         ExposureModeController.GetInstance().onValueChanged();
         DriveModeController.GetInstance().onValueChanged();
 
-        cameraUiInterface.setActiveViewFlag(Preferences.GET().getViewFlags(cameraUiInterface.getActiveViewsFlag()));
-        cameraUiInterface.updateViewVisibility();
+        cameraUIInterface.setActiveViewFlag(Preferences.GET().getViewFlags(cameraUIInterface.getActiveViewsFlag()));
+        cameraUIInterface.updateViewVisibility();
     }
 
     @Override
@@ -127,17 +127,17 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
 
     private void updateNearTextView()
     {
-        cameraUiInterface.showHintMessage("Near Focus Pos:" + focusNear);
+        cameraUIInterface.showHintMessage("Near Focus Pos:" + focusNear);
     }
 
     private void updateFarTextView()
     {
-        cameraUiInterface.showHintMessage("Far Focus Pos:" + focusFar);
+        cameraUIInterface.showHintMessage("Far Focus Pos:" + focusFar);
     }
 
     private void updatePictureCountTextView()
     {
-        cameraUiInterface.showHintMessage("PictureCount:" + pictureCount);
+        cameraUIInterface.showHintMessage("PictureCount:" + pictureCount);
     }
 
 
@@ -165,7 +165,7 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
             abort();
         }
         else {
-            cameraUiInterface.getActivityInterface().getDialHandler().setDialEventListner(this);
+            cameraUIInterface.getActivityInterface().getDialHandler().setDialEventListener(this);
             onEnterKeyUp();
         }
     }
@@ -260,13 +260,13 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
         }
         else if(uiState == UiState.SelectPictureCount)
         {
-            cameraUiInterface.showHintMessage(cameraUiInterface.getActivityInterface().getResString(R.string.icon_lowerDial)
+            cameraUIInterface.showHintMessage(cameraUIInterface.getActivityInterface().getResString(R.string.icon_lowerDial)
                     + "to set picture count,"
-                    + cameraUiInterface.getActivityInterface().getResString(R.string.icon_enterButton)
+                    + cameraUIInterface.getActivityInterface().getResString(R.string.icon_enterButton)
                     + " to confirm");
             uiState = UiState.None;
-            cameraUiInterface.getActivityInterface().getDialHandler().setDialEventListner((KeyEvents)cameraUiInterface);
-            cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(this);
+            cameraUIInterface.getActivityInterface().getDialHandler().setDialEventListener((KeyEvents) cameraUIInterface);
+            cameraUIInterface.getActivityInterface().setCaptureDoneEventListner(this);
             startCountDown();
         }
 
@@ -478,7 +478,7 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
                             synchronized (waitlock) {
                                 final int dif = newpos - currentPos;
                                 Log.d(TAG, "Diff:" + dif);
-                                cameraUiInterface.getActivityInterface().getMainHandler().post(()-> {
+                                cameraUIInterface.getActivityInterface().getMainHandler().post(()-> {
                                     if (dif < 0)
                                         FocusDriveController.GetInstance().set_In_De_crase(-getStep(dif));
                                     else
@@ -500,7 +500,7 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
                         synchronized (captureWaitLock)
                         {
                             if (doFocus)
-                                cameraUiInterface.getActivityInterface().getMainHandler().post(()-> {
+                                cameraUIInterface.getActivityInterface().getMainHandler().post(()-> {
                                     CameraInstance.GET().takePicture();
                                 });
                             try {
@@ -511,7 +511,7 @@ public class CaptureModeAfBracket extends CaptureMode implements KeyEvents, Capt
                             }
                         }
                     }
-                    cameraUiInterface.getActivityInterface().getMainHandler().post(()-> {
+                    cameraUIInterface.getActivityInterface().getMainHandler().post(()-> {
                         Log.d(TAG,"abort");
                         CaptureModeAfBracket.this.abort();
                     });

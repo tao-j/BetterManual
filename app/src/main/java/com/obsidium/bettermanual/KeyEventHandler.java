@@ -11,45 +11,40 @@ import com.sony.scalar.sysutil.ScalarInput;
 
 public class KeyEventHandler {
 
-    private final  String TAG = KeyEventHandler.class.getSimpleName();
-
-    private KeyEvents dialEventListner;
-    private KeyEvents defaultListner;
+    private final String TAG = KeyEventHandler.class.getSimpleName();
     private final boolean log = false;
+    private KeyEvents dialEventListener;
+    private KeyEvents defaultListener;
 
-    public KeyEventHandler(KeyEvents defaultListner)
-    {
-        this.defaultListner = defaultListner;
+    public KeyEventHandler(KeyEvents defaultListener) {
+        this.defaultListener = defaultListener;
     }
 
-    public void setDefaultListner()
-    {
-        this.dialEventListner = defaultListner;
+    public void setDefaultListner() {
+        this.dialEventListener = defaultListener;
     }
 
-    public void setDialEventListner(KeyEvents eventListner)
-    {
-        this.dialEventListner = eventListner;
+    public void setDialEventListener(KeyEvents eventListener) {
+        this.dialEventListener = eventListener;
     }
 
-    public boolean onKeyUp(int keyCode, KeyEvent event)
-    {
-        if (dialEventListner == null)
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (dialEventListener == null)
             return true;
         if (log)
-            Log.d(TAG,"onKeyUp " + getKeyString(event.getScanCode()));
-        if (dialEventListner != null) {
+            Log.d(TAG, "onKeyUp " + getKeyString(event.getScanCode()));
+        if (dialEventListener != null) {
             switch (event.getScanCode()) {
                 case ScalarInput.ISV_KEY_UP:
-                    return dialEventListner.onUpKeyUp();
+                    return dialEventListener.onUpKeyUp();
                 case ScalarInput.ISV_KEY_DOWN:
-                    return dialEventListner.onDownKeyUp();
+                    return dialEventListener.onDownKeyUp();
                 case ScalarInput.ISV_KEY_LEFT:
-                    return dialEventListner.onLeftKeyUp();
+                    return dialEventListener.onLeftKeyUp();
                 case ScalarInput.ISV_KEY_RIGHT:
-                    return dialEventListner.onRightKeyUp();
+                    return dialEventListener.onRightKeyUp();
                 case ScalarInput.ISV_KEY_ENTER:
-                    return dialEventListner.onEnterKeyUp();
+                    return dialEventListener.onEnterKeyUp();
 
                 case ScalarInput.ISV_DIAL_1_CLOCKWISE:
                 case ScalarInput.ISV_DIAL_1_COUNTERCW:
@@ -58,103 +53,103 @@ public class KeyEventHandler {
                     return true;
 
                 case ScalarInput.ISV_KEY_FN:
-                    return dialEventListner.onFnKeyUp();
+                    return dialEventListener.onFnKeyUp();
                 case ScalarInput.ISV_KEY_AEL:
-                    return dialEventListner.onAelKeyUp();
+                    return dialEventListener.onAelKeyUp();
                 case ScalarInput.ISV_KEY_MENU:
                 case ScalarInput.ISV_KEY_SK1:
-                    return dialEventListner.onMenuKeyUp();
+                    return dialEventListener.onMenuKeyUp();
                 case ScalarInput.ISV_KEY_S1_1:
-                    return dialEventListner.onFocusKeyUp();
+                    return dialEventListener.onFocusKeyUp();
                 case ScalarInput.ISV_KEY_S1_2:
                     return true;
                 case ScalarInput.ISV_KEY_S2:
-                    return dialEventListner.onShutterKeyUp();
+                    return dialEventListener.onShutterKeyUp();
                 case ScalarInput.ISV_KEY_PLAY:
-                    return dialEventListner.onPlayKeyUp();
+                    return dialEventListener.onPlayKeyUp();
                 case ScalarInput.ISV_KEY_STASTOP:
-                    return dialEventListner.onMovieKeyUp();
+                    return dialEventListener.onMovieKeyUp();
                 case ScalarInput.ISV_KEY_CUSTOM1:
-                    return dialEventListner.onC1KeyUp();
+                    return dialEventListener.onC1KeyUp();
                 case ScalarInput.ISV_KEY_DELETE:
                 case ScalarInput.ISV_KEY_SK2:
-                    return dialEventListner.onDeleteKeyUp();
+                    return dialEventListener.onDeleteKeyUp();
                 case ScalarInput.ISV_KEY_LENS_ATTACH:
-                    return dialEventListner.onLensDetached();
+                    return dialEventListener.onLensDetached();
             }
         }
         return true;
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (dialEventListner == null)
+        if (dialEventListener == null)
             return true;
         if (log)
-            Log.d(TAG,"onKeyDown " + getKeyString(event.getScanCode()));
+            Log.d(TAG, "onKeyDown " + getKeyString(event.getScanCode()));
         switch (event.getScanCode()) {
             case ScalarInput.ISV_KEY_UP:
-                return dialEventListner.onUpKeyDown();
+                return dialEventListener.onUpKeyDown();
             case ScalarInput.ISV_KEY_DOWN:
-                return dialEventListner.onDownKeyDown();
+                return dialEventListener.onDownKeyDown();
             case ScalarInput.ISV_KEY_LEFT:
-                return dialEventListner.onLeftKeyDown();
+                return dialEventListener.onLeftKeyDown();
             case ScalarInput.ISV_KEY_RIGHT:
-                return dialEventListner.onRightKeyDown();
+                return dialEventListener.onRightKeyDown();
             case ScalarInput.ISV_KEY_ENTER:
-                return dialEventListner.onEnterKeyDown();
+                return dialEventListener.onEnterKeyDown();
 
             case ScalarInput.ISV_DIAL_1_CLOCKWISE:
-                return dialEventListner.onUpperDialChanged(1);
+                return dialEventListener.onUpperDialChanged(1);
             case ScalarInput.ISV_DIAL_1_COUNTERCW:
-                return dialEventListner.onUpperDialChanged(-1);
+                return dialEventListener.onUpperDialChanged(-1);
             case ScalarInput.ISV_DIAL_2_CLOCKWISE:
-                return dialEventListner.onLowerDialChanged(1);
+                return dialEventListener.onLowerDialChanged(1);
             case ScalarInput.ISV_DIAL_2_COUNTERCW:
-                return dialEventListner.onLowerDialChanged(-1);
+                return dialEventListener.onLowerDialChanged(-1);
 
             case ScalarInput.ISV_KEY_FN:
-                return dialEventListner.onFnKeyDown();
+                return dialEventListener.onFnKeyDown();
             case ScalarInput.ISV_KEY_AEL:
-                return dialEventListner.onAelKeyDown();
+                return dialEventListener.onAelKeyDown();
             case ScalarInput.ISV_KEY_MENU:
             case ScalarInput.ISV_KEY_SK1:
-                return dialEventListner.onMenuKeyDown();
+                return dialEventListener.onMenuKeyDown();
             case ScalarInput.ISV_KEY_S1_1:
-                return dialEventListner.onFocusKeyDown();
+                return dialEventListener.onFocusKeyDown();
             case ScalarInput.ISV_KEY_S1_2:
                 return true;
             case ScalarInput.ISV_KEY_S2:
-                return dialEventListner.onShutterKeyDown();
+                return dialEventListener.onShutterKeyDown();
             case ScalarInput.ISV_KEY_PLAY:
-                return dialEventListner.onPlayKeyDown();
+                return dialEventListener.onPlayKeyDown();
             case ScalarInput.ISV_KEY_STASTOP:
-                return dialEventListner.onMovieKeyDown();
+                return dialEventListener.onMovieKeyDown();
             case ScalarInput.ISV_KEY_CUSTOM1:
-                return dialEventListner.onC1KeyDown();
+                return dialEventListener.onC1KeyDown();
             case ScalarInput.ISV_KEY_DELETE:
             case ScalarInput.ISV_KEY_SK2:
-                return dialEventListner.onDeleteKeyDown();
+                return dialEventListener.onDeleteKeyDown();
             case ScalarInput.ISV_KEY_LENS_ATTACH:
-                return dialEventListner.onLensAttached();
+                return dialEventListener.onLensAttached();
             case ScalarInput.ISV_KEY_MODE_DIAL:
-                return dialEventListner.onModeDialChanged(getDialStatus(ScalarInput.ISV_KEY_MODE_DIAL));
+                return dialEventListener.onModeDialChanged(getDialStatus(ScalarInput.ISV_KEY_MODE_DIAL));
             case ScalarInput.ISV_KEY_ZOOM_OFF: // zoom not active
-                return dialEventListner.onZoomOffKey();
+                return dialEventListener.onZoomOffKey();
             case ScalarInput.ISV_KEY_ZOOM_TELE: //zoom in
-                return dialEventListner.onZoomTeleKey();
+                return dialEventListener.onZoomTeleKey();
             case ScalarInput.ISV_KEY_IR_ZOOM_WIDE: //zoom out
-                return dialEventListner.onZoomWideKey();
+                return dialEventListener.onZoomWideKey();
         }
         return true;
     }
+
     protected int getDialStatus(int key) {
         return ScalarInput.getKeyStatus(key).status;
     }
 
-    public String getKeyString(int key)
-    {
-        switch (key)
-        {
+    public String getKeyString(int key) {
+        // TODO: just return the already defined ISV variable name in .j file
+        switch (key) {
             case ScalarInput.ISV_KEY_UP:
                 return "Up";
             case ScalarInput.ISV_KEY_DOWN:
@@ -167,23 +162,23 @@ public class KeyEventHandler {
                 return "Enter";
 
             case ScalarInput.ISV_DIAL_1_CLOCKWISE:
-                return "UpperDialChanged_Clock";
+                return "UpperDialChanged_CW";
             case ScalarInput.ISV_DIAL_1_COUNTERCW:
-                return "UpperDialChanged_ CW";
+                return "UpperDialChanged_CCW";
             case ScalarInput.ISV_DIAL_2_CLOCKWISE:
-                return "LowerDialChanged_Clock";
-            case ScalarInput.ISV_DIAL_2_COUNTERCW:
                 return "LowerDialChanged_CW";
+            case ScalarInput.ISV_DIAL_2_COUNTERCW:
+                return "LowerDialChanged_CCW";
 
             case ScalarInput.ISV_KEY_FN:
-                return "FnKeyDown";
+                return "Fn";
             case ScalarInput.ISV_KEY_AEL:
-                return "AelKey";
+                return "Ael";
             case ScalarInput.ISV_KEY_MENU:
             case ScalarInput.ISV_KEY_SK1:
-                return "MenuKeyDown";
+                return "Menu";
             case ScalarInput.ISV_KEY_S1_1:
-                return "FocusKeyDown";
+                return "Focus";
             case ScalarInput.ISV_KEY_S1_2:
                 return "ISV_KEY_S1_2";
             case ScalarInput.ISV_KEY_S2:
@@ -193,8 +188,13 @@ public class KeyEventHandler {
             case ScalarInput.ISV_KEY_STASTOP:
                 return "Movie";
             case ScalarInput.ISV_KEY_CUSTOM1:
-                return"C1";
+                return "C1";
+            case ScalarInput.ISV_KEY_CUSTOM2:
+                return "C2";
+            case ScalarInput.ISV_KEY_CUSTOM3:
+                return "C3";
             case ScalarInput.ISV_KEY_DELETE:
+                return "Del";
             case ScalarInput.ISV_KEY_SK2:
                 return "Delete";
             case ScalarInput.ISV_KEY_LENS_ATTACH:
@@ -210,4 +210,5 @@ public class KeyEventHandler {
         }
         return String.valueOf(key);
     }
+
 }

@@ -5,14 +5,14 @@ import com.sony.scalar.hardware.CameraEx;
 
 import java.util.List;
 
-public class IsoModel extends AbstractModel<String> implements CameraEx.AutoISOSensitivityListener {
+public class ISOModel extends AbstractModel<String> implements CameraEx.AutoISOSensitivityListener {
 
 
     private int m_curIso;
     private int currentIsoPos;
     private List<Integer> m_supportedIsos;
 
-    public IsoModel(CameraInstance cameraInstance)
+    public ISOModel(CameraInstance cameraInstance)
     {
         super(cameraInstance);
         this.m_supportedIsos = camera.getSupportedISOSensitivities();

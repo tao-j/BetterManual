@@ -12,7 +12,7 @@ import com.obsidium.bettermanual.controller.DriveModeController;
 import com.obsidium.bettermanual.controller.ExposureModeController;
 import com.obsidium.bettermanual.controller.IsoController;
 import com.obsidium.bettermanual.controller.ShutterController;
-import com.obsidium.bettermanual.layout.CameraUiInterface;
+import com.obsidium.bettermanual.layout.CameraUIInterface;
 import com.obsidium.bettermanual.model.ExposureModeModel;
 
 public class CaptureModeBracket extends CaptureMode implements  ShutterController.ShutterSpeedEvent, KeyEvents, CaptureSession.CaptureDoneEvent {
@@ -32,7 +32,7 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
     private BracketShutterController bracketShutterController;
 
 
-    public CaptureModeBracket(CameraUiInterface cameraUiInterface)
+    public CaptureModeBracket(CameraUIInterface cameraUiInterface)
     {
         super(cameraUiInterface);
     }
@@ -44,7 +44,7 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
             abort();
         }
         else {
-            cameraUiInterface.getActivityInterface().getDialHandler().setDialEventListner(this);
+            cameraUIInterface.getActivityInterface().getDialHandler().setDialEventListener(this);
             onEnterKeyUp();
         }
     }
@@ -72,18 +72,18 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
         {
             if (ExposureModeController.GetInstance().getExposureMode() != ExposureModeModel.ExposureModes.manual)
             {
-                cameraUiInterface.showMessageDelayed("Scene mode must be set to manual");
-                cameraUiInterface.getActivityInterface().getDialHandler().setDialEventListner((KeyEvents)cameraUiInterface);
+                cameraUIInterface.showMessageDelayed("Scene mode must be set to manual");
+                cameraUIInterface.getActivityInterface().getDialHandler().setDialEventListener((KeyEvents) cameraUIInterface);
                 return false;
             }
             if (IsoController.GetInstance().getCurrentIso() == 0)
             {
-                cameraUiInterface.showMessageDelayed("ISO must be set to manual");
-                cameraUiInterface.getActivityInterface().getDialHandler().setDialEventListner((KeyEvents)cameraUiInterface);
+                cameraUIInterface.showMessageDelayed("ISO must be set to manual");
+                cameraUIInterface.getActivityInterface().getDialHandler().setDialEventListener((KeyEvents) cameraUIInterface);
                 return false;
             }
 
-            cameraUiInterface.setLeftViewVisibility(false);
+            cameraUIInterface.setLeftViewVisibility(false);
 
             m_bracketPicCount = 3;
             m_bracketStep = 3;
@@ -98,10 +98,10 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
     @Override
     public void startShooting() {
         Log.d(TAG,"startShooting");
-        cameraUiInterface.hideHintMessage();
-        cameraUiInterface.hideMessage();
+        cameraUIInterface.hideHintMessage();
+        cameraUIInterface.hideMessage();
         // Take first picture at set shutter speed
-        cameraUiInterface.getActivityInterface().setBulbCapture(false);
+        cameraUIInterface.getActivityInterface().setBulbCapture(false);
         bracketShutterController = new BracketShutterController(m_bracketPicCount,m_bracketStep);
         bracketShutterController.captureRange();
         //CameraInstance.GET().takePicture();
@@ -112,24 +112,24 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
         if (bracketShutterController != null)
             bracketShutterController.abort();
         m_bracketPicCount = 0;
-        cameraUiInterface.getActivityInterface().getMainHandler().removeCallbacks(m_countDownRunnable);
-        cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(null);
+        cameraUIInterface.getActivityInterface().getMainHandler().removeCallbacks(m_countDownRunnable);
+        cameraUIInterface.getActivityInterface().setCaptureDoneEventListner(null);
         ShutterController.GetInstance().setShutterSpeedEventListner(null);
         currentDialMode = BRACKET_NON;
         //m_handler.removeCallbacks(m_timelapseRunnable);
         isActive = false;
-        cameraUiInterface.showMessageDelayed("Bracketing finished");
+        cameraUIInterface.showMessageDelayed("Bracketing finished");
         CameraInstance.GET().enableHwShutterButton();
         CameraInstance.GET().startPreview();
 
         // Update controls
-        cameraUiInterface.hideHintMessage();
-        cameraUiInterface.setLeftViewVisibility(true);
+        cameraUIInterface.hideHintMessage();
+        cameraUIInterface.setLeftViewVisibility(true);
         ExposureModeController.GetInstance().onValueChanged();
         DriveModeController.GetInstance().onValueChanged();
 
-        cameraUiInterface.setActiveViewFlag(Preferences.GET().getViewFlags(cameraUiInterface.getActiveViewsFlag()));
-        cameraUiInterface.updateViewVisibility();
+        cameraUIInterface.setActiveViewFlag(Preferences.GET().getViewFlags(cameraUIInterface.getActiveViewsFlag()));
+        cameraUIInterface.updateViewVisibility();
 
         // Reset to previous shutter speed
         final int shutterDiff = m_bracketNeutralShutterIndex - CameraUtil.getShutterValueIndex(CameraInstance.GET().getShutterSpeed());
@@ -191,12 +191,12 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
             ev = 3;
         else
             ev = 7;
-        cameraUiInterface.showMessage(String.format("%d.%dEV", m_bracketStep / 3, ev));
+        cameraUIInterface.showMessage(String.format("%d.%dEV", m_bracketStep / 3, ev));
     }
 
     protected void updateBracketPicCount()
     {
-        cameraUiInterface.showMessage(String.format("%d pictures", m_bracketPicCount));
+        cameraUIInterface.showMessage(String.format("%d pictures", m_bracketPicCount));
     }
 
     @Override
@@ -283,18 +283,18 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
         }
         else if(currentDialMode == BRACKET_STEP)
         {
-            cameraUiInterface.showHintMessage(cameraUiInterface.getActivityInterface().getResString(R.string.icon_lowerDial)
+            cameraUIInterface.showHintMessage(cameraUIInterface.getActivityInterface().getResString(R.string.icon_lowerDial)
                     + "to set picture count,"
-                    + cameraUiInterface.getActivityInterface().getResString(R.string.icon_enterButton)
+                    + cameraUIInterface.getActivityInterface().getResString(R.string.icon_enterButton)
                     + " to confirm");
             currentDialMode = BRACKET_PICCOUNT;
             reset();
         }
         else
         {
-            cameraUiInterface.getActivityInterface().getDialHandler().setDialEventListner((KeyEvents)cameraUiInterface);
+            cameraUIInterface.getActivityInterface().getDialHandler().setDialEventListener((KeyEvents) cameraUIInterface);
             ShutterController.GetInstance().setShutterSpeedEventListner(this);
-            cameraUiInterface.getActivityInterface().setCaptureDoneEventListner(this);
+            cameraUIInterface.getActivityInterface().setCaptureDoneEventListner(this);
             startCountDown();
             currentDialMode = BRACKET_NON;
         }
@@ -487,7 +487,7 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
                             synchronized (waitlock)
                             {
                                 final int toset = newIndex - shutterIndex;
-                                cameraUiInterface.getActivityInterface().getMainHandler().post(()-> {
+                                cameraUIInterface.getActivityInterface().getMainHandler().post(()-> {
                                     CameraInstance.GET().adjustShutterSpeed(-toset);
                                 });
 
@@ -500,7 +500,7 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
                             }
                             shutterIndex = CameraUtil.getShutterValueIndex(CameraInstance.GET().getShutterSpeed());
                         }
-                        cameraUiInterface.getActivityInterface().getMainHandler().post(()-> {
+                        cameraUIInterface.getActivityInterface().getMainHandler().post(()-> {
                             CameraInstance.GET().takePicture();
                         });
 
@@ -515,7 +515,7 @@ public class CaptureModeBracket extends CaptureMode implements  ShutterControlle
                         }
                         currentPicture++;
                     }
-                    cameraUiInterface.getActivityInterface().getMainHandler().post(()-> {
+                    cameraUIInterface.getActivityInterface().getMainHandler().post(()-> {
                         Log.d(TAG,"abort");
                         CaptureModeBracket.this.abort();
                     });

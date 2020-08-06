@@ -26,7 +26,7 @@ import com.obsidium.bettermanual.model.ExposureModeModel;
 import com.obsidium.bettermanual.model.FocusDriveModel;
 import com.obsidium.bettermanual.model.HistogramModel;
 import com.obsidium.bettermanual.model.ImageStabilisationModel;
-import com.obsidium.bettermanual.model.IsoModel;
+import com.obsidium.bettermanual.model.ISOModel;
 import com.obsidium.bettermanual.model.LongExposureNoiseReductionModel;
 import com.obsidium.bettermanual.model.ShutterModel;
 import com.sony.scalar.hardware.CameraEx;
@@ -46,7 +46,7 @@ public class CameraInstance extends BaseCamera implements CameraSequence.Shutter
     private SurfaceHolder surfaceHolder;
     private ApertureModel apertureModel;
     private ShutterModel shutterModel;
-    private IsoModel isoModel;
+    private ISOModel isoModel;
     private ExposureCompensationModel exposureCompensationModel;
     private ExposureHintModel exposureHintModel;
     private ExposureModeModel exposureModeModel;
@@ -101,7 +101,7 @@ public class CameraInstance extends BaseCamera implements CameraSequence.Shutter
         m_camera.setShutterSpeedChangeListener(shutterModel);
         ShutterController.GetInstance().bindModel(shutterModel);
 
-        isoModel = new IsoModel(this);
+        isoModel = new ISOModel(this);
         m_camera.setAutoISOSensitivityListener(isoModel);
         IsoController.GetInstance().bindModel(isoModel);
 
